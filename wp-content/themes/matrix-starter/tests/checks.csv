@@ -1,0 +1,108 @@
+﻿Name,"Success Criterion",Issues,Assignees,Progress
+"Check and fix broken links",,25,,31.51%
+"Add an analytics solution to every page",,243,,0%
+"Minimize 'thin' pages",,98,,1.67%
+"Check and fix misspellings",,64,,38.5%
+"Review data collected and stored via forms",,127,,0%
+"Link every page to a privacy policy",,49,,76.67%
+"Review cookies and add to privacy policy",,1,,37.69%
+"Ensure controls clearly indicate when they are selected","WCAG 2.2 AAA 2.4.13",468,,34.53%
+"Add a cookie disclaimer to every page",,49,,76.56%
+"Fix missing ARIA label IDs","WCAG 2.0 A 1.3.1",34,,1.75%
+"Ensure form controls have labels","WCAG 2.0 A 1.3.1",5,,1.26%
+"Ensure lists are marked up correctly","WCAG 2.0 A 4.1.1",3,,3.5%
+"Ensure text has sufficient contrast (AA)","WCAG 2.0 AA 1.4.3",27,,11.05%
+"Specify a Content Security Policy for all pages",,1,,0%
+"Use Strict Transport Security for all pages",,1,,0%
+"Ensure text placed over images or gradients has sufficient contrast","WCAG 2.0 AA 1.4.3",18,,0%
+"Ensure links explain their purpose","WCAG 2.0 A 2.4.4",1,,91.92%
+"Avoid excessive DOM size",,6,,0%
+"Review unapproved Favicons",,3,,0%
+"Review privacy of technologies used",,3490,,0%
+"Serve images in modern formats",,21,,25%
+"Ensure PDFs have a title","WCAG 2.0 A 2.4.2",7,,30%
+"Check images have been correctly defined as decorative","WCAG 2.0 A 1.1.1",75,,1.26%
+"Ensure cookies are only sent over SSL",,1,,75.38%
+"Check PDFs have sufficient text contrast","WCAG 2.0 A 1.4.3",10,,0%
+"Ensure help is presented consistently","WCAG 2.2 A 3.2.6",6,,2.01%
+"Allow users to quickly skip to content","WCAG 2.0 A 2.4.1",26,,86.93%
+"Review potential grammar errors",,158,,31.67%
+"Tag all PDFs","WCAG 2.0 A 1.3.1",4,,60%
+"Review publicly visible email addresses",,13,,85.34%
+"Review publicly visible phone numbers",,4,,92.21%
+"Ensure focus is not fully obscured","WCAG 2.2 AA 2.4.11",3,,99.16%
+"Check that each page has an appropriate title","WCAG 2.0 A 2.4.2",131,,0%
+"Ensure HTML is in a meaningful sequence","WCAG 2.0 A 1.3.2",244,,0%
+"Ensure PDF content is in a meaningful sequence","WCAG 2.0 A 1.3.2",10,,0%
+"Specify alternative text for images inside links","WCAG 2.0 A 1.1.1",10,,98.24%
+"Ensure PDFs are machine readable","WCAG 2.0 A 1.1.1",2,,80%
+"Consider optimizing images",,1,,99.06%
+"Specify alternative text for appropriate images","WCAG 2.0 A 1.1.1",3,,99.5%
+"Ensure alternative text is appropriate","WCAG 2.0 A 1.1.1",353,,1.26%
+"Avoid redundant entry","WCAG 2.2 A 3.3.9",127,,0%
+"Ensure drag and drop movements have an accessible alternative","WCAG 2.2 AA 2.5.7",243,,0%
+"Ensure form controls contrast sufficiently with their surroundings","WCAG 2.1 AA 1.4.11",3,,71.53%
+"Ensure users can pause or hide animated content","WCAG 2.0 A 2.2.2",244,,0%
+"Ensure pages with inactivity time limits do not cause data loss","WCAG 2.1 AAA 2.2.5",243,,0%
+"Fix duplicate IDs","WCAG 2.0 A 4.1.1",2,,1.01%
+"Ensure interactive components are far enough apart","WCAG 2.2 AA 2.5.8",87,,85.6%
+"Ensure links explain they open in a new tab","WCAG 2.0 AAA 3.2.5",519,,1.75%
+"Ensure content is not too difficult to understand","WCAG 2.0 AAA 3.1.5",10,,70.59%
+"Ensure pages appear to load quickly",,1,,33.33%
+"Ensure every page contains a top-level heading","WCAG 2.0 A 1.3.1",6,,83.42%
+"Ensure functionality is available to keyboard users","WCAG 2.0 A 2.1.1",2,,91.71%
+"Review JavaScript log messages",,3,,57.14%
+"Avoid using the same link text for different destinations","WCAG 2.0 A 2.4.4",12,,25.3%
+"Consider making text easier to understand",,0,,66.92%
+"Avoid linking to anchors that do not exist","WCAG 2.0 A 2.4.1",1,,91.33%
+"Specify headings for every PDF","WCAG 2.0 A 1.3.1",7,,30%
+"Identify the purpose of fields programmatically","WCAG 2.1 AA 1.3.5",4,,97.73%
+"Improve weak alternative text",,49,,57.16%
+"Ensure that interactive controls are large enough to tap on mobile",,1,,99.66%
+"Ensure users can find definitions of unusual words","WCAG 2.0 AAA 3.1.3",243,,0%
+"Review all network requests",,101,,0%
+"Check placeholder links work as expected",,16,,1.76%
+"Ensure focus is not partly obscured","WCAG 2.2 AAA 2.4.12",11,,81.13%
+"Specify a width and height for all images",,2,,58.33%
+"Ensure PDFs specify a default language","WCAG 2.0 A 3.1.1",3,,70%
+"Aim for large interactive controls","WCAG 2.1 AAA 2.5.5",876,,18.86%
+"Add a legend for all fieldsets","WCAG 2.0 A 1.3.1",9,,77.14%
+"Add headers to tables","WCAG 2.0 A 1.3.1",1,,99.66%
+"Ensure headings include text","WCAG 2.0 A 1.3.1",2,,99.33%
+"Ensure page titles are not longer than 60 characters",,30,,42.5%
+"Write lists or groups of links semantically","WCAG 2.0 A 1.3.1",1,,99.5%
+"Ensure users can control the visual presentation of text","WCAG 2.0 AAA 1.4.8",243,,0%
+"Ensure pages with interruptions can be postponed or suppressed by the user","WCAG 2.0 AAA 2.2.4",244,,0%
+"Aim for text to have very high contrast (AAA)","WCAG 2.0 AAA 1.4.6",48,,1.1%
+"Add a submit button to all forms","WCAG 2.0 A 3.2.2",3,,91.71%
+"Fix missing ARIA description IDs","WCAG 2.0 A 1.3.1",2,,98%
+"Ensure links contain text",,10,,98.99%
+"Ensure links can be used by screen readers","WCAG 2.0 A 4.1.2",11,,98.32%
+"Avoid more than one H1 header per page",,3,,99.25%
+"Check if text should be marked as a heading","WCAG 2.0 A 1.3.1",1,,99.33%
+"Consider using structured data",,66,,67%
+"Improve weak PDF titles","WCAG 2.0 A 2.4.2",1,,90%
+"Avoid underscores in URLs",,3,,98.56%
+"Ensure labels in the document fragment point to valid IDs","WCAG 2.0 A 1.3.1",1,,97.24%
+"Ensure labels in the document point to valid IDs","WCAG 2.0 A 1.3.1",1,,97.24%
+"Ensure components are identified consistently","WCAG 2.0 AA 3.2.4",243,,0%
+"Ensure that navigation remains consistent","WCAG 2.0 AA 3.2.3",243,,0%
+"Check pages for three flashes (Level A)","WCAG 2.0 A 2.3.1",243,,0%
+"Check pages for flashing content (Level AAA)","WCAG 2.0 AAA 2.3.2",243,,0%
+"Ensure images of text are decorative only","WCAG 2.0 AAA 1.4.9",243,,0%
+"Ensure users can identify the meaning of abbreviations","WCAG 2.0 AAA 3.1.4",243,,0%
+"Use text to convey information where possible","WCAG 2.0 AA 1.4.5",243,,0%
+"Check that headings and labels are descriptive","WCAG 2.0 AA 2.4.6",243,,0%
+"Ensure there are multiple ways to access a page","WCAG 2.0 AA 2.4.5",244,,0%
+"Ensure timing is not an essential part of an event or activity presented by the content","WCAG 2.0 AAA 2.2.3",244,,0%
+"Check if an error prevention mechanism is required (for legal, financial, data)","WCAG 2.0 AA 3.3.4",189,,7.04%
+"Check if an error prevention mechanism is required (for all forms)","WCAG 2.0 AAA 3.3.6",189,,7.04%
+"Check context-sensitive help is available for forms","WCAG 2.0 AAA 3.3.5",189,,7.04%
+"Ensure suggested corrections are provided where applicable","WCAG 2.0 AA 3.3.3",189,,7.04%
+"Ensure instructions are provided for appropriate fields","WCAG 2.0 A 3.3.2",21,,7.29%
+"Ensure custom tabbing order makes sense","WCAG 2.0 A 2.4.3",4,,37.69%
+"Wrap items with the same name inside a fieldset","WCAG 2.0 A 1.3.1",3,,89.7%
+"Check that each frame has an appropriate title","WCAG 2.0 A 2.4.1",4,,98.32%
+"Consider using summary attributes on tables","WCAG 2.0 A 1.3.1",1,,99.66%
+"Review headings on this website",,531,,0%
+"Ensure meta descriptions are at least 60 characters long",,11,,94.5%

@@ -1,0 +1,103 @@
+/* minimal preflight shim so Tailwind border utilities work */
+
+h1, .entry-content h1 {
+  @apply text-4xl font-bold;
+}
+
+h2, .entry-content h2 {
+  @apply text-3xl font-semibold;
+}
+
+h3, .entry-content h3 {
+  @apply text-2xl font-medium;
+}
+
+h4, .entry-content h4 {
+  @apply text-xl font-medium;
+}
+
+h5, .entry-content h5 {
+  @apply text-lg font-medium;
+}
+
+h6, .entry-content h6 {
+  @apply text-base font-medium;
+}
+
+.entry-content h1, .entry-content h2, .entry-content h3, .entry-content h4, .entry-content h5, .entry-content h6 {
+  @apply pt-0 pb-1 mb-2;
+}
+
+.entry-content p {
+  @apply mb-4 font-normal leading-6 text-gray-800;
+}
+
+.entry-content ul {
+  @apply mb-4 list-disc list-inside;
+}
+
+.entry-content ol {
+  @apply mb-4 list-decimal list-inside;
+}
+
+.entry-content li {
+  @apply mb-2 text-base font-normal leading-6 text-gray-800;
+}
+
+.entry-content li > ul,
+.entry-content li > ol {
+  @apply mt-2 ml-4;
+}
+
+.entry-content strong,
+.entry-content b {
+  @apply font-semibold;
+}
+
+.entry-content em,
+.entry-content i {
+  @apply italic;
+}
+
+.entry-content a {
+  @apply underline text-primary hover:text-secondary;
+}
+
+.entry-content blockquote {
+  @apply pl-4 my-4 italic border-l-4 border-gray-300;
+}
+
+.entry-content code {
+  @apply px-1 py-0.5 text-sm bg-gray-100 rounded;
+}
+
+.entry-content pre {
+  @apply overflow-x-auto p-4 mb-4 bg-gray-100 rounded;
+}
+
+.entry-content table {
+  @apply mb-4 w-full border-collapse;
+}
+
+.entry-content th,
+.entry-content td {
+  @apply p-2 text-left border border-gray-300;
+}
+
+.entry-content th {
+  @apply font-semibold bg-gray-50;
+}
+
+.entry-content li h1,
+.entry-content li h2,
+.entry-content li h3,
+.entry-content li h4,
+.entry-content li h5,
+.entry-content li h6 {
+  @apply inline-block pl-0;
+  /* This ensures the heading stays on the same line as the marker */
+}
+
+.woocommerce-EditAccountForm .entry-content span {
+  @apply w-full text-base font-normal leading-6 text-gray-800;
+}

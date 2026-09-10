@@ -1,0 +1,65 @@
+{
+  "mode": "full",
+  "baseUrl": "http://localhost:10014",
+  "scannedAt": "2026-05-20T15:03:26.679Z",
+  "pagesScanned": 6,
+  "minScoreRequired": 80,
+  "lowestScore": 97,
+  "totalViolations": 1,
+  "navigationFailures": 0,
+  "results": [
+    {
+      "url": "http://localhost:10014/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/about/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/events/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/contact/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/resources/",
+      "violationCount": 1,
+      "score": 97,
+      "violations": [
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "description": "Ensure the order of headings is semantically correct",
+          "help": "Heading levels should only increase by one",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/heading-order?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "a[aria-label=\"For Youth Workers\"] > .min-h-0.flex-1.flex-col > h3"
+              ],
+              "html": "<h3 class=\"font-montserrat text-[24px] font-bold leading-[28.8px]\" style=\"color: #ffffff;\">\n                For Youth Workers            </h3>",
+              "failureSummary": "Fix any of the following:\n  Heading order invalid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:10014/partners/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    }
+  ]
+}

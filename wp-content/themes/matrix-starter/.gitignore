@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+
+# Environment files
+.env
+.env.local
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Generated files
+tailwind.config.generated.js
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+tests/pw-artifacts/e2e-results/
+test-results/
+playwright-report/
+
+# Examples (reference templates, not shipped with theme)
+examples/
+
+# Superpowers: ignore generated files; keep example templates
+docs/superpowers/*
+!docs/superpowers/plans/
+!docs/superpowers/specs/
+docs/superpowers/plans/*
+!docs/superpowers/plans/example.md
+docs/superpowers/specs/*
+!docs/superpowers/specs/example.md
+
+# Optional (depending on preference)

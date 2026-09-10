@@ -1,0 +1,48 @@
+{
+  "mode": "full",
+  "baseUrl": "http://localhost:10014",
+  "scannedAt": "2026-05-20T15:03:55.638Z",
+  "pagesScanned": 6,
+  "minScoreRequired": 80,
+  "lowestScore": 100,
+  "totalViolations": 0,
+  "navigationFailures": 0,
+  "results": [
+    {
+      "url": "http://localhost:10014/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/about/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/events/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/contact/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/resources/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/partners/",
+      "violationCount": 0,
+      "score": 100,
+      "violations": []
+    }
+  ]
+}

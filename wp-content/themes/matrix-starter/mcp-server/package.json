@@ -1,0 +1,27 @@
+{
+  "name": "@matrix/starter-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Phase 1 dev MCP server for Matrix Starter theme",
+  "type": "module",
+  "bin": {
+    "matrix-starter-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepare": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  }
+}

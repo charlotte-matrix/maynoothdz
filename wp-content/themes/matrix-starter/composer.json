@@ -1,0 +1,44 @@
+{
+  "name": "bernardhanna/matrix-starter",
+  "description": "A WordPress starter theme that uses ACF Builder, Tailwind CSS, Alpine.js, and TypeScript.",
+  "type": "wordpress-theme",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=7.4",
+    "johnbillion/extended-cpts": "^5.0",
+    "log1x/navi": "^3.0",
+    "log1x/modern-acf-options": "^1.0",
+    "log1x/modern-login": "^1.0",
+    "stoutlogic/acf-builder": "^1.12"
+  },
+  "require-dev": {
+    "pestphp/pest": "^2.0",
+    "brain/monkey": "^2.7",
+    "phpunit/phpunit": "^10.5",
+    "wp-phpunit/wp-phpunit": "^6.5",
+    "yoast/phpunit-polyfills": "2.x-dev",
+    "vlucas/phpdotenv": "^5.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "MatrixStarter\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test:php": "vendor/bin/pest"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}

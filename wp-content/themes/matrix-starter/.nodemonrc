@@ -1,0 +1,16 @@
+{
+  "verbose": true,
+  "ignore": [
+    ".git",
+    "node_modules/**/node_modules",
+    "dist/*"
+  ],
+  "watch": [
+    "tailwind.config.js",
+    "assets/css/",
+    "assets/js/"
+  ],
+  "ext": "js,css",
+  "legacy-watch": true,
+  "delay": "250"
+}

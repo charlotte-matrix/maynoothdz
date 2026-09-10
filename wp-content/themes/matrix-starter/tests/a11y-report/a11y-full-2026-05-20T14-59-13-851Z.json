@@ -1,0 +1,54 @@
+{
+  "mode": "full",
+  "baseUrl": "http://localhost:10101",
+  "scannedAt": "2026-05-20T14:59:15.757Z",
+  "pagesScanned": 9,
+  "totalViolations": 0,
+  "results": [
+    {
+      "url": "http://localhost:10101/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10101/about/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/about/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/about/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10101/news-and-media/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/news-and-media/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/news-and-media/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10101/events/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/events/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/events/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10101/get-involved/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/get-involved/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/get-involved/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10101/contact/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/contact/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/contact/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10101/media/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/media/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/media/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10101/join/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/join/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/join/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10101/donate/",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:10101/donate/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:10101/donate/\", waiting until \"networkidle\"\u001b[22m\n",
+      "violations": []
+    }
+  ]
+}

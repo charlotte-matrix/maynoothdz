@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
+    "jsx": "react",  // Keep this as "react" if using React <= 16
+    "outDir": "./assets/js/",
+    "target": "es6",
+    "strict": true,
+    "esModuleInterop": true,  // Enable ES module interop for JSX/TSX files
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "./assets/js/**/*.ts",
+    "./assets/js/**/*.tsx",  // Include TSX files if you have any
+    "./node_modules/@types/mdx/**/*.d.ts"  // Include MDX types if needed
+  ],
+  "exclude": [
+    "node_modules",
+    "assets/js/**/*.js"
+  ]
+}

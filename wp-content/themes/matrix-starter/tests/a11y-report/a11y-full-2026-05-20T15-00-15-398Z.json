@@ -1,0 +1,257 @@
+{
+  "mode": "full",
+  "baseUrl": "http://localhost:10014",
+  "scannedAt": "2026-05-20T15:00:26.771Z",
+  "pagesScanned": 9,
+  "totalViolations": 12,
+  "results": [
+    {
+      "url": "http://localhost:10014/",
+      "violationCount": 2,
+      "violations": [
+        {
+          "id": "landmark-banner-is-top-level",
+          "impact": "moderate",
+          "description": "Ensure the banner landmark is at top level",
+          "help": "Banner landmark should not be contained in another landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-banner-is-top-level?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "#site-nav"
+              ],
+              "html": "<section id=\"site-nav\" x-data=\"{\n    isOpen: false,...\" x-init=\"\n    checkWindowSize...\" x-effect=\"isOpen ? document.bo...\" class=\"sticky top-0 left-0 ...\" role=\"banner\">",
+              "failureSummary": "Fix any of the following:\n  The banner landmark is contained in another landmark."
+            }
+          ]
+        },
+        {
+          "id": "landmark-no-duplicate-banner",
+          "impact": "moderate",
+          "description": "Ensure the document has at most one banner landmark",
+          "help": "Document should not have more than one banner landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-no-duplicate-banner?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "header"
+              ],
+              "html": "<header class=\"relative\">",
+              "failureSummary": "Fix any of the following:\n  Document has more than one banner landmark"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:10014/about/",
+      "violationCount": 4,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".tracking-\\[0\\.14em\\].leading-\\[19\\.5px\\].text-\\[\\#f4bd0b\\]"
+              ],
+              "html": "<p class=\"text-[13px] font-semibold uppercase leading-[19.5px] tracking-[0.14em] text-[#f4bd0b]\">\n                    ABOUT THE PROJECT                </p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #f4bd0b, background color: #2a7bb8, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#subhero-1f16252d-9171-45d6-b1e2-0ac422ff9d83-desc > p"
+              ],
+              "html": "<p>Supporting Youth. Strengthening Communities.</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #dfebf4, background color: #2a7bb8, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "landmark-banner-is-top-level",
+          "impact": "moderate",
+          "description": "Ensure the banner landmark is at top level",
+          "help": "Banner landmark should not be contained in another landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-banner-is-top-level?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "#site-nav"
+              ],
+              "html": "<section id=\"site-nav\" x-data=\"{\n    isOpen: false,...\" x-init=\"\n    checkWindowSize...\" x-effect=\"isOpen ? document.bo...\" class=\"sticky top-0 left-0 ...\" role=\"banner\">",
+              "failureSummary": "Fix any of the following:\n  The banner landmark is contained in another landmark."
+            }
+          ]
+        },
+        {
+          "id": "landmark-complementary-is-top-level",
+          "impact": "moderate",
+          "description": "Ensure the complementary landmark or aside is at top level",
+          "help": "Aside should not be contained in another landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-complementary-is-top-level?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "aside"
+              ],
+              "html": "<aside class=\"pace-about-sidebar flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start\">",
+              "failureSummary": "Fix any of the following:\n  The null landmark is contained in another landmark."
+            }
+          ]
+        },
+        {
+          "id": "landmark-no-duplicate-banner",
+          "impact": "moderate",
+          "description": "Ensure the document has at most one banner landmark",
+          "help": "Document should not have more than one banner landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-no-duplicate-banner?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "header"
+              ],
+              "html": "<header class=\"relative\">",
+              "failureSummary": "Fix any of the following:\n  Document has more than one banner landmark"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:10014/news-and-media/",
+      "error": "Navigation failed (404)",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/events/",
+      "violationCount": 3,
+      "violations": [
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "description": "Ensure the order of headings is semantically correct",
+          "help": "Heading levels should only increase by one",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/heading-order?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "h3"
+              ],
+              "html": "<h3 class=\"font-montserrat text-[22px] font-bold leading-[27.5px] text-[#003b65]\">",
+              "failureSummary": "Fix any of the following:\n  Heading order invalid"
+            }
+          ]
+        },
+        {
+          "id": "landmark-banner-is-top-level",
+          "impact": "moderate",
+          "description": "Ensure the banner landmark is at top level",
+          "help": "Banner landmark should not be contained in another landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-banner-is-top-level?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "#site-nav"
+              ],
+              "html": "<section id=\"site-nav\" x-data=\"{\n    isOpen: false,...\" x-init=\"\n    checkWindowSize...\" x-effect=\"isOpen ? document.bo...\" class=\"sticky top-0 left-0 ...\" role=\"banner\">",
+              "failureSummary": "Fix any of the following:\n  The banner landmark is contained in another landmark."
+            }
+          ]
+        },
+        {
+          "id": "landmark-no-duplicate-banner",
+          "impact": "moderate",
+          "description": "Ensure the document has at most one banner landmark",
+          "help": "Document should not have more than one banner landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-no-duplicate-banner?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "header"
+              ],
+              "html": "<header class=\"relative\">",
+              "failureSummary": "Fix any of the following:\n  Document has more than one banner landmark"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:10014/get-involved/",
+      "error": "Navigation failed (404)",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/contact/",
+      "violationCount": 3,
+      "violations": [
+        {
+          "id": "landmark-banner-is-top-level",
+          "impact": "moderate",
+          "description": "Ensure the banner landmark is at top level",
+          "help": "Banner landmark should not be contained in another landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-banner-is-top-level?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "#site-nav"
+              ],
+              "html": "<section id=\"site-nav\" x-data=\"{\n    isOpen: false,...\" x-init=\"\n    checkWindowSize...\" x-effect=\"isOpen ? document.bo...\" class=\"sticky top-0 left-0 ...\" role=\"banner\">",
+              "failureSummary": "Fix any of the following:\n  The banner landmark is contained in another landmark."
+            }
+          ]
+        },
+        {
+          "id": "landmark-complementary-is-top-level",
+          "impact": "moderate",
+          "description": "Ensure the complementary landmark or aside is at top level",
+          "help": "Aside should not be contained in another landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-complementary-is-top-level?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "aside"
+              ],
+              "html": "<aside class=\"pace-contact-sidebar flex w-full max-w-[458px] flex-col rounded-[18px] p-7 lg:sticky lg:top-24 lg:justify-self-end\" style=\"background-color: #fffae8;\" aria-label=\"Contact information\">",
+              "failureSummary": "Fix any of the following:\n  The complementary landmark is contained in another landmark."
+            }
+          ]
+        },
+        {
+          "id": "landmark-no-duplicate-banner",
+          "impact": "moderate",
+          "description": "Ensure the document has at most one banner landmark",
+          "help": "Document should not have more than one banner landmark",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/landmark-no-duplicate-banner?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "header"
+              ],
+              "html": "<header class=\"relative\">",
+              "failureSummary": "Fix any of the following:\n  Document has more than one banner landmark"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:10014/media/",
+      "error": "Navigation failed (404)",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/join/",
+      "error": "Navigation failed (404)",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:10014/donate/",
+      "error": "Navigation failed (404)",
+      "violations": []
+    }
+  ]
+}
