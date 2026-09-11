@@ -18,10 +18,10 @@ wp-content/wp-cache-config.php
 wp-content/debug.log
 *.log
 
-# Updraft (plugin + backup storage)
-wp-content/plugins/updraftplus/
+# Updraft backup storage only (keep the plugin)
 wp-content/updraft/
 wp-content/updraftplus/
+wp-content/uploads/updraft/
 
 # Dependencies & build artifacts
 node_modules/
