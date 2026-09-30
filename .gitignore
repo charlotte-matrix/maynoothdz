@@ -18,15 +18,16 @@ wp-content/wp-cache-config.php
 wp-content/debug.log
 *.log
 
-# Updraft backup storage only (keep the plugin)
+# Updraft backup storage only (keep the plugin code under wp-content/plugins/)
 wp-content/updraft/
-wp-content/updraftplus/
 wp-content/uploads/updraft/
 
-# Dependencies & build artifacts
+# Theme / tooling build artifacts only.
+# Do NOT ignore plugin vendor/ or dist/ — plugins ship those and Plesk git deploys need them.
 node_modules/
-vendor/
-dist/
+wp-content/themes/**/node_modules/
+wp-content/themes/**/vendor/
+wp-content/themes/**/dist/
 **/npm-debug.log*
 **/yarn-debug.log*
 **/yarn-error.log*
