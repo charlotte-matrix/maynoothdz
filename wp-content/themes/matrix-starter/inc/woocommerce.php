@@ -32,8 +32,13 @@ add_action('admin_notices', function () {
     }
 });
 
-// 2) Bail early if disabled or Woo missing
-if (! function_exists('get_field') || ! get_field('enable_woocommerce', 'option') || ! class_exists('WooCommerce')) {
+// 2) Bail early if Woo missing or disabled.
+// Check WooCommerce BEFORE get_field() — calling get_field during theme
+// bootstrap boots ACF too early (textdomain notice + field registration fatals).
+if (! class_exists('WooCommerce')) {
+    return;
+}
+if (! function_exists('get_field') || ! get_field('enable_woocommerce', 'option')) {
     return;
 }
 

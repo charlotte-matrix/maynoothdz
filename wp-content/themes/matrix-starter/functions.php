@@ -52,12 +52,18 @@ add_filter('nav_menu_link_attributes', function ($atts, $item, $args) {
 }, 10, 3);
 
 /**
- * Composer (if present)
+ * Composer (required for AcfBuilder / Extended CPTs / etc.)
  */
 if (file_exists(get_template_directory() . '/vendor/autoload.php')) {
     require_once get_template_directory() . '/vendor/autoload.php';
+} elseif (is_admin()) {
+    add_action('admin_notices', function () {
+        echo '<div class="notice notice-error"><p>';
+        echo esc_html__('matrix-starter is missing vendor/autoload.php. Run composer install --no-dev in the theme, or pull the committed vendor directory.', 'matrix-starter');
+        echo '</p></div>';
+    });
 } else {
-    error_log('Composer autoload file not found.');
+    error_log('Composer autoload file not found in matrix-starter.');
 }
 
 /**
@@ -83,6 +89,10 @@ require_once get_template_directory() . '/inc/cpts/init.php';
  * so ACF translations (textdomain 'acf') won’t be loaded too early.
  */
 add_action('acf/init', function () {
+    if (! class_exists(\StoutLogic\AcfBuilder\FieldsBuilder::class)) {
+        error_log('matrix-starter: StoutLogic\\AcfBuilder\\FieldsBuilder missing — run composer install --no-dev in the theme.');
+        return;
+    }
     require_once get_template_directory() . '/inc/acf-flexi-validation.php';
     require_once get_template_directory() . '/inc/autoload-acf-fields.php';
     require_once get_template_directory() . '/inc/autoload-acf-groups.php';

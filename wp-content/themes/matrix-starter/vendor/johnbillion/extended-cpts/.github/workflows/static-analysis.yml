@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow
+
+name: Static Analysis
+on:
+  push:
+    branches:
+      - 'develop'
+      - 'trunk'
+    paths:
+      - '.github/workflows/static-analysis.yml'
+      - '**.php'
+      - 'composer.json'
+      - 'phpstan.neon.dist'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - '.github/workflows/static-analysis.yml'
+      - '**.php'
+      - 'composer.json'
+      - 'phpstan.neon.dist'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  test:
+    name: ${{ matrix.label }}
+    permissions:
+      contents: read
+    uses: johnbillion/plugin-infrastructure/.github/workflows/reusable-static-analysis.yml@trunk
+    strategy:
+      matrix:
+        label:
+          - 'PHP'
+        php:
+          # Newest and oldest supported versions of PHP
+          - '8.4'
+          - '7.4'
+      fail-fast: false
+    with:
+      php: ${{ matrix.php }}

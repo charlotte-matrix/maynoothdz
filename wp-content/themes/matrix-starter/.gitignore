@@ -1,6 +1,5 @@
-# Dependencies
+# Dependencies (Composer production vendor is committed for Plesk git deploys)
 node_modules/
-vendor/
 
 # Build outputs
 dist/

@@ -24,9 +24,9 @@ wp-content/uploads/updraft/
 
 # Theme / tooling build artifacts only.
 # Do NOT ignore plugin vendor/ or dist/ — plugins ship those and Plesk git deploys need them.
+# Theme Composer production vendor is committed so Plesk git deploys work without composer install.
 node_modules/
 wp-content/themes/**/node_modules/
-wp-content/themes/**/vendor/
 wp-content/themes/**/dist/
 **/npm-debug.log*
 **/yarn-debug.log*

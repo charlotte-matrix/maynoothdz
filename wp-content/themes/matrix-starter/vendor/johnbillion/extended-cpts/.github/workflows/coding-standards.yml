@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow
+
+name: Coding Standards
+on:
+  push:
+    branches:
+      - 'develop'
+      - 'trunk'
+      - 'master'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  test:
+    name: ${{ matrix.label }}
+    permissions:
+      contents: read
+    uses: johnbillion/plugin-infrastructure/.github/workflows/reusable-coding-standards.yml@trunk
+    strategy:
+      matrix:
+        label:
+          - PHP
+        php:
+          - '8.4'
+      fail-fast: false
+    with:
+      php: ${{ matrix.php }}
