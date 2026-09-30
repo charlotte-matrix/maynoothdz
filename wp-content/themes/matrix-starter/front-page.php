@@ -1,15 +1,18 @@
 <?php
 /**
- * Front page — PACE hero + flexi blocks (no breadcrumbs / empty content wrapper).
+ * Front page — Maynooth DZ flexible content blocks only.
  *
  * @package Matrix_Starter
  */
 
 get_header();
 ?>
-<main id="main-content" class="site-main w-full overflow-hidden">
-    <?php load_hero_templates(); ?>
-    <?php load_flexible_content_templates(); ?>
+<main id="main-content" class="site-main">
+    <?php
+    if (function_exists('load_flexible_content_templates')) {
+        load_flexible_content_templates();
+    }
+    ?>
 </main>
 <?php
 get_footer();

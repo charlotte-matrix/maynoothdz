@@ -1,39 +1,43 @@
 <?php
 get_header();
-$enable_breadcrumbs = get_field('enable_breadcrumbs', 'option'); // Returns true/false
 ?>
-<main id="main-content" class="overflow-hidden w-full site-main">
-    <?php load_hero_templates(); ?>
-
-
+<main id="main-content" class="site-main">
     <?php
-    $enable_breadcrumbs = get_field('enable_breadcrumbs', 'option');
-    $skip_breadcrumbs   = is_page(['contact-us', 'about-us']);
+    if (function_exists('load_hero_templates')) {
+        load_hero_templates();
+    }
 
-    if ($enable_breadcrumbs !== false && !$skip_breadcrumbs) :
+    $enable_breadcrumbs = function_exists('get_field') ? get_field('enable_breadcrumbs', 'option') : false;
+    $skip_breadcrumbs   = is_page(['contact-us', 'about-us', 'flexi']);
+    $breadcrumb_tpl     = locate_template('template-parts/header/breadcrumbs.php');
+
+    if ($enable_breadcrumbs !== false && !$skip_breadcrumbs && $breadcrumb_tpl) {
         get_template_part('template-parts/header/breadcrumbs');
-    endif;
-    ?>
+    }
 
-    <?php
     if (have_posts()) :
-        while (have_posts()) : the_post();
-            if (trim(get_the_content()) != '') : ?>
-                <div class="<?php echo esc_attr(function_exists('is_checkout') && is_checkout() ? 'max-w-[1095px] mx-auto max-xl:px-5' : matrix_content_container_classes()); ?>">
-                    <?php
-                    get_template_part('template-parts/content/content', 'page');
-                    ?>
+        while (have_posts()) :
+            the_post();
+            if (trim((string) get_the_content()) !== '') :
+                $container = function_exists('matrix_content_container_classes')
+                    ? matrix_content_container_classes()
+                    : 'container';
+                if (function_exists('is_checkout') && is_checkout()) {
+                    $container = 'max-w-[1095px] mx-auto max-xl:px-5';
+                }
+                ?>
+                <div class="<?php echo esc_attr($container); ?>">
+                    <?php get_template_part('template-parts/content/content', 'page'); ?>
                 </div>
-    <?php endif;
+                <?php
+            endif;
         endwhile;
-    else :
-        echo '<p>No content found</p>';
     endif;
+
+    if (function_exists('load_flexible_content_templates')) {
+        load_flexible_content_templates();
+    }
     ?>
-
-    <?php load_flexible_content_templates(); ?>
 </main>
-
 <?php
 get_footer();
-?>

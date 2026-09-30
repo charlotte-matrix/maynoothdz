@@ -1,0 +1,831 @@
+/**
+ * Maynooth DZ homepage section styles.
+ */
+
+.dz-home .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.875rem;
+  padding: 0.625rem 1.5rem;
+  border: 0.125rem solid var(--dz-forest, #203129);
+  border-radius: 0.25rem;
+  color: #fff;
+  background: var(--dz-forest, #203129);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.375rem;
+  text-decoration: none;
+  transition: transform .3s var(--dz-ease, cubic-bezier(.22,1,.36,1)), background .3s, box-shadow .3s, color .3s;
+}
+
+.dz-home .button:hover {
+  background: #125332;
+  border-color: #125332;
+  color: #fff;
+  transform: translateY(-0.125rem);
+}
+
+.dz-home .button.outline {
+  background: transparent;
+  color: var(--dz-forest, #203129);
+}
+
+.dz-home .button.outline:hover {
+  background: var(--dz-forest, #203129);
+  color: #fff;
+}
+
+.dz-home .button.small {
+  min-height: 2.375rem;
+  padding: 0.375rem 1rem;
+}
+
+.dz-home .button img {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.dz-home .container {
+  max-width: 71rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  margin-inline: auto;
+}
+
+.dz-home .section {
+  padding-block: 6rem;
+}
+
+.dz-home h1,
+.dz-home h2,
+.dz-home h3,
+.dz-home .stat strong,
+.dz-home .action-card strong,
+.dz-home .wander-heading p {
+  font-family: Poppins, Arial, sans-serif;
+  font-weight: 700;
+  margin: 0;
+}
+
+.dz-home p {
+  margin: 0;
+}
+
+.dz-home img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Home hero */
+.dz-home.hero {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 0.5625rem;
+  color: var(--dz-forest, #203129);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.dz-home .animated-gradient {
+  isolation: isolate;
+  background-image: linear-gradient(115deg, #c0e8bc 0%, #88d8c8 25%, #9edec0 45%, #66c6c5 65%, #a9dfaa 85%, #c0e8bc 100%);
+  background-size: 320% 220%;
+  background-position: 0% 30%;
+  animation: dz-living-gradient 14s ease-in-out infinite alternate;
+}
+
+.dz-home .hero-row {
+  max-width: 93rem;
+  margin-inline: auto;
+  padding: 2.5rem 1.5rem 0;
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.35fr);
+  gap: clamp(2rem, 4vw, 4.5rem);
+  align-items: center;
+}
+
+.dz-home .hero-copy {
+  padding: 2.5rem 0;
+  max-width: 30.625rem;
+  position: relative;
+  z-index: 1;
+}
+
+.dz-home .hero-copy h1 {
+  font-size: clamp(1.875rem, 2.4vw, 2.625rem);
+  line-height: 1.15;
+}
+
+.dz-home .hero-copy p {
+  max-width: 24.375rem;
+  margin-block: 1rem;
+}
+
+.dz-home .hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.dz-home .map-art {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.dz-home .hero-map {
+  height: clamp(25rem, 32vw, 35rem);
+  border-radius: 1.5rem 1.5rem 1.5rem 4.5rem;
+  box-shadow: 0 1.125rem 3rem #20312912;
+}
+
+.dz-home .map-base {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dz-home .hero-map .map-base {
+  position: absolute;
+  width: 103.61%;
+  max-width: none;
+  height: 117.7%;
+  left: -1.53%;
+  top: -6.17%;
+}
+
+.dz-home .map-stickers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dz-home .map-stickers img {
+  position: absolute;
+  width: 7.35%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0.1875rem 0.1875rem #20312925);
+  animation: dz-float 5s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+.dz-home .map-stickers img.train {
+  width: 9.85%;
+}
+
+.dz-home .stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: space-between;
+  column-gap: 1.5rem;
+  row-gap: 1.625rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.dz-home .stat strong {
+  display: block;
+  font-size: 2.5rem;
+  line-height: 3rem;
+  letter-spacing: -0.06875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dz-home .stat p {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  max-width: 15.375rem;
+  margin-top: 0.5rem;
+}
+
+.dz-home .stat a {
+  color: #005f64;
+  text-decoration: none;
+}
+
+.dz-home .source {
+  grid-column: 1 / -1;
+  color: #005f64;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.dz-home .stripe {
+  position: absolute;
+  height: 0.5625rem;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  background-repeat: repeat-x;
+  background-size: 80.9375rem 0.5625rem;
+  pointer-events: none;
+}
+
+.dz-home .stripe.bottom {
+  bottom: 0;
+  background-image: var(--dz-stripe-bottom, none);
+}
+
+.dz-home .stripe.top {
+  top: 0;
+  background-image: var(--dz-stripe-top, none);
+}
+
+.js .dz-home .reveal {
+  opacity: 0;
+  transform: translateY(1.5625rem);
+  transition: opacity .8s var(--dz-ease, cubic-bezier(.22,1,.36,1)), transform .9s var(--dz-ease, cubic-bezier(.22,1,.36,1));
+}
+
+.js .dz-home .reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Projects carousel */
+.dz-home.projects {
+  padding-bottom: 3rem;
+  overflow: hidden;
+  color: var(--dz-forest, #203129);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.dz-home .section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dz-home .section-heading h2 {
+  font-size: 1.75rem;
+  line-height: 1.15;
+}
+
+.dz-home .text-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.1875rem;
+  color: #2f7a4d;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.dz-home .text-link:hover {
+  color: var(--dz-forest, #203129);
+}
+
+:root {
+  --dz-rail-inset: clamp(1.5rem, 3vw, 4rem);
+  --dz-rail-gap: clamp(1.25rem, 2vw, 2rem);
+  --dz-rail-count: 3;
+}
+
+.dz-home .track {
+  display: flex;
+  gap: var(--dz-rail-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  cursor: grab;
+  touch-action: pan-x pan-y;
+  scroll-padding-inline: var(--dz-rail-inset);
+  padding: 0 var(--dz-rail-inset) 1rem;
+  margin-inline: var(--dz-rail-inset);
+  padding-inline: 0;
+  scroll-padding-inline: 0;
+}
+
+.dz-home .track::-webkit-scrollbar {
+  display: none;
+}
+
+.dz-home .track.dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+  user-select: none;
+}
+
+.dz-home .project-card {
+  flex: 0 0 calc((100% - (var(--dz-rail-count) - 1) * var(--dz-rail-gap)) / var(--dz-rail-count));
+  min-width: 0;
+  background: var(--dz-paper, #f9f8f3);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: box-shadow .35s, transform .35s;
+}
+
+.dz-home .card-image {
+  height: clamp(11.25rem, 13vw, 15rem);
+  overflow: hidden;
+}
+
+.dz-home .card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .7s;
+}
+
+.dz-home .project-card:hover .card-image img {
+  transform: scale(1.055);
+}
+
+.dz-home .card-content {
+  padding: 1rem;
+  flex: 1;
+}
+
+.dz-home .card-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dz-home .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  padding: 0.1875rem 0.875rem;
+  border-radius: 62.4375rem;
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  white-space: nowrap;
+}
+
+.dz-home .tag img {
+  width: 1rem;
+  height: 1rem;
+}
+
+.dz-home .tag.retrofit { background: #d9684f; }
+.dz-home .tag.transport { background: #02a59f; }
+.dz-home .tag.biodiversity,
+.dz-home .tag.nature { background: #1b853f; }
+.dz-home .tag.public-realm { background: #258d78; }
+
+.dz-home .status {
+  text-transform: uppercase;
+  font-size: 0.625rem;
+  font-weight: 600;
+  background: #fff;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.625rem;
+}
+
+.dz-home .card-content h3 {
+  font-size: 1.1875rem;
+}
+
+.dz-home .card-content p {
+  margin-top: 0.25rem;
+  line-height: 1.625rem;
+}
+
+.dz-home .project-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.dz-home .project-link:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.dz-home .carousel-controls {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dz-home .arrow-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.25rem;
+  display: grid;
+  place-items: center;
+  border: 0.125rem solid var(--dz-forest, #203129);
+  border-radius: 0.125rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dz-home .arrow-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dz-home .arrow-button img {
+  width: 2rem;
+  height: 2rem;
+}
+
+.dz-home .scroll-progress {
+  height: 0.125rem;
+  width: 5.5rem;
+  background: #20312916;
+  margin-right: 0.625rem;
+  overflow: hidden;
+}
+
+.dz-home .scroll-progress span {
+  display: block;
+  width: 25%;
+  height: 100%;
+  background: var(--dz-forest, #203129);
+  transform: translateX(var(--progress, 0%));
+  transition: transform .2s;
+}
+
+/* Take action */
+.dz-home.take-action {
+  padding-block: 5rem 5.5rem;
+  background: #f8f7f2;
+  color: var(--dz-forest, #203129);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.dz-home .action-layout h2 {
+  font-size: 1.75rem;
+}
+
+.dz-home .action-grid {
+  margin-top: 2rem;
+}
+
+.dz-home #action-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.dz-home .action-card {
+  min-height: 9.75rem;
+  padding: 1.4rem 1.5rem;
+  gap: 1.25rem;
+  align-items: center;
+  border-radius: 0.25rem;
+  display: flex;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.dz-home .action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.6rem 1.5rem #20312918;
+}
+
+.dz-home .action-card.sand { background: #d1b382; }
+.dz-home .action-card.lime { background: #c7d384; }
+.dz-home .action-card.olive { background: #b4be82; }
+.dz-home .action-card.ochre { background: #e4cc83; }
+.dz-home .action-card.sage { background: #bfccb0; }
+.dz-home .action-card.wheat { background: #ded5a5; }
+
+.dz-home .action-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: none;
+  border-radius: 0.25rem;
+  display: grid;
+  place-items: center;
+  background: #20312912;
+}
+
+.dz-home .action-icon img {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.dz-home .action-card strong {
+  font-size: 1.25rem;
+  line-height: 1.28;
+  display: block;
+}
+
+.dz-home .action-card > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.dz-home .action-card > span:nth-child(2) > span {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.dz-home .action-arrow {
+  width: 1.5rem;
+  height: 1.75rem;
+  object-fit: contain;
+  margin-left: auto;
+  flex: none;
+}
+
+/* About band */
+.dz-home.about {
+  background: linear-gradient(100deg, #4ccbc6, #a8edea);
+  position: relative;
+  overflow: hidden;
+  color: var(--dz-forest, #203129);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.dz-home .about-grid {
+  display: grid;
+  grid-template-columns: 29.9375rem minmax(0, 1fr);
+  gap: 4rem;
+  position: relative;
+  align-items: center;
+}
+
+.dz-home .about-copy p {
+  margin-block: 1rem 0.625rem;
+}
+
+.dz-home .about-photo {
+  height: 14.125rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.dz-home .about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dz-home .brand-watermark {
+  position: absolute;
+  left: calc(50% + 2.4375rem);
+  top: 3.1875rem;
+  max-width: none;
+  pointer-events: none;
+}
+
+/* Community split */
+.dz-home.community {
+  display: grid;
+  grid-template-columns: 28.6875rem minmax(0, 1fr);
+  gap: 2rem;
+  align-items: stretch;
+  color: var(--dz-forest, #203129);
+  font-family: Inter, Arial, sans-serif;
+  padding-block: 6rem;
+}
+
+.dz-home .community-card,
+.dz-home .wander-card {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  text-align: center;
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.dz-home .community-card {
+  background: linear-gradient(130deg, #d1b382 15%, #e8d779 70%, #c7d384 100%);
+  justify-content: center;
+  gap: 2rem;
+}
+
+.dz-home .community-card h2 {
+  max-width: 21.875rem;
+}
+
+.dz-home .community-photo {
+  width: 100%;
+  height: 11.125rem;
+  object-fit: cover;
+  border-radius: 0.25rem;
+}
+
+.dz-home .wander-card {
+  gap: 1.5rem;
+}
+
+.dz-home .wander-heading h2 {
+  font-size: 2rem;
+  line-height: 2.25rem;
+}
+
+.dz-home .wander-heading p {
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.dz-home .map-preview {
+  padding: 0;
+  background: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  width: 100%;
+  aspect-ratio: 501 / 332;
+  display: block;
+}
+
+.dz-home .map-preview .map-base {
+  position: absolute;
+  height: 108.21%;
+  width: 107.58%;
+  max-width: none;
+  left: -3.59%;
+  top: -4.1%;
+}
+
+.dz-home .wander-card .button {
+  margin-top: auto;
+}
+
+.dz-home .mobile-heading {
+  display: none;
+}
+
+@media (min-width: 1600px) {
+  .dz-home .container {
+    max-width: 83rem;
+  }
+
+  :root {
+    --dz-rail-count: 4;
+  }
+
+  .dz-home .about-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dz-home .about-photo {
+    height: 22rem;
+  }
+
+  .dz-home.community {
+    grid-template-columns: 1fr 1.15fr;
+  }
+
+  .dz-home .community-photo {
+    height: 18rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --dz-rail-count: 2;
+  }
+
+  .dz-home .hero-row {
+    gap: 2rem;
+  }
+
+  .dz-home .hero-map {
+    height: 27.5rem;
+  }
+
+  .dz-home .about-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
+
+  .dz-home.community {
+    grid-template-columns: 42% minmax(0, 1fr);
+  }
+
+  .dz-home #action-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --dz-rail-count: 1;
+    --dz-rail-inset: 1.5rem;
+  }
+
+  .dz-home .section {
+    padding-block: 3rem;
+  }
+
+  .dz-home .hero-row {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1.5rem 0;
+    gap: 1.5rem;
+  }
+
+  .dz-home .hero-copy {
+    padding: 0;
+    max-width: none;
+  }
+
+  .dz-home .hero-actions {
+    flex-direction: column;
+  }
+
+  .dz-home .hero-actions .button {
+    width: 100%;
+  }
+
+  .dz-home .hero-map {
+    height: auto;
+    aspect-ratio: 1.35;
+    border-radius: 0.75rem 0.75rem 0.75rem 2.25rem;
+  }
+
+  .dz-home .stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+    align-items: center;
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .dz-home .stat strong {
+    font-size: 2rem;
+  }
+
+  .dz-home .stat p {
+    max-width: 18.75rem;
+    font-family: Poppins, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin-top: 0;
+  }
+
+  .dz-home .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dz-home.take-action {
+    padding-block: 3rem;
+  }
+
+  .dz-home #action-track {
+    grid-template-columns: 1fr;
+  }
+
+  .dz-home .about-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .dz-home .brand-watermark {
+    left: 0;
+    top: 6.25rem;
+    opacity: 0.6;
+  }
+
+  .dz-home.community {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding-block: 3rem;
+  }
+
+  .dz-home .mobile-heading {
+    display: block;
+    font-size: 1.5rem;
+  }
+
+  .dz-home .community-card,
+  .dz-home .wander-card {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dz-home .animated-gradient,
+  .dz-home .map-stickers img {
+    animation: none;
+  }
+
+  .js .dz-home .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
