@@ -48,21 +48,22 @@ class UpdraftPlus_Addon_LockAdmin {
 	public function __construct() {
 		add_filter('updraftplus_settings_page_render', array($this, 'settings_page_render'));
 		add_action('updraftplus_settings_page_render_abort', array($this, 'settings_page_render_abort'));
-		if ((!empty($_POST['updraft_unlockadmin_session_length']) || !empty($_POST['updraft_unlockadmin_password'])) && !empty($_POST['nonce'])) add_action('admin_init', array($this, 'admin_init'));
+		add_action('admin_init', array($this, 'admin_init'));
 		add_action('updraftplus_debugtools_dashboard', array($this, 'debugtools_dashboard'), 10);
 	}
 
 	private function check_user_cookie($password) {
 		if (empty($password)) return true;
+		$cookie_updraft_unlockadmin = UpdraftPlus_Manipulation_Functions::fetch_superglobal('cookie', 'updraft_unlockadmin');
 		// Value in seconds
 		$session_length = $this->opts['session_length'];
 		if (!$session_length) $session_length = 86400;
 
 		// A lock has been set. Has the user passed the test?
-		if (empty($_COOKIE['updraft_unlockadmin'])) return false;
+		if (empty($cookie_updraft_unlockadmin)) return false;
 
 		// Cookie in correct format?
-		if (!preg_match('/^(\d+):(.*)$/', $_COOKIE['updraft_unlockadmin'], $matches)) return false;
+		if (!preg_match('/^(\d+):(.*)$/', $cookie_updraft_unlockadmin, $matches)) return false;
 
 		$cookie_time = $matches[1]; // The time when the session began
 		$cookie_hash = $matches[2];
@@ -98,10 +99,14 @@ class UpdraftPlus_Addon_LockAdmin {
 	public function get_session_length_options() {
 		return array(
 			'3600' => __('1 hour', 'updraftplus'),
+			/* translators: %s: No. of hours. */
 			'10800' => sprintf(__('%s hours', 'updraftplus'), 3),
+			/* translators: %s: No. of hours. */
 			'86400' => sprintf(__('%s hours', 'updraftplus'), 24),
 			'604800' => __('1 week', 'updraftplus'),
+			/* translators: %s: No. of weeks. */
 			'2419200' => sprintf(__('%s weeks', 'updraftplus'), 4),
+			/* translators: %s: No. of weeks. */
 			'31449600' => sprintf(__('%s weeks', 'updraftplus'), 52)
 		);
 	}
@@ -119,20 +124,25 @@ class UpdraftPlus_Addon_LockAdmin {
 	 */
 	public function admin_init() {
 	
-		if ((empty($_POST['updraft_unlockadmin_session_length']) && empty($_POST['updraft_unlockadmin_password'])) || empty($_POST['nonce'])) return;
+		$post_updraft_unlockadmin_session_length = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'updraft_unlockadmin_session_length');
+		$post_updraft_unlockadmin_password = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'updraft_unlockadmin_password');
+		$post_updraft_unlockadmin_oldpassword = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'updraft_unlockadmin_oldpassword');
+		$post_updraft_unlockadmin_support_url = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'updraft_unlockadmin_support_url');
+		$post_nonce = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'nonce');
+		if ((empty($post_updraft_unlockadmin_session_length) && empty($post_updraft_unlockadmin_password)) || empty($post_nonce)) return;
 		
-		if (!wp_verify_nonce($_POST['nonce'], 'updraftplus-unlockadmin-nonce')) return;
+		if (!wp_verify_nonce($post_nonce, 'updraftplus-unlockadmin-nonce')) return;
 		
 		$user = wp_get_current_user();
 		if (!is_a($user, 'WP_User')) return;
 		
 		$this->get_opts();
 		
-		if (!empty($_POST['updraft_unlockadmin_session_length']) && isset($_POST['updraft_unlockadmin_oldpassword']) && $_POST['updraft_unlockadmin_oldpassword'] == $this->opts['password']) {
+		if (!empty($post_updraft_unlockadmin_session_length) && isset($post_updraft_unlockadmin_oldpassword) && $post_updraft_unlockadmin_oldpassword == $this->opts['password']) {
 			$this->old_password = $this->opts['password'];
-			$this->opts['password'] = $_POST['updraft_unlockadmin_password'];
-			$this->opts['support_url'] = $_POST['updraft_unlockadmin_support_url'];
-			$this->opts['session_length'] = (int) $_POST['updraft_unlockadmin_session_length'];
+			$this->opts['password'] = $post_updraft_unlockadmin_password;
+			$this->opts['support_url'] = $post_updraft_unlockadmin_support_url;
+			$this->opts['session_length'] = (int) $post_updraft_unlockadmin_session_length;
 			UpdraftPlus_Options::update_updraft_option('updraft_adminlocking', $this->opts);
 			$this->password_length = strlen($this->opts['password']);
 			add_action('all_admin_notices', array($this, 'show_admin_warning_passwordset'));
@@ -140,7 +150,7 @@ class UpdraftPlus_Addon_LockAdmin {
 		
 		// Note: this code also fires when the user sets a new password (because we don't want to immediately lock them)
 		$password = $this->opts['password'];
-		if ($password === (string) $_POST['updraft_unlockadmin_password']) {
+		if ($password === (string) $post_updraft_unlockadmin_password) {
 			$session_length = (int) $this->opts['session_length'];
 			if ($session_length<1) $session_length = 86400;
 			// The cookie relies on the user ID, password and session time. So, someone stealing the cookie can't use it forever. They need the password to generate valid cookies.
@@ -165,7 +175,7 @@ class UpdraftPlus_Addon_LockAdmin {
 		} elseif ($this->old_password !== $this->opts['password']) {
 			$msg .= __('The admin password has been changed.', 'updraftplus');
 		} else {
-			$msg .= __('Settings saved.');
+			$msg .= __('Settings saved.'); // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Already available in core, see wp-admin/network/sites.php:366
 		}
 		$msg .= '</strong>';
 		global $updraftplus_admin;

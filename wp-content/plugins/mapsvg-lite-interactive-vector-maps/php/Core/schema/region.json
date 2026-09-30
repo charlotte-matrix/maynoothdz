@@ -1,0 +1,90 @@
+{
+  "name": "regions_%MAP_ID%",
+  "primaryKeyField": "id",
+  "objectNameSingular": "region",
+  "objectNamePlural": "regions",
+  "apiEndpoints": [
+    { "url": "regions/%name%", "method": "GET", "name": "index" },
+    { "url": "regions/%name%/[:id]", "method": "GET", "name": "show" },
+    { "url": "regions/%name%", "method": "POST", "name": "create" },
+    { "url": "regions/%name%/[:id]", "method": "PUT", "name": "update" },
+    { "url": "regions/%name%/[:id]", "method": "DELETE", "name": "delete" },
+    { "url": "regions/%name%", "method": "DELETE", "name": "clear" },
+    { "url": "collection/%name%/orphans", "method": "DELETE", "name": "deleteOrphans" }
+  ],
+  "fields": [
+    {
+      "name": "id",
+      "label": "ID",
+      "type": "id",
+      "db_type": "varchar(255)",
+      "visible": true,
+      "protected": true,
+      "searchable": true,
+      "auto_increment": false
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "type": "text",
+      "db_type": "varchar(255)",
+      "visible": true,
+      "searchable": true,
+      "renamable": false
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "textarea",
+      "db_type": "text",
+      "visible": true,
+      "searchable": false,
+      "renamable": true
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "type": "status",
+      "db_type": "int(11)",
+      "visible": true,
+      "options": [
+        {
+          "label": "Enabled",
+          "value": 1,
+          "disabled": false,
+          "color": ""
+        },
+        {
+          "label": "Disabled",
+          "value": 0,
+          "disabled": true,
+          "color": ""
+        }
+      ],
+      "db_default": 1
+    },
+    {
+      "name": "orphaned",
+      "label": "Orphaned",
+      "type": "checkbox",
+      "db_type": "tinyint(1)",
+      "visible": false,
+      "protected": true,
+      "db_default": 0
+    },
+    {
+      "name": "images",
+      "label": "Images",
+      "type": "image",
+      "db_type": "text",
+      "visible": true
+    },
+    {
+      "name": "link",
+      "label": "Link",
+      "type": "text",
+      "db_type": "varchar(255)",
+      "visible": true
+    }
+  ]
+}

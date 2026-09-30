@@ -1,0 +1,69 @@
+---
+description: Rules for adding or modifying schema properties/fields in MapSVG.
+globs: wp-content/plugins/mapsvg/php/Domain/Schema/**
+alwaysApply: true
+---
+
+# Schema Changes
+
+When adding, renaming, or removing a schema property (e.g. a new `gs*` field), four files must be updated in concert:
+
+## 1. PHP Schema class — property + setter
+
+**File:** `php/Domain/Schema/Schema.php`
+
+- Add a typed `public $propertyName` declaration with a docblock.
+- Add a `setPropertyName($value)` setter method. Cast/validate inside the setter (e.g. `(int)$value` for booleans, `(string)$value` for strings, `in_array(...)` for enums).
+
+## 2. PHP Migration — table column
+
+**File:** `php/Migrate/Migrations/next.php`
+
+- Add the column definition to the existing `$schemaColumnsToAdd` array (do **not** create a new `ALTER TABLE` statement).
+- Follow the rules in `migrations.mdc`: guard with `SHOW TABLES`, `SHOW COLUMNS`, use `$db->mapsvg_prefix`.
+
+## 3. PHP schema JSON — field definition
+
+**File:** `php/Core/schema/schema.json`
+
+- This JSON defines the meta-schema for the `schemas` table itself (what fields a schema record has).
+- Add a field entry to the `fields` array, e.g.:
+  ```json
+  {
+    "name": "gsImportSourceValid",
+    "label": "Import Source Valid",
+    "type": "boolean",
+    "db_type": "tinyint(1)",
+    "visible": false
+  }
+  ```
+
+## 4. TypeScript Schema class — type + setter + `getData()`
+
+**File:** `js/mapsvg/Infrastructure/Server/Schema.ts`
+
+- Add an optional type declaration to the class body (e.g. `gsImportSourceValid?: number`).
+- Add a `setPropertyName(value)` setter. The `build()` / `update()` methods auto-dispatch to `set${ucfirst(key)}`.
+- Add the property to the `getData()` method so it is included in the serialized payload sent to the server on `schemaRepo.update()`.
+
+## 5. TypeScript SchemaModel — field definition
+
+**File:** `js/mapsvg/Infrastructure/Server/SchemaModel.ts`
+
+- Add a field entry to the `SchemaModelSchema` fields array inside the `new Schema({...})` constructor, e.g.:
+  ```ts
+  {
+    name: "gsImportSourceValid",
+    type: "boolean",
+  },
+  ```
+
+## Summary checklist
+
+| # | File | What to add |
+|---|------|-------------|
+| 1 | `php/Domain/Schema/Schema.php` | `public $prop` + setter |
+| 2 | `php/Migrate/Migrations/next.php` | Column in existing `$schemaColumnsToAdd` array |
+| 3 | `php/Core/schema/schema.json` | Field entry in the `fields` array |
+| 4 | `js/mapsvg/Infrastructure/Server/Schema.ts` | Type declaration + setter + `getData()` entry |
+| 5 | `js/mapsvg/Infrastructure/Server/SchemaModel.ts` | Field entry in `SchemaModelSchema` fields |

@@ -1,0 +1,70 @@
+.mapsvg-form-field-select .select2-container .select2-selection--single {
+  height: 33px !important;
+  padding: 20px 32px 10px 32px !important;
+  border-radius: 33px !important;
+  border-color: #e5e5e5;
+  box-sizing: content-box;
+}
+.mapsvg-form-field-select {
+  position: relative;
+}
+.mapsvg-form-field-select label {
+  position: absolute;
+  z-index: 1;
+  top: 16px;
+  left: 32px;
+}
+.mapsvg-form-field-select
+  .select2-container
+  .select2-selection--single
+  .select2-selection__rendered {
+  margin-top: 14px;
+  padding: 0;
+  line-height: 22px !important;
+  display: inline-block;
+}
+
+.mapsvg-form-field-select .select2-selection__clear {
+  margin-left: 7px;
+}
+
+.mapsvg-form-field-select
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__arrow {
+  height: 66px;
+  right: 16px;
+}
+
+.mapsvg-form-field-select > .select2-container.select2-container--default.select2-container--open {
+  margin-top: 3px;
+}
+
+.mapsvg-form-field-select .select2-dropdown.select2-dropdown--below {
+  padding: 32px 32px;
+  border-radius: 33px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+.mapsvg-form-field-select .select2-search.select2-search--dropdown {
+  margin-bottom: 10px;
+}
+
+.mapsvg-form-field-select .select2-search__field {
+  border-radius: 8px !important;
+}
+
+.mapsvg-form-field-select .select2-results__option {
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.mapsvg-form-field-select
+  .select2-container--default
+  .select2-results__option--highlighted[aria-selected] {
+  background-color: #eee;
+  color: black;
+}
+.mapsvg-form-field-select .select2-results__option {
+  margin-bottom: 4px;
+}

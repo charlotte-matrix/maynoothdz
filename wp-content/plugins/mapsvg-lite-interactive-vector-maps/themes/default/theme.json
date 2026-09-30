@@ -1,0 +1,8 @@
+{
+  "name": "MapSVG default theme",
+  "description": "Default theme. Use it as a start for you own one.",
+  "version": "1.0.0",
+  "css": ["./assets/css/some.css", "https://site.css"],
+  "js": [],
+  "isolateStyles": false
+}

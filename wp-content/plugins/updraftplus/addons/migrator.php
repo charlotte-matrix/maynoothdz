@@ -166,7 +166,11 @@ class UpdraftPlus_Addons_Migrator extends UpdraftPlus_Migrator_Lite {
 		global $updraftplus, $updraftplus_admin;// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Its used on line 187 but for some reason its flagged assuming becuase of the closed and open php tags ?>
 		<div id="updraft_migrate_tab_main">
 
-			<?php $updraftplus_admin->include_template('wp-admin/settings/temporary-clone.php'); ?>
+			<?php
+				$updraftplus_admin->include_template('wp-admin/settings/temporary-clone.php', false, array(
+					'checkout_clone_token_attributes' => 'href="'.esc_url($updraftplus->get_url('buy_clone_tokens')).'" target="_blank"'
+				));
+			?>
 
 			<h2><?php esc_html_e('Migrate (create a copy of a site on hosting you control)', 'updraftplus');?></h2>
 
@@ -186,7 +190,7 @@ class UpdraftPlus_Addons_Migrator extends UpdraftPlus_Migrator_Lite {
 			</div>
 
 			<?php
-				if (file_exists(UPDRAFTPLUS_DIR . '/includes/updraftplus-migration.php')) {
+				if (class_exists('UpdraftPlus_Migration', false)) {
 					$is_extendify_migration_active = isset($_GET['source']) && 'extendify' === $_GET['source'] ? true : false;
 					$updraftplus_module_widget_class = ($is_extendify_migration_active) ? 'updraft_simple_migrate_widget_module_content opened' : 'updraft_simple_migrate_widget_module_content';
 					$context = ($is_extendify_migration_active) ? 'extendify' : 'premium';
@@ -314,20 +318,39 @@ class UpdraftPlus_Addons_Migrator extends UpdraftPlus_Migrator_Lite {
 			$original_error_count = count($err);
 
 			if (!empty($elements['wpcore'])) {
-				$err[] = sprintf(__('You selected %s to be included in the restoration - this cannot / should not be done when importing a single site into a network.', 'updraftplus'), __('WordPress core', 'updraftplus')).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/how-do-i-restore-a-single-sub-site-on-a-multisite-network/" target="_blank">'.__('Go here for more information.', 'updraftplus').'</a>';
+				$err[] = sprintf(
+					/* translators: %s: Translated string "WordPress core". */
+					__('You selected %s to be included in the restoration - this cannot / should not be done when importing a single site into a network.', 'updraftplus'),
+					__('WordPress core', 'updraftplus')
+				).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/how-do-i-restore-a-single-sub-site-on-a-multisite-network/" target="_blank">'.__('Go here for more information.', 'updraftplus').'</a>';
 			}
 			if (!empty($elements['others'])) {
-				$err[] = sprintf(__('You selected %s to be included in the restoration - this cannot / should not be done when importing a single site into a network.', 'updraftplus'), __('other content from wp-content', 'updraftplus')).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/how-do-i-restore-a-single-sub-site-on-a-multisite-network/" target="_blank">'.__('Go here for more information.', 'updraftplus').'</a>';
+				$err[] = sprintf(
+					/* translators: %s: Translated string "other content from wp-content". */
+					__('You selected %s to be included in the restoration - this cannot / should not be done when importing a single site into a network.', 'updraftplus'),
+					__('other content from wp-content', 'updraftplus')
+				).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/how-do-i-restore-a-single-sub-site-on-a-multisite-network/" target="_blank">'.__('Go here for more information.', 'updraftplus').'</a>';
 			}
 			if (!empty($elements['mu-plugins'])) {
-				$err[] = sprintf(__('You selected %s to be included in the restoration - this cannot / should not be done when importing a single site into a network.', 'updraftplus'), __('Must-use plugins', 'updraftplus')).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/how-do-i-restore-a-single-sub-site-on-a-multisite-network/" target="_blank">'.__('Go here for more information.', 'updraftplus').'</a>';
+				$err[] = sprintf(
+					/* translators: %s: Translated string "Must-use plugins". */
+					__('You selected %s to be included in the restoration - this cannot / should not be done when importing a single site into a network.', 'updraftplus'),
+					__('Must-use plugins', 'updraftplus')
+				).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/how-do-i-restore-a-single-sub-site-on-a-multisite-network/" target="_blank">'.__('Go here for more information.', 'updraftplus').'</a>';
 			}
 
 			global $updraftplus;
 			if (version_compare($updraftplus->get_wordpress_version(), '3.5', '<')) {
-				$err[] = __('Importing a single site into a multisite install', 'updraftplus').': '.sprintf(__('This feature requires %s version %s or later', 'updraftplus'), 'WordPress', '3.5');
+				$err[] = __('Importing a single site into a multisite install', 'updraftplus').': '.
+						/* translators: 1: Untranslated string "WordPress", 2: WP version - "3.5". */
+						sprintf(__('This feature requires %1$s version %2$s or later', 'updraftplus'), 'WordPress', '3.5');
 			} elseif (get_site_option('ms_files_rewriting')) {
-				$err[] = __('Importing a single site into a multisite install', 'updraftplus').': '.sprintf(__('This feature is not compatible with %s', 'updraftplus'), 'pre-WordPress-3.5-style multisite uploads rewriting', 'updraftplus');
+				$err[] = __('Importing a single site into a multisite install', 'updraftplus').': '.
+						sprintf(
+							/* translators: %s: Translated string "pre-WordPress-3.5-style multisite uploads rewriting". */
+							__('This feature is not compatible with %s', 'updraftplus'),
+							__('pre-WordPress-3.5-style multisite uploads rewriting', 'updraftplus')
+						);
 			}
 
 			if (count($err) > $original_error_count) return;
@@ -388,7 +411,14 @@ class UpdraftPlus_Addons_Migrator extends UpdraftPlus_Migrator_Lite {
 		$blog_title = __('Migrated site (from UpdraftPlus)', 'updraftplus');
 
 		if (!isset($this->restore_options['updraftplus_migrate_blogname'])) {
-			return new WP_Error('multisite_info_missing', sprintf(__('Required information for restoring this backup was not given (%s)', 'updraftplus'), 'new multisite import location'));
+			return new WP_Error(
+				'multisite_info_missing',
+				sprintf(
+					/* translators: %s: Translated string "new multisite import location". */
+					__('Required information for restoring this backup was not given (%s)', 'updraftplus'),
+					__('new multisite import location', 'updraftplus')
+				)
+			);
 		}
 
 		// Verify value given
@@ -400,7 +430,14 @@ class UpdraftPlus_Addons_Migrator extends UpdraftPlus_Migrator_Lite {
 
 		global $wpdb, $updraftplus;
 		if (domain_exists($result['domain'], $result['path'], $wpdb->siteid)) {
-			return new WP_Error('already_taken', sprintf(__('Error: %s', 'updraftplus'), 'Site URL already taken'));
+			return new WP_Error(
+				'already_taken',
+				sprintf(
+					/* translators: %s: Translated string "Site URL already taken". */
+					__('Error: %s', 'updraftplus'),
+					__('Site URL already taken', 'updraftplus')
+				)
+			);
 		}
 
 		$create = $this->create_empty_blog($result['domain'], $result['path'], $blog_title, $wpdb->siteid);
@@ -445,7 +482,7 @@ class UpdraftPlus_Addons_Migrator extends UpdraftPlus_Migrator_Lite {
 		} else {
 			// Things like __('<strong>ERROR</strong>: problem creating site entry.' )
 			$updraftplus->log(__('Error when creating new site at your chosen address:', 'updraftplus'), 'warning-restore');
-			return new WP_Error('create_empty_blog_failed', __('Error when creating new site at your chosen address:', 'updraftplus').' '.(is_string($create) ? $create : print_r($create, true)));
+			return new WP_Error('create_empty_blog_failed', __('Error when creating new site at your chosen address:', 'updraftplus').' '.(is_string($create) ? $create : print_r($create, true))); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- print_r is returning data not displaying it.
 		}
 
 	}
@@ -463,12 +500,18 @@ class UpdraftPlus_Addons_Migrator extends UpdraftPlus_Migrator_Lite {
 		// Out of an abundance of caution, call the native, un-deprecated version if there is one
 		global $updraftplus;
 		$wp_version = $updraftplus->get_wordpress_version();
-		if (version_compare($wp_version, '4.4', '<') && function_exists('create_empty_blog')) return create_empty_blog($domain, $path, $weblog_title, $site_id);
-
+		if (version_compare($wp_version, '4.4', '<') && function_exists('create_empty_blog')) return create_empty_blog($domain, $path, $weblog_title, $site_id); // phpcs:ignore WordPress.WP.DeprecatedFunctions.create_empty_blogFound -- Executing function only if it's not deprecated.
 		if (empty($path)) $path = '/';
 
 		// Check if the domain has been used already. We should return an error message.
-		if (domain_exists($domain, $path, $site_id)) return __('<strong>ERROR</strong>: Site URL already taken.');
+		if (domain_exists($domain, $path, $site_id)) {
+			return sprintf(
+				/* translators: 1: Opening <strong> tag, 2: Closing </strong> tag. */
+				__('%1$sERROR%2$s: Site URL already taken.', 'updraftplus'),
+				'<strong>',
+				'</strong>'
+			);
+		}
 
 		// Need to backup wpdb table names, and create a new wp_blogs entry for new blog.
 		// Need to get blog_id from wp_blogs, and create new table names.
@@ -477,10 +520,17 @@ class UpdraftPlus_Addons_Migrator extends UpdraftPlus_Migrator_Lite {
 		// insert_blog() and install_blog() are deprecated as of WP 5.1.0.
 		// This has also caused an error when using install_blog on 5.1+, so we have switched to the new 'wp_insert_site'
 		if (version_compare($wp_version, '5.1', '<')) {
-			if (!$blog_id = insert_blog($domain, $path, $site_id)) return __('<strong>ERROR</strong>: problem creating site entry.');
+			if (!$blog_id = insert_blog($domain, $path, $site_id)) { // phpcs:ignore WordPress.WP.DeprecatedFunctions.insert_blogFound -- Executing function only if it's not deprecated.
+				return sprintf(
+					/* translators: 1: Opening <strong> tag, 2: Closing </strong> tag. */
+					__('%1$sERROR%2$s: problem creating site entry.', 'updraftplus'),
+					'<strong>',
+					'</strong>'
+				);
+			}
 
 			switch_to_blog($blog_id);
-			install_blog($blog_id);
+			install_blog($blog_id); // phpcs:ignore WordPress.WP.DeprecatedFunctions.install_blogFound -- Executing function only if it's not deprecated.
 			restore_current_blog();
 		} else {
 			$admins = get_users(array(
@@ -570,13 +620,31 @@ if (!class_exists('UpdraftPlus_Addons_Migrator_RemoteSend')) {
 				<p><?php echo esc_html(__('To allow another site to send a backup to this site, create a key below.', 'updraftplus').' '.__("When you are shown the key, then press the 'Migrate' button on the other (sending) site, and copy-and-paste the key over there (in the 'Send a backup to another site' section).", 'updraftplus'));?></p>
 				<p>
 					<?php esc_html_e('Create a key: give this key a unique name (e.g. indicate the site it is for), then press "Create key":', 'updraftplus');?><br>
-					<input id="updraft_migrate_receivingsites_keyname" type="text" placeholder="<?php esc_attr_e('Enter your chosen name', 'updraftplus');?>" value="<?php echo esc_attr(__('Key', 'updraftplus').' - '.date('Y-m-d'));?>">
+					<input id="updraft_migrate_receivingsites_keyname" type="text" placeholder="<?php esc_attr_e('Enter your chosen name', 'updraftplus');?>" value="<?php echo esc_attr(__('Key', 'updraftplus').' - '.get_date_from_gmt(gmdate('Y-m-d'), 'Y-m-d'));?>">
 
 					<?php esc_html_e('Encryption key size:', 'updraftplus');?>
 					<select id="updraft_migrate_receivingsites_keysize">
-						<option value="1024"><?php echo esc_html(sprintf(__('%s bits', 'updraftplus').' - '.__('faster (possibility for slow PHP installs)', 'updraftplus'), '1024'));?></option>
-						<option value="2048" selected="selected"><?php echo esc_html(sprintf(__('%s bytes', 'updraftplus').' - '.__('recommended', 'updraftplus'), '2048'));?></option>
-						<option value="4096"><?php echo esc_html(sprintf(__('%s bits', 'updraftplus').' - '.__('slower, strongest', 'updraftplus'), '4096'));?></option>
+						<option value="1024">
+							<?php
+								/* translators: %s: Number of Bits "1024". */
+								echo esc_html(sprintf(__('%s bits', 'updraftplus').' - '.
+								__('faster (possibility for slow PHP installs)', 'updraftplus'), '1024'));
+							?>
+						</option>
+						<option value="2048" selected="selected">
+							<?php
+								/* translators: %s: Number of Bytes "2048". */
+								echo esc_html(sprintf(__('%s bytes', 'updraftplus').' - '.
+								__('recommended', 'updraftplus'), '2048'));
+							?>
+						</option>
+						<option value="4096">
+							<?php
+								/* translators: %s: Number of Bits "4096". */
+								echo esc_html(sprintf(__('%s bits', 'updraftplus').' - '.
+								__('slower, strongest', 'updraftplus'), '4096'));
+							?>
+						</option>
 					</select>
 
 					<button id="updraft_migrate_receivingsites_createkey" class="button button-primary" onclick="updraft_migrate_receivingsites_createkey();"><?php esc_html_e('Create key', 'updraftplus');?></button>
@@ -603,9 +671,9 @@ if (!class_exists('UpdraftPlus_Addons_Migrator_RemoteSend')) {
 		 * @return void Outputs javascript on relevant pages.
 		 */
 		public function admin_footer() {
-			global $updraftplus, $pagenow;
+			global $updraftplus, $pagenow, $plugin_page;
 			// Next, the actions that only come on the UpdraftPlus page
-			if (UpdraftPlus_Options::admin_page() != $pagenow || empty($_REQUEST['page']) || 'updraftplus' != $_REQUEST['page']) return;
+			if (UpdraftPlus_Options::admin_page() != $pagenow || 'updraftplus' != $plugin_page) return;
 
 			?>
 			<script>

@@ -1,0 +1,20 @@
+.mapsvg-form-field-search {
+  position: relative;
+}
+.mapsvg-directory-search-wrap-margin {
+  position: relative;
+  height: var(--mapsvg-input-height);
+}
+.mapsvg-directory-search:active,
+.mapsvg-directory-search:focus {
+  border: var(--mapsvg-border) !important;
+}
+.mapsvg-directory-search:focus,
+.mapsvg-directory-search:active {
+  outline: 0 !important;
+  -webkit-appearance: none !important;
+  border: 0;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}

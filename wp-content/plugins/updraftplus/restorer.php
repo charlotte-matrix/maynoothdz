@@ -665,6 +665,17 @@ class Updraft_Restorer {
 	public function perform_restore($entities_to_restore, $restore_options) {
 		global $updraftplus;
 		
+		// Block all restore operations when DISALLOW_FILE_MODS is active. This is the final enforcement point (the UI and WP-CLI checks are early conveniences); a resumed restore re-enters this method and is re-checked.
+		if (defined('DISALLOW_FILE_MODS') && DISALLOW_FILE_MODS) {
+			$error_message = sprintf(
+				/* translators: %s: Constant name (DISALLOW_FILE_MODS) */
+				__('Restore operations are disabled by the %s constant.', 'updraftplus'),
+				'DISALLOW_FILE_MODS'
+			).' '.__('To restore this site, temporarily remove the constant from wp-config.php or set it to false.', 'updraftplus');
+			$updraftplus->log($error_message, 'error');
+			return new WP_Error('restore_disallowed', $error_message);
+		}
+
 		$updraftplus->log_restore_update(array('type' => 'state', 'stage' => 'verifying', 'data' => implode(', ', array_flip($entities_to_restore))));
 
 		// Now log. We first remove any encryption passphrase from the log data.
@@ -702,6 +713,10 @@ class Updraft_Restorer {
 		
 		$updraftplus->jobdata_set('second_loop_entities', $second_loop);
 		$updraftplus->jobdata_set('backup_timestamp', $timestamp);
+
+		// The timestamp when the restoration process started
+		$restore_timestamp = $updraftplus->jobdata_get('restore_timestamp', false);
+		if (!$restore_timestamp) $updraftplus->jobdata_set('restore_timestamp', time());
 		
 		// Use a site option, as otherwise on multisite when all the array of options is updated via UpdraftPlus_Options::update_site_option(), it will over-write any restored UD options from the backup
 		update_site_option('updraft_restore_in_progress', $updraftplus->nonce);
@@ -780,6 +795,14 @@ class Updraft_Restorer {
 
 				do_action('updraft_restored_archive', $file, $type, $restore_result, $fkey, $timestamp);
 
+			}
+
+			// Scan and delete leftover files in the "uploads" directory that are not part of the backup file or don't exist in the backup file
+			if ('uploads' == $type && apply_filters('updraftplus_restore_uploads_in_one_go', !class_exists('UpdraftPlusAddOn_MultiSite')) && (!defined('UPDRAFTPLUS_RESTORE_DELETE_OLD_UPLOAD_FILES') || UPDRAFTPLUS_RESTORE_DELETE_OLD_UPLOAD_FILES)) {
+				$working_dir = $info['path'];
+				$restore_timestamp = $updraftplus->jobdata_get('restore_timestamp');
+				$updraftplus->log('Scan and delete old files that are not presented in the restored backup...');
+				UpdraftPlus_Filesystem_Functions::delete_files_by_age($working_dir, $restore_timestamp, apply_filters('updraftplus_restore_uploads_paths_to_keep', array(), $working_dir, $this->ud_backup_is_multisite, $this->ud_multisite_selective_restore));
 			}
 			
 			// Update the job data each time we go round the loop, so that if it aborts, it can be resumed from the correct point
@@ -932,12 +955,13 @@ class Updraft_Restorer {
 	 *
 	 * In the 'ordinary' case of unzipping a UD zip backup, this method basically does some preparation, and then calls UpdraftPlus_Filesystem_Functions::unzip_file() for the actual unzipping
 	 *
-	 * @param  String		  $package - specify package - relative to UpdraftPlus::backups_dir_location()
-	 * @param  String|Boolean $type    - type of archive e.g. db.
+	 * @param string         $package             - specify package - relative to UpdraftPlus::backups_dir_location()
+	 * @param string|boolean $type                - type of archive e.g. db.
+	 * @param boolean        $use_fast_extraction - whether or not to use the fast extraction. If this is true, then files will be directly extracted to the designated location. Otherwise, they will be extracted to the 'upgrade' directory first.
 	 *
-	 * @return String|WP_Error If successful, then this indicates the working directory that the archive was unpacked in; a WP_Filesystem path
+	 * @return string|WP_Error If successful, then this indicates the working directory that the archive was unpacked in; a WP_Filesystem path
 	 */
-	private function unpack_package_archive($package, $type = false) {
+	private function unpack_package_archive($package, $type = false, $use_fast_extraction = false) {
 
 		global $wp_filesystem, $updraftplus;
 
@@ -963,7 +987,7 @@ class Updraft_Restorer {
 		// We need a working directory. This has a change from the WP core version - minimise path length
 		// N.B. It is deterministic; the same package file will get the same working directory
 		// $working_dir = $upgrade_folder . basename($package, '.zip');
-		$working_dir = $upgrade_folder.substr(md5($package), 0, 8);
+		$working_dir = ($use_fast_extraction) ? $wp_filesystem->wp_content_dir() : $upgrade_folder.substr(md5($package), 0, 8);
 		
 		if (preg_match('#\.zip$#i', $package)) {
 		
@@ -984,7 +1008,7 @@ class Updraft_Restorer {
 			
 		}
 
-		if (0 == $zip_starting_index) {
+		if (0 == $zip_starting_index && !$use_fast_extraction) {
 			// Clean up contents of upgrade directory beforehand.
 			$upgrade_files = $wp_filesystem->dirlist($upgrade_folder);
 			if (!empty($upgrade_files)) {
@@ -1006,12 +1030,17 @@ class Updraft_Restorer {
 		// Unzip package to working directory
 		if (preg_match('#\.zip$#i', $package)) {
 
-			$folders_to_include = array();
+			$folders_to_look = array();
+			$extract_matched_folders = 'extract_only';
 			
-			if ('themes' == $type && !$this->include_unspecified_themes) $folders_to_include = $this->themes_to_restore;
-			if ('plugins' == $type && !$this->include_unspecified_plugins) $folders_to_include = $this->plugins_to_restore;
+			if ('themes' == $type && !$this->include_unspecified_themes) $folders_to_look = $this->themes_to_restore;
+			if ('plugins' == $type && !$this->include_unspecified_plugins) $folders_to_look = $this->plugins_to_restore;
+			if ('uploads' == $type && apply_filters('updraftplus_restore_uploads_in_one_go', !class_exists('UpdraftPlusAddOn_MultiSite'))) {
+				$folders_to_look = apply_filters('updraftplus_restore_uploads_folders_to_look', $folders_to_look, $this->ud_multisite_selective_restore);
+				$extract_matched_folders = apply_filters('updraftplus_restore_uploads_extract_matched_folders', $extract_matched_folders, $this->ud_multisite_selective_restore);
+			}
 
-			$result = UpdraftPlus_Filesystem_Functions::unzip_file($package, $working_dir, $zip_starting_index, $folders_to_include);
+			$result = UpdraftPlus_Filesystem_Functions::unzip_file($package, $working_dir, $zip_starting_index, $folders_to_look, $extract_matched_folders);
 			
 		} elseif (preg_match('#\.tar(\.(gz|bz2))?$#i', $package)) {
 			
@@ -1676,6 +1705,14 @@ class Updraft_Restorer {
 
 		$updraftplus->log("restore_backup(backup_file=$backup_file, type=$type, info=".serialize($info).", last_one=$last_one)");
 
+		if (function_exists('set_time_limit')) @set_time_limit(1800);// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- Silenced to suppress errors that may arise because of the function.
+
+		// Perform an improved restoration process for the 'uploads' entity which directly extracts the files to the 'wp-content/uploads' directory.
+		if (apply_filters('updraftplus_restore_uploads_in_one_go', !class_exists('UpdraftPlusAddOn_MultiSite')) && empty($this->ud_foreign) && 'uploads' == $type) {
+			$working_dir = $this->unpack_package_archive($backup_file, $type, true);
+			return is_wp_error($working_dir) ? $working_dir : true;
+		}
+
 		if ('db' == $type) {
 			$get_dir = '';
 		} else {
@@ -1696,8 +1733,6 @@ class Updraft_Restorer {
 		
 		$this->import_table_prefix = $import_table_prefix;
 		$this->final_import_table_prefix = $updraftplus->get_table_prefix(false);
-		
-		if (function_exists('set_time_limit')) @set_time_limit(1800);// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- Silenced to suppress errors that may arise because of the function.
 
 		// Based upon how WP updates work, the following code unpacks the "package" (the backup archive) and then later its contents are moved to their destination.
 
@@ -3065,7 +3100,12 @@ class Updraft_Restorer {
 
 				$updraftplus->log(sprintf('Your database user does not have permission to drop tables. We will attempt to restore by simply emptying the tables; this should work as long as you are restoring from a WordPress version with the same database structure (%s)', '('.$this->last_error.', '.$this->last_error_no.')'));
 				
-				$updraftplus->log(__('Your database user does not have permission to drop tables.', 'updraftplus').' '.sprintf(__('We will attempt to restore by simply emptying the tables; this should work as long as you are restoring from a WordPress version with the same database structure (%s)', 'updraftplus'), '('.$this->last_error.', '.$this->last_error_no.')'), 'warning-restore');
+				$updraftplus->log(
+					__('Your database user does not have permission to drop tables.', 'updraftplus').' '.
+					/* translators: %s: Error message */
+					sprintf(__('We will attempt to restore by simply emptying the tables; this should work as long as you are restoring from a WordPress version with the same database structure (%s)', 'updraftplus'), '('.$this->last_error.', '.$this->last_error_no.')'),
+					'warning-restore'
+				);
 				
 			}
 		}
@@ -3135,6 +3175,7 @@ class Updraft_Restorer {
 				if ('' == $this->old_siteurl && preg_match('/^\# Backup of: (http(.*))$/', $buffer, $matches)) {
 					$this->old_siteurl = untrailingslashit($matches[1]);
 					$updraftplus->log("Backup of: ".$this->old_siteurl);
+					/* translators: %s: Old site */
 					$updraftplus->log(sprintf(__('Backup of: %s', 'updraftplus'), $this->old_siteurl), 'notice-restore', 'backup-of');
 					do_action('updraftplus_restore_db_record_old_siteurl', $this->old_siteurl);
 
@@ -3176,6 +3217,7 @@ class Updraft_Restorer {
 						// Sanity checks
 						if (isset($this->old_siteinfo['multisite']) && !$this->old_siteinfo['multisite'] && is_multisite()) {
 							if (!class_exists('UpdraftPlusAddOn_MultiSite') || !class_exists('UpdraftPlus_Addons_Migrator')) {
+								/* translators: %s: String 'UpdraftPlus Premium' */
 								return new WP_Error('missing_addons', sprintf(__('To import an ordinary WordPress site into a multisite installation requires %s.', 'updraftplus'), 'UpdraftPlus Premium'));
 							}
 						}
@@ -3315,6 +3357,7 @@ class Updraft_Restorer {
 				if (0 == $this->insert_statements_run && $this->restoring_table && $this->restoring_table == $import_table_prefix.'options') {
 					$updraftplus->log("Leaving maintenance mode");
 					$this->maintenance_mode(false);
+					/* translators: %s: translated "INSERT (options)" */
 					return new WP_Error('initial_db_error', sprintf(__('An error occurred on the first %s command - aborting run', 'updraftplus'), 'INSERT (options)'));
 				}
 				continue;
@@ -3457,12 +3500,14 @@ class Updraft_Restorer {
 				$connection_charset = $updraftplus->get_connection_charset();
 				if ('utf8' === $charset && 'utf8mb4' === $connection_charset) {
 					$sql_line = UpdraftPlus_Manipulation_Functions::str_lreplace("SET NAMES $charset", "SET NAMES $connection_charset", $sql_line);
+					/* translators: 1: Charset found, 2: Changed charset to */
 					$updraftplus->log(sprintf(__('Found SET NAMES %1$s, but changing to %2$s as suggested by WPDB::determine_charset().', 'updraftplus'), $charset, $connection_charset), 'notice-restore');
 					$charset = $connection_charset;
 				}
 				$this->set_names = $charset;
 				if (!isset($supported_charsets[strtolower($charset)])) {
 					$sql_line = UpdraftPlus_Manipulation_Functions::str_lreplace($smatches[1]." ".$charset, "SET NAMES ".$this->restore_options['updraft_restorer_charset'], $sql_line);
+					/* translators: 1: Requested charset, 2: Fallback charset */
 					$updraftplus->log('SET NAMES: '.sprintf(__('Requested character set (%1$s) is not present - changing to %2$s.', 'updraftplus'), esc_html($charset), esc_html($this->restore_options['updraft_restorer_charset'])), 'notice-restore');
 				}
 			} elseif (preg_match('/^\s*create trigger /i', $sql_line)) {
@@ -3776,6 +3821,7 @@ class Updraft_Restorer {
 			}
 			$skip_table = true;
 		} elseif (!empty($last_table) && !empty($table_name) && $table_name != $last_table) {
+			/* translators: 1: Table name, 2: Last table name */
 			if (empty($this->previous_table_name) || $table_name != $this->previous_table_name) $updraftplus->log(sprintf(__('Skipping table %1$s: already restored on a prior run; next table to restore: %2$s', 'updraftplus'), $table_name, $last_table), 'notice-restore');
 			$skip_table = true;
 		} elseif (!empty($last_table) && !empty($table_name) && $table_name == $last_table) {
@@ -3934,7 +3980,14 @@ class Updraft_Restorer {
 		$logit = substr($sql_line, 0, 100);
 		$updraftplus->log(sprintf("An SQL line that is larger than the maximum packet size and cannot be split was found: %s", '('.strlen($sql_line).', '.$logit.' ...)'));
 		
-		$updraftplus->log(__('Warning:', 'updraftplus').' '.sprintf(__("An SQL line that is larger than the maximum packet size and cannot be split was found; this line will not be processed, but will be dropped: %s", 'updraftplus'), '('.strlen($sql_line).', '.$this->max_allowed_packet.', '.$logit.' ...)'), 'notice-restore');
+		$updraftplus->log(
+			__('Warning:', 'updraftplus').' '.
+			sprintf(
+				/* translators: %s: SQL line */
+				__("An SQL line that is larger than the maximum packet size and cannot be split was found; this line will not be processed, but will be dropped: %s", 'updraftplus'),
+				'('.strlen($sql_line).', '.$this->max_allowed_packet.', '.$logit.' ...)'
+			),
+		'notice-restore');
 	}
 
 	private function restore_this_table($table_name) {
@@ -4060,6 +4113,7 @@ class Updraft_Restorer {
 				if (0 == $this->insert_statements_run && $this->new_table_name && $this->new_table_name == $import_table_prefix.'options') {
 					$updraftplus->log('Leaving maintenance mode');
 					$this->maintenance_mode(false);
+					/* translators: %s: String 'INSERT (options)' */
 					return new WP_Error('initial_db_error', sprintf(__('An error occurred on the first %s command - aborting run', 'updraftplus'), 'INSERT (options)'));
 				}
 				return false;
@@ -4102,7 +4156,11 @@ class Updraft_Restorer {
 		if (!$req) {
 			if (!$ignore_errors) $this->errors++;
 			$print_err = (strlen($sql_line) > 100) ? substr($sql_line, 0, 100).' ...' : $sql_line;
-			$updraftplus->log(sprintf(_x('An error (%s) occurred:', 'The user is being told the number of times an error has happened, e.g. An error (27) occurred', 'updraftplus'), $this->errors)." - ".$this->last_error." - ".__('the database query being run was:', 'updraftplus').' '.$print_err, 'notice-restore');
+			$updraftplus->log(sprintf(
+				/* translators: %s: Error message */
+				_x('An error (%s) occurred:', 'The user is being told the number of times an error has happened, e.g. An error (27) occurred', 'updraftplus'),
+				$this->errors
+			)." - ".$this->last_error." - ".__('the database query being run was:', 'updraftplus').' '.$print_err, 'notice-restore');
 			$updraftplus->log("An error (".$this->errors.") occurred: ".$this->last_error." - SQL query was (type=$sql_type): ".substr($sql_line, 0, 65536));
 
 			if ('MySQL server has gone away' == $this->last_error || 'Connection was killed' == $this->last_error) {
@@ -4132,6 +4190,7 @@ class Updraft_Restorer {
 				} else {
 					$updraftplus->log("Leaving maintenance mode");
 					$this->maintenance_mode(false);
+					/* translators: %s: String 'CREATE TABLE' */
 					return new WP_Error('initial_db_error', sprintf(__('An error occurred on the first %s command - aborting run', 'updraftplus'), 'CREATE TABLE'));
 				}
 			} elseif (2 == $sql_type && 0 == $this->tables_created && !empty($this->db_permissons_forbidden['drop'])) {
@@ -4147,9 +4206,17 @@ class Updraft_Restorer {
 				$extra_msg = '';
 				$dbv = $wpdb->db_version();
 				if ('utf8mb4' == strtolower($this->set_names) && $dbv && version_compare($dbv, '5.2.0', '<=')) {
-					$extra_msg = ' '.__('This problem is caused by trying to restore a database on a very old MySQL version that is incompatible with the source database.', 'updraftplus').' '.sprintf(__('This database needs to be deployed on MySQL version %s or later.', 'updraftplus'), '5.5');
+					$extra_msg = ' '.__('This problem is caused by trying to restore a database on a very old MySQL version that is incompatible with the source database.', 'updraftplus').' '.
+					/* translators: %s: String '5.5' */
+					sprintf(__('This database needs to be deployed on MySQL version %s or later.', 'updraftplus'), '5.5');
 				}
-				return new WP_Error('initial_db_error', sprintf(__('An error occurred on the first %s command - aborting run', 'updraftplus'), 'SET NAMES').'. '.sprintf(__('To use this backup, your database server needs to support the %s character set.', 'updraftplus'), $this->set_names).$extra_msg);
+				return new WP_Error(
+					'initial_db_error',
+					/* translators: %s: String 'SET NAMES' */
+					sprintf(__('An error occurred on the first %s command - aborting run', 'updraftplus'), 'SET NAMES').'. '.
+					/* translators: %s: The character set */
+					sprintf(__('To use this backup, your database server needs to support the %s character set.', 'updraftplus'), $this->set_names).$extra_msg
+				);
 			} elseif (12 == $sql_type) {
 				// sql_type 12 is stored routine creation
 				// in case we dealt with an sql syntax error from the stored routine body, the restore operation should not be stopped
@@ -4295,6 +4362,7 @@ class Updraft_Restorer {
 				// WordPress has an option name predicated upon the table prefix. Yuk.
 				if ($import_table_prefix != $old_table_prefix) {
 					$updraftplus->log("Table prefix has changed: changing options table field(s) accordingly (".$mprefix."options)");
+					/* translators: %s: String 'option' for table */
 					$print_line = sprintf(__('Table prefix has changed: changing %s table field(s) accordingly:', 'updraftplus'), 'option').' ';
 					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is safely escaped via UpdraftPlus_Database_Utility::escape_table_name().
 					if (false === $wpdb->query($wpdb->prepare("UPDATE $escaped_table_name SET option_name=%s WHERE option_name=%s LIMIT 1", $import_table_prefix . $mprefix . 'user_roles', $old_table_prefix . $mprefix . 'user_roles'))) {
@@ -4418,7 +4486,7 @@ class Updraft_Restorer {
 			// This table is not a per-site table, but per-install
 
 			$updraftplus->log("Table prefix has changed: changing usermeta table field(s) accordingly");
-
+			/* translators: %s: String 'usermeta' for table */
 			$print_line = sprintf(__('Table prefix has changed: changing %s table field(s) accordingly:', 'updraftplus'), 'usermeta').' ';
 
 			$errors_occurred = false;
@@ -4509,9 +4577,17 @@ class Updraft_Restorer {
 					$updraftplus->log($err_string, 'warning-restore');
 				}
 			} elseif (false == $report) {
-				$updraftplus->log(sprintf(__('Failed: the %s operation was not able to start.', 'updraftplus'), __('search and replace', 'updraftplus')), 'warning-notice');
+				$updraftplus->log(sprintf(
+					/* translators: %s: String 'search and replace' */
+					__('Failed: the %s operation was not able to start.', 'updraftplus'),
+					__('search and replace', 'updraftplus')
+				), 'warning-notice');
 			} elseif (!is_array($report)) {
-				$updraftplus->log(sprintf(__('Failed: we did not understand the result returned by the %s operation.', 'updraftplus'), __('search and replace', 'updraftplus')), 'warning-notice');
+				$updraftplus->log(sprintf(
+					/* translators: %s: String 'search and replace' */
+					__('Failed: we did not understand the result returned by the %s operation.', 'updraftplus'),
+					__('search and replace', 'updraftplus')
+				), 'warning-notice');
 			}
 		}
 	}

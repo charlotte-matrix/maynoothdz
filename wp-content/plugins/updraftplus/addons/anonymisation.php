@@ -22,7 +22,7 @@ class UpdraftPlus_Anonymisation_Functions {
 		add_filter('updraft_backupnow_database_showmoreoptions', array('UpdraftPlus_Anonymisation_Functions', 'backupnow_database_showmoreoptions'), 10, 2);
 		add_filter('updraftplus_migration_additional_ui', array('UpdraftPlus_Anonymisation_Functions', 'updraftplus_migration_anonymisation_options'));
 		add_filter('updraftplus_clone_additional_ui', array('UpdraftPlus_Anonymisation_Functions', 'updraftplus_clone_anonymisation_options'));
-		add_action('pre_database_backup_setup', array('UpdraftPlus_Anonymisation_Functions', 'setup_anonymisation_settings'));
+		add_action('updraftplus_pre_database_backup_setup', array('UpdraftPlus_Anonymisation_Functions', 'setup_anonymisation_settings'));
 	}
 
 	/**

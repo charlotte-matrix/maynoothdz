@@ -1,0 +1,692 @@
+<script type="text/x-handlebars-template" data-name="main">
+  <div class="mapsvg-view-padding">{{{premiumFeatureAlert}}}</div>
+
+  <div class="mapsvg-view-padding">
+
+    <div class="alert alert-info py-2 mb-3 d-flex align-items-center gap-2" role="alert">
+      <i class="bi bi-info-circle-fill"></i>
+      See the <a href="#" data-csv-role="instructions-trigger" class="alert-link">
+        CSV format instructions
+      </a>
+    </div>
+
+    <form id="mapsvg-gs-form">
+
+      <!-- ── Import source selector ──────────────────────────────────── -->
+      <div class="form-group row mb-3">
+        <label class="col-md-3 col-form-label" for="gs-source-upload">Import source</label>
+        <div class="col-md-9">
+          <div class="d-flex gap-3 mt-1">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="gsImportSource"
+                id="gs-source-upload"
+                value="upload"
+                {{#unless gs.isRemote}}checked{{/unless}}
+              />
+              <label class="form-check-label" for="gs-source-upload">
+                <i class="bi bi-upload me-1"></i>Upload file
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="gsImportSource"
+                id="gs-source-remote"
+                value="remote"
+                {{#if gs.isRemote}}checked{{/if}}
+              />
+              <label class="form-check-label" for="gs-source-remote">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Remote URL / Google Sheets
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Upload input (source-specific) ─────────────────────────── -->
+      <div id="gs-upload-section"{{#if gs.isRemote}} style="display:none;"{{/if}}>
+        {{#if gs.gsSync}}
+        <div class="alert alert-warning py-2 mb-3 d-flex align-items-center gap-2" role="alert" data-csv-role="upload-blocked-alert">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          Upload is disabled while AppScript bi-directional sync is active. Reset the connection first.
+        </div>
+        {{/if}}
+        <div class="form-group row mb-3">
+          <label class="col-md-3 col-form-label">Upload CSV file</label>
+          <div class="col-md-9">
+            <div class="input-group">
+              <input id="mapsvg-csv-file" class="form-control" type="file" {{#if gs.gsSync}}disabled{{/if}} />
+              <button class="btn btn-outline-secondary" type="button" id="mapsvg-btn-csv-check" disabled="disabled">
+                <span id="mapsvg-csv-file-spinner" style="display:none;">
+                  <span class="spinner-border spinner-border-sm" role="status"></span>
+                </span>
+                <span id="mapsvg-csv-file-check-label">Sync fields</span>
+              </button>
+            </div>
+            <div id="mapsvg-csv-file-error" class="text-danger form-text mt-1" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Remote input + remote-only options ─────────────────────── -->
+      <div id="gs-remote-section"{{#unless gs.isRemote}} style="display:none;"{{/unless}}>
+        <div class="form-group row mb-3">
+          <label class="col-md-3 col-form-label">
+            Remote CSV URL
+            <span
+              class="bi bi-question-circle text-muted ms-1 toggle-tooltip"
+              title="Google Sheets: File → Share → Publish to web → CSV → Copy link."
+            ></span>
+          </label>
+          <div class="col-md-9">
+            <div class="input-group">
+              <input
+                id="mapsvg-gs-csv-url"
+                class="form-control"
+                type="url"
+                name="gsCsvUrl"
+                value="{{gs.gsCsvUrl}}"
+                placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv"
+              />
+              <button class="btn btn-outline-secondary" type="button" id="mapsvg-btn-gs-check-csv" disabled="disabled">
+                <span id="mapsvg-gs-csv-spinner" style="display:none;">
+                  <span class="spinner-border spinner-border-sm" role="status"></span>
+                </span>
+                <span id="mapsvg-gs-check-csv-label">Sync fields</span>
+              </button>
+            </div>
+            <div id="mapsvg-gs-csv-error" class="text-danger form-text mt-1" style="display:none;"></div>
+            <div class="form-text">
+              Google Sheets: <strong>File → Share → Publish to web → CSV → Copy link</strong>
+              (URL must contain <code>output=csv</code> or <code>format=csv</code> — not a web-view / pubhtml link).
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- ── Common fields (shared for upload + remote) — shown after Sync fields, before Save ── -->
+      <div id="gs-common-checked-panel"{{#unless gs.gsImportSourceValid}} style="display:none;"{{/unless}}>
+
+        <!-- ── Edit mode ─────────────────────────────────────────────── -->
+        <div id="gs-common-checked-edit">
+          <!--- ID field name -->
+          <div class="form-group row mb-3">
+            <label class="col-md-3 col-form-label">
+              ID column
+              <span
+                class="bi bi-question-circle text-muted ms-1 toggle-tooltip"
+                title="Column used to match rows during import. Enables updating existing records instead of full table replacement."
+              ></span>
+            </label>
+            <div class="col-md-9">
+              <select
+                id="mapsvg-gs-id-field"
+                class="form-select mapsvg-select2"
+                name="gsIdFieldName"
+                style="width:200px;"
+              >
+                <option value="">No ID field in CSV (snapshot replace on auto-refetch)</option>
+                <option value="{{gs.gsIdFieldName}}">{{gs.gsIdFieldName}}</option>
+              </select>
+              <div class="form-text">ID selected: upsert. No ID field in CSV: upload/manual import appends rows; remote auto-refetch replaces the collection snapshot.</div>
+            </div>
+          </div>
+
+          <!--- Missing fields -->
+          <div id="gs-missing-fields-panel" style="display:none;">
+            <div class="form-group row mb-3">
+              <label class="col-md-3 col-form-label">
+                Missing fields
+              </label>
+              <div class="col-md-9">
+                <div class="alert alert-info py-2 mb-2 d-flex align-items-center gap-2" role="alert">
+                  <i class="bi bi-info-circle-fill"></i>
+                  Checked CSV fields will be added to MapSVG schema. Unchecked CSV fields will be skipped during import.
+                </div>
+                <table class="table table-sm table-bordered mb-2" id="gs-missing-fields-table">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width:36px;" class="text-center"></th>
+                      <th>Name</th>
+                      <th>Label</th>
+                      <th style="width:150px;">Type</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group row mb-4">
+            <label class="col-md-3 col-form-label"></label>
+            <div class="col-md-9">
+              <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-primary" id="mapsvg-btn-gs-sync-save">
+                  Continue
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="mapsvg-btn-gs-sync-cancel">
+                  Cancel
+                </button>
+                <span id="mapsvg-gs-sync-status" class="form-text ms-2 d-inline"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Summary mode (shown after Continue) ───────────────────── -->
+        <div id="gs-common-checked-summary" style="display:none;">
+          <div class="form-group row mb-3">
+            <label class="col-md-3 col-form-label">ID column</label>
+            <div class="col-md-9">
+              <span id="gs-summary-id-field" style="line-height: 35px;"></span>
+            </div>
+          </div>
+
+          <div id="gs-summary-missing" style="display:none;">
+            <div class="form-group row mb-3">
+              <label class="col-md-3 col-form-label">
+                Missing fields
+              </label>
+              <div class="col-md-9" style="line-height: 35px;">
+                <em id="gs-summary-skipped-list"></em>: skipped
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group row mb-4">
+            <label class="col-md-3 col-form-label"></label>
+            <div class="col-md-9">
+              <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-secondary" id="mapsvg-btn-gs-sync-edit">
+                  Edit fields mapping
+                </button>
+                <span id="mapsvg-gs-edit-status" class="form-text ms-2 d-inline"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="gs-validated-blocks" style="{{#unless gs.gsImportSourceValid}}display:none;{{/unless}}">
+      <!-- Geocoding block is always in DOM; visibility is driven by _syncGeocodingVisibility() (schema location + tab allow-list). -->
+      <div id="gs-geocoding-group" style="display:none;">
+      <!-- ── Geocoding ──────────────────────────────────────────────── -->
+      <div class="form-group row">
+        <label class="col-md-3 col-form-label">Location field: use Google Geocoding API</label>
+        <div class="col-md-9">
+          <div class="form-switch form-switch-md">
+            <input id="mapsvg-gs-geocode" type="checkbox" class="form-check-input" name="gsGeocode" disabled="disabled" />
+          </div>
+        </div>
+      </div>
+
+      <div id="gs-geocoding-options"{{#unless gs.gsGeocode}} style="display:none;"{{/unless}}>
+        <div class="form-group row mb-3">
+          <div class="col-md-3"></div>
+          <div class="col-md-9">
+            <div class="form-check mb-2">
+              <input
+                id="gs-opt-latlng-to-address"
+                type="checkbox"
+                class="form-check-input"
+                name="gsGeocodeConvertLatLngToAddress"
+                {{#if gs.gsGeocodeConvertLatLngToAddress}}checked{{/if}}
+              />
+              <label for="gs-opt-latlng-to-address" class="form-check-label">
+                Convert <em>lat,lng</em> coordinates in the <em>"location"</em> column to addresses
+              </label>
+            </div>
+            <div class="form-check mb-3">
+              <input
+                id="gs-opt-address-to-latlng"
+                type="checkbox"
+                class="form-check-input"
+                name="gsGeocodeConvertAddressToLatLng"
+                {{#if gs.gsGeocodeConvertAddressToLatLng}}checked{{/if}}
+              />
+              <label for="gs-opt-address-to-latlng" class="form-check-label">
+                Convert address strings in the <em>"location"</em> column to <em>lat,lng</em> coordinates
+              </label>
+            </div>
+            <div class="form-check mb-3">
+              <input
+                id="gs-opt-paid-geocoding"
+                type="checkbox"
+                class="form-check-input"
+                name="gsPaidGeocoding"
+                {{#if gs.gsPaidGeocoding}}checked{{/if}}
+              />
+              <label for="gs-opt-paid-geocoding" class="form-check-label">
+                I'm willing to pay for the Geocoding API to make it faster
+              </label>
+            </div>
+            <p class="form-text mb-2">
+              Geocoding runs in the background after each import.
+            </p>
+            <div class="alert alert-info mb-0" style="font-size: 13px;">
+              <strong>Google Geocoding API quota</strong><br />
+              <span id="gs-geocoding-quota-free">
+                Free tier: <strong>~1,300 requests/day</strong> (40,000/month).<br />
+                If your CSV has more rows needing geocoding they will be spread over multiple days.
+                This budget is shared with live address searches on all your maps.<br />
+                MapSVG also stores geocoding results in a local database cache. On future imports,
+                repeated addresses and coordinates are resolved from cache, which is faster and does
+                not consume additional Google Geocoding quota.
+              </span>
+              <span id="gs-geocoding-quota-paid" style="display:none;">
+                Paid tier: geocoding runs <strong>as fast as possible</strong> with no daily cap.<br />
+                You will be charged by Google based on your usage (<a href="https://mapsplatform.google.com/pricing/" target="_blank">see pricing</a>).
+                The $200/month free credit (~40,000 requests) still applies before charges begin.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+
+
+      <div id="gs-remote-options" {{#unless gs.isRemote}}style="display:none;"{{/unless}}>
+        <hr class="mb-3" />
+        <div class="form-group row mb-3">
+          <label class="col-md-3 col-form-label">Auto-refetch</label>
+          <div class="col-md-9">
+            <div class="form-switch form-switch-md">
+              <input
+                id="mapsvg-gs-autorefetch"
+                type="checkbox"
+                class="form-check-input mapsvg-toggle-visibility"
+                name="gsAutoRefetch"
+                data-toggle-visibility="#gs-interval-row"
+                {{#if gs.gsAutoRefetch}}checked{{/if}}
+              />
+            </div>
+            <div class="form-text">Automatically re-download and re-import the CSV on a schedule.</div>
+          </div>
+        </div>
+
+        <div id="gs-interval-row" class="form-group row mb-3"{{#unless gs.gsAutoRefetch}} style="display:none;"{{/unless}}>
+          <label class="col-md-3 col-form-label">Interval</label>
+          <div class="col-md-9">
+            <div class="input-group" style="width:160px">
+              <input
+                id="mapsvg-gs-interval"
+                class="form-control"
+                type="number"
+                name="gsRefetchInterval"
+                min="1"
+                max="168"
+                value="{{gs.gsRefetchInterval}}"
+              />
+              <span class="input-group-text">hours</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </div>
+
+      <!-- APP SCRIPT PANEL - DO NOT DELETE THIS, IT WILL BE IMPLEMENTED LATER-->
+      <div id="gs-appscript-panel" style="display:none;">
+
+        <hr class="mb-3" />
+
+        <div class="form-group row mb-3">
+          <label class="col-md-3 col-form-label">
+            AppScript URL
+            <span
+              class="bi bi-question-circle text-muted ms-1 toggle-tooltip"
+              title="The URL of the deployed MapSVG AppScript Web App in your Google Sheet."
+            ></span>
+          </label>
+          <div class="col-md-9">
+            <div class="input-group" style="max-width:480px;">
+              <input
+                id="mapsvg-gs-appscript-url"
+                class="form-control"
+                type="url"
+                name="gsAppScriptUrl"
+                value="{{gs.gsAppScriptUrl}}"
+                placeholder="https://script.google.com/macros/s/.../exec"
+                {{#if gs.gsConnected}}disabled{{/if}}
+              />
+              {{#unless gs.gsConnected}}
+              <button class="btn btn-outline-secondary" type="button" id="mapsvg-btn-gs-check-url">
+                <span id="mapsvg-gs-sheets-spinner" style="display:none;">
+                  <span class="spinner-border spinner-border-sm" role="status"></span>
+                </span>
+                <span id="mapsvg-gs-check-label">Check</span>
+              </button>
+              {{/unless}}
+            </div>
+            <div id="mapsvg-gs-sheets-error" class="text-danger form-text mt-1" style="display:none;"></div>
+            <div class="form-text">
+              Deploy the MapSVG AppScript in your Google Sheet, then paste the Web App URL here.
+            </div>
+          </div>
+        </div>
+
+        <!-- Sheet name + ID column + setup key + connect — shown after URL is validated -->
+        <div id="gs-appscript-fields" style="display:none;">
+
+        <div class="form-group row mb-3">
+          <label class="col-md-3 col-form-label">
+            Sheet tab name
+            <span
+              class="bi bi-question-circle text-muted ms-1 toggle-tooltip"
+              title="The name of the sheet tab in your Google Sheet that contains the data to sync."
+            ></span>
+          </label>
+          <div class="col-md-9">
+            <select
+              id="mapsvg-gs-sheet-name"
+              class="form-select"
+              name="gsSheetName"
+              style="width:200px;"
+              {{#if gs.gsConnected}}disabled{{/if}}
+            >
+              <option value="{{gs.gsSheetName}}">{{gs.gsSheetName}}</option>
+            </select>
+            <div class="form-text">
+              Sheet tab containing your data (default: Sheet1).
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row mb-3">
+          <label class="col-md-3 col-form-label">Connection</label>
+          <div class="col-md-9" id="mapsvg-gs-connection-status">
+            {{#if gs.gsConnected}}
+            <span class="badge bg-success me-2"><i class="bi bi-check-circle me-1"></i>Connected</span>
+            <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="mapsvg-btn-gs-reset">
+              <i class="bi bi-x-circle me-1"></i>Reset connection
+            </button>
+            {{else}}
+            <span class="badge bg-secondary me-2">Not connected</span>
+            {{/if}}
+          </div>
+        </div>
+
+        {{#unless gs.gsConnected}}
+        <div class="form-group row mb-3" id="gs-setup-key-row">
+          <label class="col-md-3 col-form-label">
+            Setup key
+            <span
+              class="bi bi-question-circle text-muted ms-1 toggle-tooltip"
+              title="One-time key shown by the MapSVG AppScript sidebar in your Google Sheet. Used only once during setup."
+            ></span>
+          </label>
+          <div class="col-md-9">
+            <input
+              id="mapsvg-gs-setup-key"
+              class="form-control"
+              type="text"
+              placeholder="Paste the setup key shown by the AppScript"
+              style="width:320px"
+            />
+            <div class="form-text">
+              Open Google Sheet → Menu → MapSVG → Setup.<br />
+              Copy the setup key shown in the sidebar and paste it here.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row mb-3" id="gs-connect-row">
+          <label class="col-md-3 col-form-label"></label>
+          <div class="col-md-9 d-flex gap-2 align-items-center">
+            <button type="button" class="btn btn-outline-primary" id="mapsvg-btn-gs-connect">
+              <i class="bi bi-plug"></i> Save &amp; Connect
+            </button>
+            <span id="mapsvg-gs-connect-status" class="form-text ms-1"></span>
+          </div>
+        </div>
+        {{/unless}}
+
+        </div><!-- /gs-appscript-fields -->
+      </div><!-- /gs-appscript-panel -->
+
+      <div id="gs-validated-actions" style="{{#unless gs.gsImportSourceValid}}display:none;{{/unless}}">
+      <!-- ── Buttons + status bar ──────────────────────────────────── -->
+      <div class="form-group row mb-0 mt-3">
+        <label class="col-md-3 col-form-label"></label>
+        <div class="col-md-9">
+          <div class="d-flex gap-2 align-items-center mb-2">
+            <button type="button" disabled="disabled" class="btn btn-outline-primary" id="mapsvg-btn-gs-import">Import now</button>
+            <!-- START csv — Save settings is remote-only; uploads use Import now only (visibility set in csv-controller.js) -->
+
+              <button type="button" class="btn btn-outline-secondary" id="mapsvg-btn-gs-save" style="display:none;">
+                Save settings
+              </button>
+
+            <!-- END REPLACE
+            <button type="button" disabled="disabled" class="btn btn-outline-secondary" id="mapsvg-btn-gs-save">Save settings</button>
+            -->
+            <span id="mapsvg-gs-status" class="form-text ms-1"></span>
+          </div>
+          <small class="text-muted" data-csv-role="import-status">
+            {{#if gs.gsImportStartedAt}}
+              {{#unless gs.gsImportFinishedAt}}
+                Import in progress…
+              {{/unless}}
+            {{/if}}
+            {{#if gs.gsImportFinishedAt}}
+              Last import: {{gs.gsImportFinishedAt}}
+            {{/if}}
+            {{#unless gs.gsImportFinishedAt}}
+              {{#unless gs.gsImportStartedAt}}
+                No import yet.
+              {{/unless}}
+            {{/unless}}
+            <a href="#" data-csv-role="show-logs" class="ms-2">See logs</a>
+          </small>
+        </div>
+      </div>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Instructions modal -->
+  <div class="modal fade" data-csv-role="instructions-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-info-circle me-2"></i>CSV import instructions &amp; field reference
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{#if showGeocoding}}
+          <p>
+            The first row of the CSV must contain field names matching
+            your MapSVG schema exactly.
+          </p>
+            <p>When you click "Sync fields" button next to the file input, fields are detected automatically from the
+            CSV header row. Any columns not yet in your schema will be shown as suggestions — you
+            can add them with one click before importing.
+          </p>
+          <p>
+            If you import a <code>Location</code> field, first set the address language in
+            <code><i class="bi bi-database"></i> Database &gt; Edit fields &gt; Location &gt; Language</code>.
+          </p>
+          <p>
+            <a
+              href="https://docs.google.com/spreadsheets/d/1OFATRH7-FkcGUPO_HHfM_5K51HVlzfFwq9NMoOjaXrU/edit?usp=sharing"
+              target="_blank"
+              class="btn btn-sm btn-outline-primary"
+            >
+              <i class="bi bi-table"></i> Open example spreadsheet
+            </a>
+          </p>
+          {{else}}
+          <p>
+            The first row of the CSV must contain field names matching
+            your MapSVG schema exactly. When you click "Sync fields" button next to the file input, fields are detected automatically from the
+            CSV header row. Any columns not yet in your schema will be shown as suggestions — you
+            can add them with one click before importing.
+          </p>
+          <p>
+            <a
+              href="https://docs.google.com/spreadsheets/d/1gNXQqw1EH6u6q4LJPOcDcoYYrJJ-HrmCGLoGgv1qEfo/edit?usp=sharing"
+              target="_blank"
+              class="btn btn-sm btn-outline-primary"
+            >
+              <i class="bi bi-table"></i> Open example spreadsheet
+            </a>
+          </p>
+          {{/if}}
+          <h6 class="mt-3">CSV field format reference</h6>
+          <table style="width:100%;" class="table table-bordered table-sm">
+            <thead class="table-light">
+              <tr>
+                <th style="width:150px;">Field type</th>
+                <th style="width:200px;">Example value</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Text</code></td>
+                <td>Coffee Roasters</td>
+                <td>Stored as-is.</td>
+              </tr>
+              <tr>
+                <td><code>Number</code></td>
+                <td>4.5</td>
+                <td>Integer or decimal. Stored as-is.</td>
+              </tr>
+              <tr>
+                <td rowspan="3"><code>Select, Radio, Status</code></td>
+                <td><code>1</code></td>
+                <td>Option <strong>value</strong> — stored directly.</td>
+              </tr>
+              <tr>
+                <td><code>North</code></td>
+                <td>Option <strong>label</strong> — resolved to the matching value automatically.</td>
+              </tr>
+              <tr>
+                <td><s>South-West</s></td>
+                <td>❌ Invalid — must match an existing option value or label exactly.</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><code>Select (multiselect)</code></td>
+                <td><code>Coffee,Tea</code></td>
+                <td>Comma-separated list. Each token matched by value or label.</td>
+              </tr>
+              <tr>
+                <td><code>Beer</code></td>
+                <td>Single value.</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><code>Checkboxes</code></td>
+                <td><code>Wifi,Parking</code></td>
+                <td>Comma-separated list. Each token matched by value or label.</td>
+              </tr>
+              <tr>
+                <td><code>Wifi</code></td>
+                <td>Single value.</td>
+              </tr>
+              <tr>
+                <td rowspan="4"><code>Checkbox</code></td>
+                <td><code>1</code></td>
+                <td>Checked.</td>
+              </tr>
+              <tr><td><code>0</code></td><td>Unchecked.</td></tr>
+              <tr><td><code>true</code></td><td>Checked (text form).</td></tr>
+              <tr><td><code>false</code></td><td>Unchecked (text form).</td></tr>
+              {{#if showGeocoding}}
+              <tr>
+                <td rowspan="4"><code>Location</code></td>
+                <td><code>40.7128,-74.0060</code></td>
+                <td>lat,lng coordinates. Valid range: ±90 lat, ±180 lng.</td>
+              </tr>
+              <tr>
+                <td><code>Paris</code></td>
+                <td>Address — geocoded to coordinates if Google Geocoding API is enabled (~1,300 free requests/day, runs in the background).</td>
+              </tr>
+              <tr>
+                <td><code>Main st. 1, New York, USA</code></td>
+                <td>Address with commas — also accepted.</td>
+              </tr>
+              <tr>
+                <td><s>99.1211,199.2323</s></td>
+                <td>❌ Invalid — coordinates outside the valid range.</td>
+              </tr>
+              <tr>
+                <td rowspan="3"><code>Regions</code></td>
+                <td><code>US-TX</code></td>
+                <td>Single region ID.</td>
+              </tr>
+              <tr>
+                <td><code>US-TX,US-AL,US-NY</code></td>
+                <td>Multiple region IDs — comma-separated.</td>
+              </tr>
+              <tr>
+                <td><s>US-TX US-AL US-NY</s></td>
+                <td>❌ Invalid — use commas, not spaces, as separator.</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><code>Post</code></td>
+                <td><code>42</code></td>
+                <td>WordPress post ID — verified to exist before storing.</td>
+              </tr>
+              <tr>
+                <td><code>my-post-slug</code></td>
+                <td>Post slug — automatically resolved to the post ID.</td>
+              </tr>
+              {{/if}}
+              <tr>
+                <td rowspan="2"><code>Date / Datetime</code></td>
+                <td><code>2024-06-15</code></td>
+                <td>Date only (YYYY-MM-DD).</td>
+              </tr>
+              <tr>
+                <td><code>2024-06-15 14:30:00</code></td>
+                <td>Date and time (YYYY-MM-DD HH:MM:SS).</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><code>Image</code></td>
+                <td><code>https://example.com/photo.jpg</code></td>
+                <td>Single remote image URL. Downloaded and added to the WordPress Media Library automatically. The same URL is never downloaded twice.</td>
+              </tr>
+              <tr>
+                <td><code>https://example.com/a.jpg,https://example.com/b.jpg</code></td>
+                <td>Multiple images — comma-separated URLs.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import logs modal -->
+  <div class="modal fade" data-csv-role="logs-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Import Logs</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" data-csv-role="logs-modal-body">
+          <p class="text-muted">Loading…</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>

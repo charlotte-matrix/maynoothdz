@@ -372,7 +372,14 @@ class UpdraftPlus_Addon_S3_Enhanced {
 				'PolicyDocument' => $pol_doc
 			));
 		} catch (Exception $e) {
-			return array('e' => 1, 'm' => __('Failed to apply User Policy'.$e->getMessage()));
+			return array(
+				'e' => 1,
+				'm' => sprintf(
+					// translators: %s: error message from the exception
+					__('Failed to apply User Policy: %s', 'updraftplus'),
+					$e->getMessage()
+				),
+			);
 		}
 	
 		if (!empty($response['error'])) {

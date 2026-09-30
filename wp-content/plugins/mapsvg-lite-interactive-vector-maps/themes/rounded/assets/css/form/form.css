@@ -1,0 +1,76 @@
+@import url(./select.css);
+@import url(./search.css);
+@import url(./distance.css);
+
+.mapsvg-filters-wrap .mapsvg-data-form-view > .form-group.mapsvg-form-field-distance,
+.mapsvg-filters-wrap .mapsvg-data-form-view > .form-group.mapsvg-form-field-search,
+.mapsvg-filters-wrap .mapsvg-data-form-view > .form-group.mapsvg-form-field-select {
+  height: var(--mapsvg-input-height);
+  font-family: var(--mapsvg-font-family);
+  font-size: var(--mapsvg-font-size);
+  color: var(--mapsvg-text-primary);
+  background-color: var(--mapsvg-bg-primary);
+  border: var(--mapsvg-border);
+  border-radius: var(--mapsvg-border-radius);
+  padding: 14px 30px;
+  outline: none;
+  min-width: 150px;
+}
+.mapsvg-filters-wrap .btn {
+  padding: 10px 20px;
+  border: var(--mapsvg-border);
+}
+.mapsvg-filters-reset-container button {
+  align-self: center;
+}
+.mapsvg-filters-wrap input::placeholder,
+.mapsvg-filters-wrap
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__placeholder,
+.mapsvg-filters-wrap textarea::placeholder {
+  color: #999;
+  opacity: 1; /* чтобы цвет был именно таким, а не выцветшим */
+}
+
+.mapsvg-map-container
+  .mapsvg-filters-wrap
+  .mapsvg-data-form-view
+  > .form-group.mapsvg-form-field-distance,
+.mapsvg-map-container
+  .mapsvg-filters-wrap
+  .mapsvg-data-form-view
+  > .form-group.mapsvg-form-field-search,
+.mapsvg-map-container
+  .mapsvg-filters-wrap
+  .mapsvg-data-form-view
+  > .form-group.mapsvg-form-field-select,
+.mapsvg-map-container .mapsvg-filters-wrap .btn {
+  background-color: var(--mapsvg-bg-glass-white);
+  backdrop-filter: var(--mapsvg-bg-glass-blur);
+  border: var(--mapsvg-bg-glass-border);
+}
+
+.mapsvg-filters-wrap .mapsvg-data-form-view > .form-group > label {
+  margin: 0 0 7px;
+  color: #222;
+}
+
+.mapsvg-form-builder input[type="text"] {
+  height: 22px;
+  line-height: 24px;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  outline: none;
+}
+.mapsvg-filters-wrap input[type="text"]:focus,
+.mapsvg-filters-wrap input[type="text"]:active {
+  border: none !important;
+  outline: 0 !important;
+  -webkit-appearance: none !important;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}

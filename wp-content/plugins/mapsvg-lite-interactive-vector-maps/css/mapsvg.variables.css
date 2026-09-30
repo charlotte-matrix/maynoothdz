@@ -1,0 +1,47 @@
+:root,
+:host {
+  /* Colors */
+  --mapsvg-text-primary: #333;
+  --mapsvg-text-muted: #aaa;
+  --mapsvg-text-hint: #999;
+  --mapsvg-bg-primary: #ffffff;
+  --mapsvg-border-color: #ccc;
+  --mapsvg-border-color-light: #ccc;
+  --mapsvg-hover-bg: #e6e6e6;
+  --mapsvg-hover-border: #adadad;
+  --mapsvg-accent: #0097cf;
+
+  /* Opacity values for shadows/overlays */
+  --mapsvg-shadow-color: rgba(0, 0, 0, 0.2);
+  --mapsvg-shadow-inset: rgba(0, 0, 0, 0.125);
+
+  /* Dimensions - Form Controls */
+  --mapsvg-input-height: 35px;
+  --mapsvg-button-height: 35px;
+  --mapsvg-map-button-height: 30px;
+  --mapsvg-map-button-width: 30px;
+  --mapsvg-map-button-icon-size: 12px;
+  --mapsvg-map-button-border-radius: 3px;
+  --mapsvg-input-line-height: 32px;
+
+  /* Spacing Scale */
+  --mapsvg-space-xs: 3px;
+  --mapsvg-space-sm: 5px;
+  --mapsvg-space-md: 10px;
+  --mapsvg-space-lg: 15px;
+
+  /* Typography */
+  --mapsvg-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mapsvg-font-size: 14px;
+  --mapsvg-line-height: 1.42857143;
+  --mapsvg-font-weight-normal: 400;
+
+  /* Border Radius */
+  --mapsvg-border-radius: 4px;
+  --mapsvg-border-radius-sm: 3px;
+  --mapsvg-border-radius-dropdown: 3px;
+
+  /* Borders */
+  --mapsvg-border-width: 1px;
+  --mapsvg-border: 1px solid var(--mapsvg-border-color);
+}

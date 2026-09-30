@@ -134,7 +134,7 @@ class HTTP_Request2_CookieJar implements Serializable
      * @throws HTTP_Request2_LogicException
      * @throws HTTP_Request2_MessageException
      */
-    protected function checkAndUpdateFields(array $cookie, Net_URL2 $setter = null)
+    protected function checkAndUpdateFields(array $cookie, $setter = null)
     {
         if ($missing = array_diff(['name', 'value'], array_keys($cookie))) {
             throw new HTTP_Request2_LogicException(
@@ -212,7 +212,7 @@ class HTTP_Request2_CookieJar implements Serializable
      * @return bool whether the cookie was successfully stored
      * @throws HTTP_Request2_Exception
      */
-    public function store(array $cookie, Net_URL2 $setter = null)
+    public function store(array $cookie, $setter = null)
     {
         try {
             $cookie = $this->checkAndUpdateFields($cookie, $setter);
@@ -253,7 +253,7 @@ class HTTP_Request2_CookieJar implements Serializable
      * @return bool whether all cookies were successfully stored
      * @throws HTTP_Request2_LogicException
      */
-    public function addCookiesFromResponse(HTTP_Request2_Response $response, Net_URL2 $setter = null)
+    public function addCookiesFromResponse(HTTP_Request2_Response $response, $setter = null)
     {
         if (null === $setter) {
             if (!($effectiveUrl = $response->getEffectiveUrl())) {

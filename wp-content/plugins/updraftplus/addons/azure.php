@@ -11,7 +11,7 @@ RequiresPHP: 5.6
 Latest Change: 1.13.12
 */
 // @codingStandardsIgnoreEnd
-// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fclose, WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fgets, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_mkdir, WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.WP.AlternativeFunctions.file_system_operations_fputs, WordPress.WP.AlternativeFunctions.file_system_operations_is_writeable, WordPress.WP.AlternativeFunctions.file_system_operations_chown, WordPress.WP.AlternativeFunctions.file_system_operations_chgrp, WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Native PHP fileystem function is used for direct control and performance because it can bypass additional layers of abstraction so that no overhead from the WordPress filesystem API's internal handling
+// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fclose, WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fgets, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_mkdir, WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.WP.AlternativeFunctions.file_system_operations_fputs, WordPress.WP.AlternativeFunctions.file_system_operations_is_writeable, WordPress.WP.AlternativeFunctions.file_system_operations_chown, WordPress.WP.AlternativeFunctions.file_system_operations_chgrp, WordPress.WP.AlternativeFunctions.file_system_operations_touch, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir, WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Native PHP fileystem function is used for direct control and performance because it can bypass additional layers of abstraction so that no overhead from the WordPress filesystem API's internal handling
 if (!defined('UPDRAFTPLUS_DIR')) die('No direct access allowed');
 
 if (!class_exists('UpdraftPlus_RemoteStorage_Addons_Base_v2')) updraft_try_include_file('methods/addon-base-v2.php', 'require_once');
@@ -57,6 +57,11 @@ class UpdraftPlus_Addons_RemoteStorage_azure extends UpdraftPlus_RemoteStorage_A
 			'default_value' => 'blob.core.windows.net',
 			'contexts' => array('option', 'input'),
 		),
+		'storage_account_type' => array(
+			// possible values: 2 = 'StorageV2', 1 = 'BlobStorage' or 'Storage' (legacy) and 0
+			'default_value' => 0, // zero integer means no storage account type check was performed
+			'contexts' => array('option'),
+		),
 	);
 
 	public function __construct() {
@@ -65,9 +70,155 @@ class UpdraftPlus_Addons_RemoteStorage_azure extends UpdraftPlus_RemoteStorage_A
 		// https://msdn.microsoft.com/en-us/library/azure/ee691964.aspx - maximum block size is 4MB
 		if (defined('UPDRAFTPLUS_UPLOAD_CHUNKSIZE') && UPDRAFTPLUS_UPLOAD_CHUNKSIZE > 0) $this->chunk_size = max(UPDRAFTPLUS_UPLOAD_CHUNKSIZE, 4194304);
 	}
+
+	/**
+	 * Print the JavaScript for dismissing the Azure legacy storage notice.
+	 *
+	 * This function outputs inline JavaScript that adds a click event listener
+	 * to the dismiss button within the Azure notice. When clicked, it sends an
+	 * AJAX request to dismiss the notice for every user with the manage_options capability
+	 *
+	 * Note: This function ensures the script is only printed once per request.
+	 */
+	public static function print_azure_legacy_storage_notice_scripts() {
+		static $printed = false;
+		if (!UpdraftPlus_Options::user_can_manage() || $printed) return;
+		$printed = true;
+		?>
+	<script>
+		jQuery(function($) {
+			$(document).on('updraftplus-notice-added', function(e) {
+				$('div.updraftplus-azure-notice').one('click', 'button.notice-dismiss, a.dismiss-text', function (event) {
+					if ($(this).is('a')) event.preventDefault();
+					event.stopImmediatePropagation();
+					var $this = $(this);
+					$.ajax(ajaxurl, {
+						type: 'POST',
+						data: {
+							action: 'updraft_ajax',
+							subaction: 'dismiss_azure_legacy_storage_notice',
+							nonce: '<?php echo esc_js(wp_create_nonce('updraftplus-credentialtest-nonce')); ?>',
+						},
+						error: function(xhr, status, error_code) {
+							alert(error_code+':'+status);
+						},
+						success: function(data, status, xhr) {
+							if ($this.is('a')) $this.parents('div.updraftplus-azure-notice').slideUp();
+						}
+					});
+				});
+			});
+			$(document).trigger('updraftplus-notice-added');
+		});
+	</script>
+		<?php
+	}
 	
+	/**
+	 * Checks Azure storage settings for legacy accounts and displays an admin warning if any are found or just returns the warning message
+	 *
+	 * This function scans the configured Azure storage options to identify legacy storage accounts
+	 * that need migration. If such accounts are detected, it displays or returns a warning message
+	 * advising users to migrate to GPv2 storage accounts before the retirement date.
+	 *
+	 * It interacts with the UpdraftPlus storage settings and admin notice system.
+	 *
+	 * @param Boolean $return_instead_of_echo Whether to return or directly display the results.
+	 *
+	 * @return Mixed
+	 */
+	public static function maybe_show_azure_legacy_storage_warning($return_instead_of_echo = false) {
+		global $updraftplus, $updraftplus_admin, $wp_current_filter, $wp_version;
+		static $printed = false;
+		if (time() > 1792108800 || 1 == UpdraftPlus_Options::get_updraft_option('updraftplus_dismiss_azure_legacy_storage_notice', 0) || !in_array('azure', $updraftplus->get_canonical_service_list())) return; // 16-10-2026
+		$legacy_storage = '';
+		$settings = UpdraftPlus_Storage_Methods_Interface::update_remote_storage_options_format('azure');
+		if (is_array($settings) && !empty($settings['settings'])) {
+			$should_update_option = false;
+			if (in_array('all_admin_notices', $wp_current_filter, true)) $updraftplus->register_wp_http_option_hooks(); // alternative to doing_action
+			foreach ($settings['settings'] as $instance_id => $storage_options) {
+				if (empty($storage_options['account_name']) || empty($storage_options['key']) || (isset($storage_options['instance_enabled']) && empty($storage_options['instance_enabled']))) continue;
+				if (empty($storage_options['storage_account_type'])) {
+					$endpoint = empty($storage_options['endpoint']) ? 'blob.core.windows.net' : $storage_options['endpoint'];
+					$storage_options['storage_account_type'] = self::get_storage_account_type($storage_options['account_name'], $storage_options['key'], $endpoint);
+					$storage_options['storage_account_type'] = 'StorageV2' === $storage_options['storage_account_type'] ? 2 : 1;
+					$settings['settings'][$instance_id] = $storage_options;
+					$should_update_option = true;
+				}
+				if (isset($storage_options['storage_account_type']) && 1 == $storage_options['storage_account_type']) {
+					if (!empty($legacy_storage)) $legacy_storage .= ', ';
+					$legacy_storage .= $storage_options['account_name'];
+				}
+			}
+			if (in_array('all_admin_notices', $wp_current_filter, true)) $updraftplus->register_wp_http_option_hooks(false);
+			if ($should_update_option) UpdraftPlus_Options::update_updraft_option('updraft_azure', $settings);
+		}
+		$warning_msg = '<strong>'.__('UpdraftPlus notice:', 'updraftplus').'</strong> '.
+			__('Microsoft will retire legacy Azure Blob Storage accounts on October 13, 2026, resulting in potential service disruptions for accounts that have not been migrated to general-purpose v2 (GPv2) storage accounts by that date.', 'updraftplus').' '.
+			__('If you are using legacy blob storage accounts, it is essential to migrate your accounts to GPv2 as soon as possible to ensure that your backups to Azure remote storage continue to work properly and without interruption.', 'updraftplus').' '.
+			__('If legacy accounts are not migrated before the retirement date, they will be automatically converted to a read-only state, which can cause backups to fail.', 'updraftplus').' '.
+			/* translators: 1: Opening anchor tag, 2: Closing anchor tag */
+			sprintf(__('%1$sPlease see this article for more information%2$s.', 'updraftplus'), '<a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-account-upgrade?tabs=azure-portal" target="_blank">', '</a>');
+		if (version_compare($wp_version, '4.2', '<')) $warning_msg .= sprintf(
+			/* translators: 1: Opening HTML tags, 2: Closing HTML tags */
+			__('%1$sDismiss%2$s', 'updraftplus'),
+			'<p><a class="dismiss-text" href="javascript:void();">',
+		'</a></p>');
+		if ($return_instead_of_echo) {
+			$warning_msg .= ' https://learn.microsoft.com/en-us/azure/storage/common/storage-account-upgrade?tabs=azure-portal';
+			if ($legacy_storage) return strip_tags($warning_msg);
+			return;
+		}
+		if (empty($legacy_storage) || !UpdraftPlus_Options::user_can_manage() || $printed) return;
+		if (defined('DOING_AJAX') && DOING_AJAX && 'updraft_savesettings' == UpdraftPlus_Manipulation_Functions::fetch_superglobal('request', 'action', '')) {
+			self::print_azure_legacy_storage_notice_scripts();
+		} else {
+			add_action('admin_print_footer_scripts', array('UpdraftPlus_Addons_RemoteStorage_azure', 'print_azure_legacy_storage_notice_scripts'));
+		}
+		$azure_notice_class = 'notice notice-warning updraftplus-azure-notice is-dismissible';
+		if (version_compare($wp_version, '4.2', '<')) $azure_notice_class = 'update-nag '.$azure_notice_class;
+		// https://learn.microsoft.com/en-us/azure/storage/common/legacy-blob-storage-account-migration-overview
+		$updraftplus_admin->show_admin_warning(wp_kses_post($warning_msg), $azure_notice_class);
+		$printed = true;
+	}
+
+	/**
+	 * Retrieves the storage account type for an Azure storage account.
+	 *
+	 * This function sends a signed HTTP request to Azure Storage REST API to fetch
+	 * the account properties and determine the account kind (type).
+	 *
+	 * @param string $account_name The name of the Azure storage account.
+	 * @param string $key          The account key used for authentication.
+	 * @param string $endpoint     The endpoint domain, defaults to 'blob.core.windows.net'. (Optional)
+	 * @return string The account type (e.g., 'BlobStorage', 'StorageV2', or empty string on failure).
+	 */
+	private static function get_storage_account_type($account_name, $key, $endpoint = 'blob.core.windows.net') {
+		$account_type = '';
+		$date = gmdate('D, d M Y H:i:s \G\M\T');
+		$api_version = '2025-01-05';
+		$string_to_sign = "GET\n\n\n\n\n\n\n\n\n\n\n\nx-ms-date:{$date}\nx-ms-version:{$api_version}\n/{$account_name}/\ncomp:properties\nrestype:account";
+		$signature = base64_encode(hash_hmac('sha256', $string_to_sign, base64_decode($key), true));
+		$auth_header = "SharedKey ".$account_name.":".$signature;
+		$url = "https://{$account_name}.{$endpoint}/?restype=account&comp=properties";
+		$args = array(
+			'headers' => array(
+				'x-ms-date' => $date,
+				'x-ms-version' => $api_version,
+				'Authorization' => $auth_header,
+			),
+			'timeout' => 5
+		);
+		$api_response = wp_remote_get($url, $args);
+		if (!is_wp_error($api_response) && is_array($api_response) && 200 === wp_remote_retrieve_response_code($api_response)) {
+			$account_type = wp_remote_retrieve_header($api_response, 'x-ms-account-kind');
+		}
+		return $account_type;
+	}
+
 	public function do_upload($file, $from) {
 		global $updraftplus;
+		static $legacy_storage_warning_msg_processed = false; // one time log for all instances
 
 		$opts = $this->options;
 		$storage = $this->get_storage();
@@ -85,6 +236,14 @@ class UpdraftPlus_Addons_RemoteStorage_azure extends UpdraftPlus_RemoteStorage_A
 			$odg_warning = sprintf(__('Due to the shutdown of the %1$s endpoint, support for %1$s will be ending soon.', 'updraftplus'), 'Azure Germany').' '.__('You will need to migrate to the Global endpoint in your UpdraftPlus settings.', 'updraftplus').' '.sprintf(__('For more information, please see: %s', 'updraftplus'), 'https://www.microsoft.com/en-us/cloud-platform/germany-cloud-regions');
 			// We only want to log this once per backup job
 			$this->log($odg_warning, 'warning', 'azure_de_migrate');
+		}
+
+		if (!$legacy_storage_warning_msg_processed) $legacy_storage_warning_msg_processed = $updraftplus->jobdata_get('azure_legacy_storage_warning_msg_processed', false);
+		if (!$legacy_storage_warning_msg_processed) {
+			$msg = self::maybe_show_azure_legacy_storage_warning(true);
+			if ($msg) $this->log($msg, 'warning');
+			$legacy_storage_warning_msg_processed = true;
+			$updraftplus->jobdata_set('azure_legacy_storage_warning_msg_processed', true);
 		}
 		
 		// Create/check container
@@ -190,6 +349,7 @@ class UpdraftPlus_Addons_RemoteStorage_azure extends UpdraftPlus_RemoteStorage_A
 				if ('folder' == $key) $value = trim(str_replace('\\', '/', $value), '/');
 				// Only lower-case containers are permitted - enforce this
 				if ('container' == $key) $value = strtolower($value);
+				if ('account_name' == $key && isset($opts['settings'][$instance_id]['account_name']) && $opts['settings'][$instance_id]['account_name'] !== $value) $opts['settings'][$instance_id]['storage_account_type'] = 0;
 				$opts['settings'][$instance_id][$key] = ('key' == $key || 'account_name' == $key) ? trim($value) : $value;
 				// Convert one likely misunderstanding of the format to enter the account name in
 				if ('account_name' == $key && preg_match('#^https?://(.*)\.blob\.core\.windows#i', $opts['settings'][$instance_id]['account_name'], $matches)) {
@@ -695,9 +855,15 @@ class UpdraftPlus_Addons_RemoteStorage_azure extends UpdraftPlus_RemoteStorage_A
 	 */
 	public function get_template_properties() {
 		global $updraftplus_admin;
+		/* translators: 1: Service name, 2: Required PHP module name */
+		$module_warning = sprintf(__("Your web server's PHP installation does not included a <strong>required</strong> (for %1\$s) module (%2\$s).", 'updraftplus'), 'Azure', 'php-xml - SimpleXMLElement');
+		$warning_label = __('Warning', 'updraftplus');
+		$contact_host = __("Please contact your web hosting provider's support and ask for them to enable it.", 'updraftplus');
+		$simplexmlelement_missing_message = '<strong>'.$warning_label.':</strong> '.$module_warning.' '.$contact_host;
+
 		$properties = array(
 			'storage_image_url' => UPDRAFTPLUS_URL.'/images/azure.png',
-			'simplexmlelement_existence_label' => !apply_filters('updraftplus_azure_simplexmlelement_exists', class_exists('SimpleXMLElement')) ? wp_kses($updraftplus_admin->show_double_warning('<strong>'.__('Warning', 'updraftplus').':</strong> '.sprintf(__("Your web server's PHP installation does not included a <strong>required</strong> (for %s) module (%s).", 'updraftplus'), 'Azure', 'php-xml - SimpleXMLElement').' '.__("Please contact your web hosting provider's support and ask for them to enable it.", 'updraftplus'), 'azure', false), $this->allowed_html_for_content_sanitisation()) : '',
+			'simplexmlelement_existence_label' => !apply_filters('updraftplus_azure_simplexmlelement_exists', class_exists('SimpleXMLElement')) ? wp_kses($updraftplus_admin->show_double_warning($simplexmlelement_missing_message, 'azure', false), $this->allowed_html_for_content_sanitisation()) : '',
 			'credentials_creation_link_text' => __('Create Azure credentials in your Azure developer console.', 'updraftplus'),
 			'configuration_helper_link_text' => __('For more detailed instructions, follow this link.', 'updraftplus'),
 			'input_account_name_label' => sprintf(__('%s Account Name', 'updraftplus'), __('Azure', 'updraftplus')),
@@ -707,7 +873,15 @@ class UpdraftPlus_Addons_RemoteStorage_azure extends UpdraftPlus_RemoteStorage_A
 			'input_key_type' => apply_filters('updraftplus_admin_secret_field_type', 'password'),
 			'input_key_placeholder' => __('Enter your account key', 'updraftplus'),
 			'input_container_label' => sprintf(__('%s Container', 'updraftplus'), __('Azure', 'updraftplus')),
-			'input_container_title' => sprintf(__('Enter the path of the %s you wish to use here.', 'updraftplus'), 'container').' '.sprintf(__('If the %s does not already exist, then it will be created.'), 'container'),
+			'input_container_title' => sprintf(
+				/* translators: %s: Untranslated string "container". */
+				__('Enter the path of the %s you wish to use here.', 'updraftplus'),
+				'container'
+			).' '.sprintf(
+				/* translators: %s: Untranslated string "container". */
+				__('If the %s does not already exist, then it will be created.', 'updraftplus'),
+				'container'
+			),
 			'input_container_link_text' => __("See Microsoft's guidelines on container naming by following this link.", 'updraftplus'),
 			'input_container_placeholder' => __('Enter your container name', 'updraftplus'),
 			'input_prefix_label' => wp_kses(sprintf(__('%s Prefix', 'updraftplus'), __('Azure', 'updraftplus')).' <em>('.__('optional', 'updraftplus').')</em>', $this->allowed_html_for_content_sanitisation()),

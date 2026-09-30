@@ -110,7 +110,7 @@ class UpdraftCentral_Analytics_Commands extends UpdraftCentral_Commands {
 
 		// Retrieve header content
 		ob_start();
-		do_action('wp_head');
+		do_action('wp_head'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
 		$header_content = ob_get_clean();
 		
 		// Extract analytics information if available.
@@ -122,7 +122,7 @@ class UpdraftCentral_Analytics_Commands extends UpdraftCentral_Commands {
 		if (empty($result['tracking_id'])) {
 			// Retrieve footer content
 			ob_start();
-			do_action('wp_footer');
+			do_action('wp_footer'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
 			$footer_content = ob_get_clean();
 			$output = $this->parse_content($footer_content);
 			$result['installed'] = $output['installed'];

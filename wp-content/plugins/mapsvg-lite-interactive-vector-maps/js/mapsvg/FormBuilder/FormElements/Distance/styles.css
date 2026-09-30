@@ -1,0 +1,215 @@
+.mapsvg-address-search {
+  /* height: 66px !important;
+  padding: 15px 32px !important;
+  border-radius: 33px !important;
+  border-color: #e5e5e5;
+  box-sizing: border-box; */
+}
+.mapsvg-form-field-distance {
+  position: relative;
+}
+.mapsvg-form-field-distance label {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 32px;
+}
+.mapsvg-form-field-distance .mapsvg-address-search:not([name]) {
+  height: 66px !important;
+  padding: 15px 32px !important;
+  border-radius: 33px !important;
+  border: 1px solid #e5e5e5 !important;
+  box-sizing: border-box;
+  padding-right: 86px !important;
+  position: relative !important;
+  color: transparent !important;
+}
+.mapsvg-form-field-distance .mapsvg-address-search[name]:not([name=""]) {
+  height: 22px !important;
+  padding: 15px 0 !important;
+  border: none !important;
+  position: absolute !important;
+  z-index: 1;
+  top: 30px;
+  left: 0;
+  padding-left: 32px;
+  background: none !important;
+  width: auto;
+  margin-right: 96px;
+  margin-left: 32px;
+}
+.mapsvg-form-field-distance .select2-selection .select2-selection--single {
+  background: none;
+}
+.mapsvg-form-field-distance .tt-menu.tt-open {
+  max-width: 100%;
+  width: 100%;
+  border-radius: 33px;
+  padding: 15px 32px;
+  margin-top: 5px;
+}
+.tt-suggestion {
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+.typeahead {
+  background-color: #fff;
+}
+.twitter-typeahead {
+  display: block !important;
+}
+input.typeahead.form-control.tt-input {
+  background-color: #fff !important;
+}
+.twitter-typeahead {
+  width: 100%;
+}
+.tt-input,
+.tt-hint {
+  width: 100%;
+  outline: none;
+}
+
+.tt-input {
+}
+
+.tt-hint {
+  color: #999;
+}
+
+.tt-menu {
+  width: 100%;
+  margin-top: 0px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.tt-suggestion {
+  padding: 3px 15px;
+}
+
+.tt-suggestion.tt-cursor,
+.tt-suggestion.tt-selectable:hover {
+  background-color: #eee;
+  cursor: pointer;
+}
+.tt-suggestion p {
+  margin: 0;
+}
+
+.twitter-typeahead .spinner-border,
+.distance-search-wrap .spinner-border {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.distance-search-wrap {
+  position: relative;
+}
+.distance-search-wrap.with-user-location-button {
+}
+.distance-search-wrap.with-user-location-button .mapsvg-address-search {
+  padding-right: 30px !important;
+}
+.distance-search-wrap .user-location-button {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 11px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+  cursor: pointer;
+}
+.distance-search-wrap .user-location-button:hover {
+  opacity: 0.6;
+}
+.distance-search-wrap.with-user-location-button .user-location-button {
+  display: block;
+}
+.mapsvg-header .mapsvg-distance-fields,
+.mapsvg-footer .mapsvg-distance-fields {
+  display: flex;
+  flex-direction: row;
+}
+.mapsvg-header .mapsvg-distance-fields > div:first-child,
+.mapsvg-footer .mapsvg-distance-fields > div:first-child {
+  flex-grow: 2;
+  margin-right: 5px;
+}
+.mapsvg-distance-fields > .mapsvg-distance-field-2 {
+  margin-top: 5px;
+  position: absolute;
+  right: 25px;
+}
+.mapsvg-distance-field-2 .select2-selection {
+  border: 0 !important;
+  border-radius: 0 !important;
+  height: 64px !important;
+  transform: translateY(1px);
+  border-left: 1px solid #e5e5e5 !important;
+  background-color: transparent !important;
+}
+.mapsvg-distance-fields.search-by-zip .tt-menu {
+  display: none !important;
+}
+.mapsvg-header .mapsvg-distance-fields > .mapsvg-distance-field-2,
+.mapsvg-footer .mapsvg-distance-fields > .mapsvg-distance-field-2 {
+  margin-top: 0;
+}
+
+.select2-dropdown--below {
+  border: 1px solid #e5e5e5;
+  transform: translateY(2px);
+}
+
+.mapsvg-filters-wrap
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__rendered {
+  line-height: 64px;
+}
+.mapsvg-filters-wrap
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__arrow {
+  height: 64px;
+}
+
+.mapsvg-form-field-distance
+  > .select2-container.select2-container--default.select2-container--open {
+  margin-top: 3px;
+}
+
+.mapsvg-form-field-distance .select2-dropdown.select2-dropdown--below {
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+.mapsvg-form-field-distance .select2-search.select2-search--dropdown {
+  margin-bottom: 10px;
+}
+
+.mapsvg-form-field-distance .select2-search__field {
+  border-radius: 8px !important;
+}
+
+.mapsvg-form-field-distance .select2-results__option {
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.mapsvg-form-field-distance
+  .select2-container--default
+  .select2-results__option--highlighted[aria-selected] {
+  background-color: #eee;
+  color: black;
+}
+.mapsvg-form-field-distance .select2-results__option {
+  margin-bottom: 4px;
+}

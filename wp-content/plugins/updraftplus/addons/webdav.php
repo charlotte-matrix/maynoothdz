@@ -157,8 +157,9 @@ class UpdraftPlus_Addons_RemoteStorage_webdav extends UpdraftPlus_RemoteStorage_
 	 * @var array
 	 */
 	protected $input_option_field_mappings = array(
-		'protocol' => array(
+		'webdav' => array(
 			'default_value' => 'webdav://',
+			'template_property_input_mapping' => 'protocol',
 			'contexts' => array('input'),
 		),
 		'user' => array(
@@ -529,20 +530,29 @@ class UpdraftPlus_Addons_RemoteStorage_webdav extends UpdraftPlus_RemoteStorage_
 		$this->mkdir($url);
 		
 		$msg = '';
-		$testfile = $url.'/'.md5(time().rand());
+		$testfile = $url.'/'.md5(time().wp_rand());
 		$res = $this->_parse_url($testfile);
 		if ($res) {
 			try {
-				$res = $this->write(self::CREDENTIALS_TEST_DATA, $posted_settings['enable_chunk']);
-				$msg = __("We successfully accessed the directory, and were able to create files within it", 'updraftplus');
-				$this->set_connection_status(true);
+				$use_chunk = !empty($posted_settings['enable_chunk']);
+				$buffer = $use_chunk ? str_repeat('a', 128 * 1024) : self::CREDENTIALS_TEST_DATA;
+				$written = $this->write($buffer, $use_chunk);
+				if (-1 === $written) {
+					$res = false;
+					$msg = __("Failed: Your WebDAV server does not support chunked uploads.", 'updraftplus') . ' ' . __("Please disable the 'Split uploads into chunks' option.", 'updraftplus');
+				} elseif ($written) {
+					$msg = __("We successfully accessed the directory, and were able to create files within it", 'updraftplus');
+					$this->set_connection_status(true);
+				} else {
+					$res = false;
+				}
 			} catch (Exception $e) {
 				$res = false;
 				$msg = $e->getMessage();
 			}
 			if ($res) $this->unlink($testfile);
 		}
-		if (!$res) $msg = __("Failed: We were not able to place a file in that directory - please check your credentials.", 'updraftplus');
+		if (!$res && empty($msg)) $msg = __("Failed: We were not able to place a file in that directory - please check your credentials.", 'updraftplus');
 		echo wp_kses($msg, array());
 	}
 
@@ -1152,25 +1162,27 @@ class UpdraftPlus_Addons_RemoteStorage_webdav extends UpdraftPlus_RemoteStorage_
 				break;
 			case 400:
 				if (false !== strpos($result->getBody(), 'Content-Range')) {
-					$this->log('WebDAV server returned 400 due to Content-Range issue; will try all-at-once method');
+					$this->log('WebDAV server does not support chunked uploads (returned HTTP 400 for Content-Range); falling back to all-at-once upload. Consider disabling the \'Split uploads into chunks\' option.');
 					if (self::CREDENTIALS_TEST_DATA === $buffer) throw new Exception(__('WebDAV server returned 400; probably does not support Content-Range (chunks)', 'updraftplus'));// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- prevent the string from being double-escaped; the escaping should occur when printed
 					return ($use_chunk) ? -1 : false; // "-1" recoverable error, false if chunks is in use
 				} else {
 					$msg = UpdraftPlus_HTTP_Error_Descriptions::get_http_status_code_description($result->getStatus());
 					$this->log(sprintf("Unexpected HTTP response code (%s): %s", $result->getStatus(), $msg));
-					if (self::CREDENTIALS_TEST_DATA === $buffer) throw new Exception(sprintf(__("Unexpected HTTP response code (%s): %s", "updraftplus"), $result->getStatus(), $msg));// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- prevent the string from being double-escaped; the escaping should occur when printed
+					/* translators: 1: HTTP response code, 2: HTTP status description */
+					if (self::CREDENTIALS_TEST_DATA === $buffer) throw new Exception(sprintf(__("Unexpected HTTP response code (%1\$s): %2\$s", "updraftplus"), $result->getStatus(), $msg));// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- prevent the string from being double-escaped; the escaping should occur when printed
 					return false;
 				}
 				break;
 			case 501:
-				$this->log('WebDAV server returned 501; probably does not support Content-Range; will try all-at-once method');
+				$this->log('WebDAV server does not support chunked uploads (returned HTTP 501 for Content-Range); falling back to all-at-once upload. Consider disabling the \'Split uploads into chunks\' option.');
 				if (self::CREDENTIALS_TEST_DATA === $buffer) throw new Exception(__('WebDAV server returned 501; probably does not support Content-Range (chunks)', 'updraftplus'));// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- prevent the string from being double-escaped; the escaping should occur when printed
 				return ($use_chunk) ? -1 : false; // "-1" recoverable error, false if chunks is in use
 				break;
 			default:
 				$msg = UpdraftPlus_HTTP_Error_Descriptions::get_http_status_code_description($result->getStatus());
 				$this->log(sprintf("Unexpected HTTP response code (%s): %s", $result->getStatus(), $msg));
-				if (self::CREDENTIALS_TEST_DATA === $buffer) throw new Exception(sprintf(__("Unexpected HTTP response code (%s): %s", "updraftplus"), $result->getStatus(), $msg));// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- prevent the string from being double-escaped; the escaping should occur when printed
+				/* translators: 1: HTTP response code, 2: HTTP status description */
+				if (self::CREDENTIALS_TEST_DATA === $buffer) throw new Exception(sprintf(__("Unexpected HTTP response code (%1\$s): %2\$s", "updraftplus"), $result->getStatus(), $msg));// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- prevent the string from being double-escaped; the escaping should occur when printed
 				return false;
 		}
 

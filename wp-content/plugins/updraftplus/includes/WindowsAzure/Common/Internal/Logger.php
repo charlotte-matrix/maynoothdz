@@ -56,13 +56,13 @@ class Logger
     public static function log($var, $tip = Resources::EMPTY_STRING)
     {
         if (!empty($tip)) {
-            error_log($tip . "\n", 3, self::$_filePath);
+            error_log($tip . "\n", 3, self::$_filePath); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- This code doesn’t seem to be getting triggered under any circumstances. There’s nothing in our codebase that calls this class.
         }
         
         if (is_array($var) || is_object($var)) {
-            error_log(print_r($var, true), 3, self::$_filePath);
+            error_log(print_r($var, true), 3, self::$_filePath); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- This code doesn’t seem to be getting triggered under any circumstances. There’s nothing in our codebase that calls this class.
         } else {
-            error_log($var . "\n", 3, self::$_filePath);
+            error_log($var . "\n", 3, self::$_filePath); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- This code doesn’t seem to be getting triggered under any circumstances. There’s nothing in our codebase that calls this class.
         }
     }
     

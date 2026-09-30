@@ -259,10 +259,10 @@ if (is_multisite()) {
 				'updraft_retain' => 1,
 				'updraft_retain_db' => 1,
 				'updraft_retain_extra' => array(),
-				'updraft_starttime_files' => date('H:i', time()+600),
-				'updraft_starttime_db' => date('H:i', time()+600),
-				'updraft_startday_files' => date('w', time()+600),
-				'updraft_startday_db' => date('w', time()+600)
+				'updraft_starttime_files' => gmdate('H:i', time()+600),
+				'updraft_starttime_db' => gmdate('H:i', time()+600),
+				'updraft_startday_files' => gmdate('w', time()+600),
+				'updraft_startday_db' => gmdate('w', time()+600)
 			);
 			
 			global $updraftplus;
@@ -309,8 +309,8 @@ if (is_multisite()) {
 		
 			global $updraftplus, $pagenow;
 			$updraftplus->plugin_title .= " - ".__('Multisite Install', 'updraftplus');
-
-			if ((!defined('UPDRAFTPLUS_DISABLE_TOP_LEVEL_MENU_ENTRY') || !UPDRAFTPLUS_DISABLE_TOP_LEVEL_MENU_ENTRY) && 'settings.php' == $pagenow && isset($_REQUEST['page']) && 'updraftplus' == substr($_REQUEST['page'], 0, 11)) {
+			$page = UpdraftPlus_Manipulation_Functions::fetch_superglobal('request', 'page', '');
+			if ((!defined('UPDRAFTPLUS_DISABLE_TOP_LEVEL_MENU_ENTRY') || !UPDRAFTPLUS_DISABLE_TOP_LEVEL_MENU_ENTRY) && 'settings.php' == $pagenow && 'updraftplus' == substr($page, 0, 11)) {
 				add_filter('parent_file', array('UpdraftPlus', 'parent_file'), 99);
 			}
 		}
@@ -373,7 +373,7 @@ if (is_multisite()) {
 					if (preg_match("/^([0-2]?[0-9]):([0-5][0-9])$/", $value, $matches)) {
 						$options[$key] = sprintf("%02d:%s", $matches[1], $matches[2]);
 					} elseif ('' == $value) {
-						$options[$key] = date('H:i', time()+300);
+						$options[$key] = gmdate('H:i', time()+300);
 					} else {
 						$options[$key] = '00:00';
 					}
@@ -835,7 +835,7 @@ if (is_multisite()) {
 				}
 			}
 
-			$site_results = $wpdb->get_results($query, ARRAY_A);
+			$site_results = $wpdb->get_results($query, ARRAY_A); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is dynamically built using $wpdb->prepare() for user values; dynamic table reference ($wpdb->blogs) cannot be parameterized
 
 			return $site_results;
 		}
@@ -914,14 +914,14 @@ if (is_multisite()) {
 			global $wpdb, $updraftplus;
 			$tables = array();
 			$blog_tables = $wpdb->tables('blog', true, (int) $blog_id);
-			foreach ($wpdb->get_results("SHOW TABLES LIKE '".$table_prefix.$blog_id."_%'") as $table) {
+			foreach ($wpdb->get_results("SHOW TABLES LIKE '".$table_prefix.$blog_id."_%'") as $table) { // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SHOW TABLES LIKE with dynamic table prefix cannot use $wpdb->prepare()
 				$tables = array_merge($tables, array_values(get_object_vars($table)));
 			}
 			$tables = array_unique($tables);
 			$tables = array_diff($tables, $blog_tables);
 			$suppress = $wpdb->suppress_errors();
 			foreach ($tables as $table) {
-				if (!$wpdb->query('DROP TABLE IF EXISTS '.UpdraftPlus_Manipulation_Functions::backquote(str_replace('`', '``', $table))) && !empty($wpdb->last_error)) {// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange -- Direct schema change is required here and handled carefully.
+				if (!$wpdb->query('DROP TABLE IF EXISTS '.UpdraftPlus_Manipulation_Functions::backquote(str_replace('`', '``', $table))) && !empty($wpdb->last_error)) {// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Direct schema change is required here and handled carefully; DROP TABLE with a dynamic table name cannot use $wpdb->prepare()
 					$updraftplus->log(__METHOD__.' : '.$wpdb->last_error.' - '.$wpdb->last_query);
 				}
 			}

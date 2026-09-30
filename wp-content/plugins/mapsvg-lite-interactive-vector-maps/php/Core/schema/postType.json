@@ -1,0 +1,36 @@
+{
+  "name": "postType",
+  "objectNameSingular": "postType",
+  "objectNamePlural": "postTypes",
+  "apiEndpoints": [
+    { "url": "post-types", "method": "GET", "name": "index" },
+    { "url": "post-types/%name%", "method": "GET", "name": "get" }
+  ],
+  "fields": [
+    {
+      "name": "postType",
+      "label": "Post type",
+      "type": "string",
+      "db_type": "varchar(255)",
+      "visible": true,
+      "protected": true,
+      "auto_increment": true
+    },
+    {
+      "name": "taxonomy",
+      "label": "Taxonomy",
+      "type": "json",
+      "db_type": "text",
+      "visible": true,
+      "searchable": true
+    },
+    {
+      "name": "meta",
+      "label": "Meta fields",
+      "type": "json",
+      "db_type": "text",
+      "visible": true,
+      "readonly": true
+    }
+  ]
+}

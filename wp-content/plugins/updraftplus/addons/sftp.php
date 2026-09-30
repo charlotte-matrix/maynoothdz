@@ -769,7 +769,7 @@ class UpdraftPlus_Addons_RemoteStorage_sftp extends UpdraftPlus_RemoteStorage_Ad
 			$this->ssh->exec('mkdir '.$this->possibly_escapeshellarg($path));
 		}
 
-		$testfile = md5(time().rand());
+		$testfile = md5(time().wp_rand());
 		if (!empty($scp) && !empty($path)) $testfile = trailingslashit($path).$testfile;
 		// Now test uploading a file
 		$putfile = $sftp->put($testfile, 'test');
@@ -968,6 +968,13 @@ class UpdraftPlus_ftp_wrapper {
 
 	private $port;
 
+	/**
+	 * Standard input stream handle
+	 *
+	 * @var resource|null
+	 */
+	private $stdin_handle;
+
 	public $timeout = 60;
 
 	public $passive = true;
@@ -990,6 +997,7 @@ class UpdraftPlus_ftp_wrapper {
 		$this->username = $username;
 		$this->password = $password;
 		$this->port     = $port;
+		$this->stdin_handle = defined('STDIN') && is_resource(STDIN) ? STDIN : fopen('php://stdin', 'r');
 	}
  
 	public function connect() {
@@ -1313,7 +1321,7 @@ class UpdraftPlus_ftp_wrapper {
 			curl_setopt($this->curl_handle, CURLOPT_QUOTE, array('DELE '.$remote_file_path));
 			// Unset some (possibly) previously-set options
 			curl_setopt($this->curl_handle, CURLOPT_UPLOAD, false);
-			curl_setopt($this->curl_handle, CURLOPT_INFILE, STDIN);
+			curl_setopt($this->curl_handle, CURLOPT_INFILE, $this->stdin_handle);
 			$output = curl_exec($this->curl_handle);
 			return $output;
 		}

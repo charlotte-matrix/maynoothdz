@@ -1,0 +1,15 @@
+<script type="text/x-handlebars-template" id="mapsvg-data-tmpl-save-view">
+    <div class="form-group mb-3 row">
+        <div class="col-sm-3 col-form-label"></div>
+        <div class="col-sm-9">
+            <button class="btn btn-outline-secondary btn-save"{{#if readOnly}} disabled{{/if}}>OK&nbsp;<span class="mapsvg-hotkey-mac">⌘↵</span><span class="mapsvg-hotkey-others">Ctrl+↵</span></button>
+            <button class="btn btn-outline-secondary mapsvg-close">Close <span class="mapsvg-hotkey">Esc</span></button>
+            {{#if readOnly}}
+            <div class="alert alert-info py-2 mt-2 mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-lock-fill"></i>
+                <span>{{readOnlyMessage}}</span>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</script>

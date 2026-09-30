@@ -1,0 +1,15 @@
+---
+description: Rules for adding new DB migrations in the MapSVG project.
+globs: wp-content/plugins/mapsvg/php/Migrate/Migrations/**
+alwaysApply: true
+---
+
+# MapSVG Database Migrations
+
+When adding new database migrations for this project:
+
+- **NEVER** create a new versioned migration file (e.g. `8.12.3.php`).
+- **ALWAYS** append new migration code to the existing `php/Migrate/Migrations/next.php` file.
+- `next.php` is the single file that accumulates all pending migrations. It is idempotent — every operation must guard itself with `SHOW TABLES LIKE` / `SHOW COLUMNS LIKE` checks before altering the schema.
+- Use the `Database` singleton (`Database::get()`) for all queries, not raw `$wpdb`.
+- Prefix all table names with `$db->mapsvg_prefix`.

@@ -1,0 +1,330 @@
+---
+description: MapSVG release workflow — triggered by "/release X.Y.Z"
+alwaysApply: false
+---
+
+# MapSVG Release Workflow
+
+Triggered when the user types `/release X.Y.Z` || `/release patch` || `/release minor` || `/release major`.
+
+## Step 0 — Guards (run before anything else)
+
+### 0a — Must be on `dev` (or `master`, which is synced into `dev`)
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-wp/wp-content/plugins/mapsvg && git branch --show-current
+```
+
+- If on `dev` — continue.
+- If on `master` — switch to `dev` and merge `master` into `dev`, then continue:
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-wp/wp-content/plugins/mapsvg
+git checkout dev
+git merge master --no-edit
+```
+
+If the merge has conflicts, stop and tell the user to resolve them before releasing.
+
+- If on any other branch, stop and tell the user:
+
+> ❌ You are on branch `<branch>`. Please switch to `dev` (or `master`) before releasing.
+
+### 0b — Validate version format
+
+If exact version number is provided, the requested version must match exactly `X.Y.Z` where X, Y, Z are non-negative integers.
+
+If the format is wrong, stop and tell the user:
+
+> ❌ Invalid version format `<input>`. Expected format: `X.Y.Z` (e.g. `8.12.3`).
+
+### 0c — Validate version is greater than current
+
+Read the current version from `mapsvg/package.json` field `"version"`.
+
+Compare each part numerically (major → minor → patch). The requested version must be strictly greater.
+
+If it is equal or lower, stop and tell the user:
+
+> ❌ Requested version `X.Y.Z` is not greater than current version `A.B.C`. Please provide a higher version number.
+
+### 0d - Confirm version keyword
+
+If, instead of exact version number, a keyword was provided after "/release" when it must be one of: "patch", "minor", "major".
+Increase the version number automatically depending on the provided keyword:
+
+- major: increase X
+- minor: increase Y
+- patch: increase Z
+
+### 0f — Confirm if major version is changing
+
+If the major part (X) is different from the current major, **stop and ask the user to confirm** before proceeding:
+
+> ⚠️ This is a **major release** (`A.x.x` → `X.Y.Z`). Are you sure? Reply "yes" to continue or anything else to cancel.
+
+Only proceed if the user explicitly replies with "yes" (case-insensitive).
+
+---
+
+## Step 1 — Determine bump type
+
+Read the current version from `mapsvg/package.json` field `"version"`.
+
+Compare with the requested version X.Y.Z:
+
+- If major part changed → bump type is `--major`
+- If minor part changed → bump type is `--minor`
+- If only patch part changed → bump type is `--patch` (default, no flag needed)
+
+---
+
+## Step 2 — Collect changelog entries from commits
+
+Run:
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-wp/wp-content/plugins/mapsvg && git log $(git describe --tags --abbrev=0)..HEAD --format="%s"
+```
+
+Use those commit messages to write human-readable changelog bullet points.
+Group them into categories if applicable (Bug Fixes / Features / Improvements).
+
+---
+
+## Step 2.5 — Changelog writing style (mandatory)
+
+Write release notes for humans, not as a commit dump.
+
+**README.txt order:** always newest version first (reverse chronological). New entries go right under `== Changelog ==`.
+
+Rules:
+
+- Lead with the main release story in the first bullet (the biggest user-facing change).
+- Use plain product language; avoid internal-only wording where possible.
+- Prefer outcomes over implementation details (what improved for users/admins).
+- Condense related commits into a single clear bullet when they describe one outcome.
+- Do not copy commit prefixes into changelog text (`feat:`, `fix:`, `refactor:`, `chore:`).
+- Skip low-signal items unless they affect behavior, reliability, or migration safety.
+- **Never** put build, deploy, CI, `gulp bump`, SVN, release-script, or other internal release-process changes in the user-facing changelog (Docusaurus + README). Those belong in commit messages only, not in product release notes.
+
+Default size:
+
+- `### 🚀 Features / Improvements`: 2-4 bullets
+- `### 🐛 Bug Fixes`: 1-3 bullets
+
+Style:
+
+- Keep bullets short and parallel (`Added...`, `Improved...`, `Fixed...`).
+- Start each bullet with a bold lead label in this exact form: `- **Label**: description`.
+- Use short product-facing labels such as `CSV import`, `Error handling`, `Google Sheets sync`, `UI`, `Performance`.
+- Mention internal architecture only when it changes user-visible behavior.
+- For import/sync releases, explicitly mention data source, automation/schedule behavior, and UX impact.
+
+Example style:
+
+```markdown
+### ✨ Improvements
+
+- **CSV import**: Large files are processed in the background with progress tracking.
+- **Error handling**: Errors include unique codes and clear troubleshooting guidance.
+```
+
+Before showing the draft, self-check:
+
+1. Can a non-developer understand each bullet?
+2. Is the main release theme obvious in the first bullet?
+3. Were noisy commits condensed into clear outcomes?
+4. Is there any commit-message artifact left in wording?
+5. Were build/deploy/release-tooling bullets excluded from the draft?
+6. Omit `### 🚀 Features / Improvements` entirely when there are no user-facing feature bullets (patch-only bugfix releases are OK with only `### 🐛 Bug Fixes`).
+
+---
+
+## Step 3 — Create Docusaurus changelog
+
+Changelog will be based on info from comments in Step 2, plus additional optional edits from user.
+
+File path: `/Users/roma/WebstormProjects/mapsvg-docusaurus/changelog/v{MAJOR}/X.Y.Z.md`
+
+Where `{MAJOR}` is the major version number (e.g. `v8` for version `8.12.3`).
+
+Use this format (match existing files in that folder exactly):
+
+```markdown
+---
+date: YYYY-MM-DD
+hide_table_of_contents: true
+title: X.Y.Z
+slug: X.Y.Z
+---
+
+### 🚀 Features / Improvements
+
+- ...
+
+### 🐛 Bug Fixes
+
+- ...
+```
+
+Only include sections that have entries. Use today's date.
+
+Before creating the file and proceeding further, output full generated changelog to chat and ask for a confirmation.
+
+---
+
+## Step 3 — Update README.txt changelog
+
+File: `mapsvg/README.txt`
+
+Changelog order is **newest first** (reverse chronological). Insert the new section immediately after `== Changelog ==` (above all existing version entries), never at the bottom:
+
+```
+= X.Y.Z =
+* <bullet points from step 2>
+```
+
+---
+
+## Step 5 — Commit changelog changes (mapsvg plugin repo)
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-wp/wp-content/plugins/mapsvg
+git add README.txt
+git commit -m "chore: add X.Y.Z changelog entry"
+```
+
+This MUST happen before gulp bump (which checks for uncommitted changes and aborts if any exist).
+
+---
+
+## Step 6 — Commit and push Docusaurus changelog
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-docusaurus
+git add changelog/vX/X.Y.Z.md
+git commit -m "chore: add X.Y.Z changelog"
+git push
+```
+
+---
+
+## Step 7 — Run gulp bump
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-wp/wp-content/plugins/mapsvg && gulp bump <bump-type-flag>
+```
+
+Where `<bump-type-flag>` is `--minor`, `--major`, or omitted for patch.
+
+Note: `gulp bump` will automatically:
+
+- Bump version in `package.json`, `mapsvg.php`, `README.txt` (Stable tag)
+- Commit all changes with `"build: bump version to X.Y.Z"`
+- Create git tag `vX.Y.Z`
+- Push the tag to origin
+
+Wait for this to complete successfully before proceeding.
+
+---
+
+## Step 8 — Build
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-wp/wp-content/plugins/mapsvg && gulp build-all
+```
+
+Wait for completion. If it exits with an error, stop and report the error. Do NOT proceed to deploy.
+
+---
+
+## Step 9 — Deploy
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-wp/wp-content/plugins/mapsvg && gulp deploy-all --env production --withDemo
+```
+
+Wait for completion. Watch for any `❌` error output or non-zero exit code.
+
+If there are ANY errors:
+
+- Stop immediately
+- Report what failed
+- Do NOT merge to master
+- Tell the user to fix the issue and run `/publish X.Y.Z` to retry the final merge step
+
+---
+
+## Step 10 — Merge dev → master and push (only if deploy succeeded)
+
+```bash
+cd /Users/roma/WebstormProjects/mapsvg-wp/wp-content/plugins/mapsvg
+git checkout master
+git merge dev --no-ff -m "release: X.Y.Z"
+git push origin master
+git checkout dev
+```
+
+No need to tag again — `gulp bump` already created and pushed the tag in Step 7.
+
+---
+
+## Step 11 — Slack `#release` (mandatory)
+
+After deploy + master merge succeed, post the Docusaurus changelog to Slack `#release`. Do this on a normal `/release` and also after a successful `/publish`.
+
+1. Resolve the channel with Slack MCP `slack_search_channels` (`query`: `release`). Use the `#release` channel id (not a similarly named channel).
+2. Read the changelog body from the file created in Step 3:
+
+   `/Users/roma/WebstormProjects/mapsvg-docusaurus/changelog/v{MAJOR}/X.Y.Z.md`
+
+3. Send with Slack MCP `slack_send_message` (`channel_id` = `#release` id).
+
+**Same changelog as Docusaurus**, minus YAML frontmatter. Do not rewrite, shorten, or translate bullets. Slack MCP accepts a **markdown subset**, not full MD and not Slack `mrkdwn`:
+
+| Works | Does not work |
+|---|---|
+| `**bold**` | `#` / `##` / `###` headings (show as literal `###`) |
+| `_italic_` | tables |
+| `` `code` `` / ``` fences | images `![]()` |
+| `-` / `1.` lists | |
+| `[text](url)` | |
+| `> quote` | |
+
+Convert each `### Heading` line to a **bold line** (`**🚀 Features / Improvements**`). Leave `- **Label**: …` bullets as-is.
+
+Prefix one title line, then a blank line, then the adapted body:
+
+```
+Released **X.Y.Z**
+
+**🚀 Features / Improvements**
+
+- **Label**: description.
+
+**🐛 Bug Fixes**
+
+- **Label**: description.
+```
+
+Only include sections that exist in the Docusaurus file.
+
+If Slack MCP is unavailable or `#release` cannot be found: do **not** fail the release. Report the error in chat and paste the exact message so it can be posted manually.
+
+Return the Slack message link in the Step 12 report.
+
+---
+
+## Step 12 — Done
+
+Report success:
+
+> ✅ Released X.Y.Z — master updated, tag pushed, deploy complete, Slack `#release` notified.
+
+---
+
+## `/publish X.Y.Z` — retry merge after fixing a failed deploy
+
+If the user types `/publish X.Y.Z`, it means Steps 1–9 already ran but deploy failed.
+Skip directly to Step 9 (deploy) and if successful, do Step 10, then Step 11 (Slack), then Step 12.

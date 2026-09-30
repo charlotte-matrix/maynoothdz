@@ -295,9 +295,20 @@ function updraft_remote_storage_tabs_setup() {
 	var servicecheckbox = jQuery('.updraft_servicecheckbox');
 	if (typeof servicecheckbox.labelauty === 'function') {
 		servicecheckbox.labelauty();
-		var $vault_label = jQuery('label[for=updraft_servicecheckbox_updraftvault] .labelauty-unchecked');
-		var $vault_info = jQuery('<div class="udp-info"><span class="info-trigger">?</span><div class="info-content-wrapper"><div class="info-content">'+updraftlion.updraftvault_info+'</div></div></div>');
-		$vault_label.append($vault_info);
+		var $vault_info = jQuery('label[for=updraft_servicecheckbox_updraftvault]').find('.labelauty-unchecked, .labelauty-checked').append('<div class="udp-info"><span class="info-trigger">?</span><div class="info-content-wrapper"><div class="info-content">'+updraftlion.updraftvault_info+'</div></div></div>').find('.udp-info');
+
+		// Tooltip is normally shown on hover, which has no equivalent on touch devices; toggle it on tap instead.
+		$vault_info.on('click touchend', '.info-trigger', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$vault_info.toggleClass('udp-info-active');
+		});
+
+		jQuery(document).on('click', function(e) {
+			if (!jQuery(e.target).closest('.udp-info').length) {
+				$vault_info.removeClass('udp-info-active');
+			}
+		});
 	}
 	
 }
@@ -5238,6 +5249,13 @@ jQuery(function($) {
 			// Displays warning to the user of their mistake if they try to enter a URL in the OneDrive settings and saved
 			$('#remote-storage-holder .updraftplus_onedrive_folder_input').trigger('keyup');
 			initialize_remote_storage_select2_elements(jQuery('#remote-storage-holder'));
+			// Move the premium storage upsell block after the configuration block.
+			var $storage_holder = $('#remote-storage-holder');
+			var $premium_row = $storage_holder.find('tr.updraft-background-white');
+			if ($premium_row.length) {
+				var $premium_tbody = $('<tbody>').append($premium_row.prev('tr.updraft-empty-tr'), $premium_row);
+				$storage_holder.children().last().after($premium_tbody);
+			}
 		});
 	}
 
@@ -5290,8 +5308,8 @@ jQuery(function($) {
 				  check_cloud_authentication()
 				});
 			}
-
 			$.unblockUI();
+			$(document).trigger('wp-notice-added');
 		}, { action: 'updraft_savesettings', error_callback: function(response, status, error_code, resp) {
 				$.unblockUI();
 				if (typeof resp !== 'undefined' && resp.hasOwnProperty('fatal_error')) {
@@ -6899,99 +6917,3 @@ function validate_dreamobjects_endpoint(select_element) {
 		select_element.classList.add('updraft-input--invalid');
 	}
 }
-
-/**
- * Reference to the authentication popup window.
- *
- * @type {Window|null}
- */
-var updraft_popup_ref = null;
-
-/**
- * Interval ID used to check if the popup window has been closed.
- *
- * @type {number|null}
- */
-var updraft_popup_check_interval = null;
-
-/**
- * Opens (or focuses) an authentication popup window and monitors when it closes.
- *
- * When the popup is closed, a `CustomEvent` named `updraftAuthPopupClosed` is dispatched
- * on the `window` object, containing the opened URL in the event detail.
- *
- * @param {string} url - The URL to open in the popup window.
- * @fires window#updraftAuthPopupClosed
- */
-function updraft_open_authentication_popup(url) {
-	const width = 1000;
-	const height = 800;
-	const left = (window.screen.width / 2) - (width / 2);
-	const top = (window.screen.height / 2) - (height / 2);
-
-	// Open (or focus existing) popup
-	if (!updraft_popup_ref || updraft_popup_ref.closed) {
-		updraft_popup_ref = window.open(
-			url,
-			'updraft_auth_popup',
-			'width=' + width + ',height=' + height + ',top=' + top + ',left=' + left + ',scrollbars=yes,resizable=yes'
-		);
-	} else {
-		updraft_popup_ref.focus();
-	}
-
-	// Clear any previous interval
-	if (updraft_popup_check_interval) clearInterval(updraft_popup_check_interval);
-
-	// Check every 500ms if popup closed
-	updraft_popup_check_interval = setInterval(function() {
-		if (!updraft_popup_ref || updraft_popup_ref.closed) {
-			clearInterval(updraft_popup_check_interval);
-			updraft_popup_check_interval = null;
-
-			/**
-			 * Fired when the authentication popup window is closed.
-			 *
-			 * @event window#updraftAuthPopupClosed
-			 * @type {CustomEvent}
-			 * @property {Object} detail - Additional event details.
-			 * @property {string} detail.url - The URL that was opened in the popup.
-			 */
-			window.dispatchEvent(new CustomEvent('updraftAuthPopupClosed', {
-				detail: { url: url }
-			}));
-		}
-	}, 500);
-}
-
-window.addEventListener('message', function (event) {
-	if (!event.data || event.data.type !== 'auth_success' || jQuery('#teamupdraft-onboarding').length === 1) {
-		return;
-	}
-
-	window.location.reload();
-});
-
-/**
- * Handles click events on authentication and deauthentication links.
- * Prevents default navigation and opens the popup using {@link updraft_open_authentication_popup}.
- *
- * @param {MouseEvent} e - The click event.
- * @returns {boolean|void} Returns false if the click should not open a popup.
- */
-jQuery(document).on('click', 'a.updraft_authlink', function(e, data) {
-	e.preventDefault();
-
-	// Prevent middle-click or Ctrl/Cmd + click from opening new tab
-	if (e.button === 1 || e.ctrlKey || e.metaKey) {
-		return false;
-	}
-
-	if (!data) data = {};
-
-	if (data && data.is_requesting_popup_auth) {
-		updraft_open_authentication_popup(this.href);
-	} else {
-		window.location.href = this.href;
-	}
-});

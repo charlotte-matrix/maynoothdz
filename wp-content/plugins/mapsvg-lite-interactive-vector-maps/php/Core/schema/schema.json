@@ -1,0 +1,81 @@
+{
+  "name": "schema",
+  "postType": "",
+  "objectNameSingular": "schema",
+  "objectNamePlural": "schemas",
+  "apiEndpoints": [
+    { "url": "schemas", "method": "GET", "name": "index" },
+    { "url": "schemas/[:id]", "method": "GET", "name": "show" },
+    { "url": "schemas", "method": "POST", "name": "create" },
+    { "url": "schemas/[:id]", "method": "PUT", "name": "update" },
+    { "url": "schemas/[:id]", "method": "DELETE", "name": "delete" },
+    { "url": "schemas", "method": "DELETE", "name": "clear" }
+  ],
+  "fields": [
+    {
+      "name": "id",
+      "label": "ID",
+      "type": "id",
+      "db_type": "int(11)",
+      "visible": true,
+      "protected": true,
+      "auto_increment": true
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "type": "text",
+      "db_type": "varchar(255)",
+      "visible": true
+    },
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "text",
+      "db_type": "varchar(255)",
+      "visible": true
+    },
+    {
+      "name": "fields",
+      "label": "Fields",
+      "type": "text",
+      "db_type": "longtext",
+      "visible": true
+    },
+    {
+      "name": "primaryKeyField",
+      "label": "Primary Key Field",
+      "type": "text",
+      "db_type": "varchar(50)",
+      "visible": false
+    },
+    {
+      "name": "postType",
+      "label": "Post Type",
+      "type": "text",
+      "db_type": "varchar(50)",
+      "visible": false
+    },
+    {
+      "name": "objectNameSingular",
+      "label": "Object Name Singular",
+      "type": "text",
+      "db_type": "varchar(50)",
+      "visible": false
+    },
+    {
+      "name": "objectNamePlural",
+      "label": "Object Name Plural",
+      "type": "text",
+      "db_type": "varchar(50)",
+      "visible": false
+    },
+    {
+      "name": "apiEndpoints",
+      "label": "API Endpoints",
+      "type": "text",
+      "db_type": "longtext",
+      "visible": false
+    }
+  ]
+}

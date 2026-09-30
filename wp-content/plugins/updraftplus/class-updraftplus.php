@@ -121,6 +121,8 @@ class UpdraftPlus {
 		);
 
 		if (is_file(UPDRAFTPLUS_DIR.'/udaddons/updraftplus-cli-command-base.php')) $load_classes['UpdraftPlus_CLI_Command_Base'] = 'udaddons/updraftplus-cli-command-base.php';
+
+		if ($this->is_onboarding_supported()) $load_classes['UpdraftPlus_Onboarding'] = 'includes/class-onboarding.php';
 		
 		foreach ($load_classes as $class => $relative_path) {
 			if (!class_exists($class)) updraft_try_include_file(''.$relative_path, 'include_once');
@@ -129,6 +131,8 @@ class UpdraftPlus {
 		if (!class_exists('UpdraftPlus_Addons_Migrator')) {
 			new UpdraftPlus_Migrator_Lite();
 		}
+
+		if (class_exists('UpdraftPlus_Onboarding')) new UpdraftPlus_Onboarding();
 
 		if (defined('WP_CLI') && WP_CLI && class_exists('UpdraftPlus_CLI_Command_Base') && !class_exists('UpdraftPlus_CLI_Command')) {
 			WP_CLI::add_command('updraftplus', 'UpdraftPlus_CLI_Command_Base');
@@ -660,26 +664,6 @@ class UpdraftPlus {
 					$this->log(sprintf(__('%1$s error: %2$s', 'updraftplus'), $method, $e->getMessage().' ('.$e->getCode().')', 'error'));
 				}
 				$this->register_wp_http_option_hooks(false);
-				$updraftplus_auth = UpdraftPlus_Manipulation_Functions::fetch_superglobal('get', 'updraftplus_'.$method.'auth');
-				if ((false === UpdraftPlus_Options::get_updraft_option('updraftplus_completed_onboarding', false)
-					|| false === UpdraftPlus_Options::get_updraft_option('updraftplus_onboarding_free_completed', false))
-					&& false === UpdraftPlus_Options::get_updraft_option('updraftplus_skipped_onboarding', false)
-					&& false !== UpdraftPlus_Options::get_updraft_option('updraftplus_start_onboarding', false)
-					&& !$updraftplus_auth
-				) {
-					global $updraftplus_admin;
-					if (empty($updraftplus_admin)) updraft_try_include_file('admin.php', 'include_once');
-					$status = UpdraftPlus_Manipulation_Functions::fetch_superglobal('get', 'error');
-
-					$updraftplus_admin->include_template('oauth.php', false, array(
-						'status' => $status ? 'error' : 'success',
-						'method' => $method,
-						'label' => $this->backup_methods[$method],
-						'logo' => UPDRAFTPLUS_URL.'/images/oauth/'.$method.'.png',
-						'kses_allow_tags' => $updraftplus_admin->kses_allow_tags(),
-					));
-					exit;
-				}
 			} elseif ('updraftplus' === $page && 'downloadlog' === $action && $updraftplus_backup_nonce && preg_match("/^[0-9a-f]{12}$/", $updraftplus_backup_nonce) && UpdraftPlus_Options::user_can_manage()) {
 				// No WordPress nonce is needed here or for the next, since the backup is already nonce-based
 				$updraft_dir = $this->backups_dir_location();
@@ -1898,7 +1882,7 @@ class UpdraftPlus {
 
 			if (!file_exists($updraft_dir.'/binziptest/subdir1/subdir2')) return false;
 			
-			file_put_contents($updraft_dir.'/binziptest/subdir1/subdir2/test.html', '<html><body><a href="https://updraftplus.com">UpdraftPlus is a great backup and restoration plugin for WordPress.</a></body></html>');
+			file_put_contents($updraft_dir.'/binziptest/subdir1/subdir2/test.html', '<html><body><a href="https://teamupdraft.com/updraftplus/">UpdraftPlus is a great backup and restoration plugin for WordPress.</a></body></html>');
 			
 			if (file_exists($updraft_dir.'/binziptest/test.zip')) unlink($updraft_dir.'/binziptest/test.zip');
 			
@@ -1928,7 +1912,7 @@ class UpdraftPlus {
 
 				// Now test -@
 				if (true == $all_ok) {
-					file_put_contents($updraft_dir.'/binziptest/subdir1/subdir2/test2.html', '<html><body><a href="https://updraftplus.com">UpdraftPlus is a really great backup and restoration plugin for WordPress.</a></body></html>');
+					file_put_contents($updraft_dir.'/binziptest/subdir1/subdir2/test2.html', '<html><body><a href="https://teamupdraft.com/updraftplus/">UpdraftPlus is a really great backup and restoration plugin for WordPress.</a></body></html>');
 					
 					$exec = $potzip;
 					if (defined('UPDRAFTPLUS_BINZIP_OPTS') && UPDRAFTPLUS_BINZIP_OPTS) $exec .= ' '.UPDRAFTPLUS_BINZIP_OPTS;
@@ -2487,7 +2471,7 @@ class UpdraftPlus {
 			// More than 12 minutes late?
 			if ($time_now > $our_expected_start + 720) {
 				$this->log('Long time past since expected resumption time: approx expected='.round($our_expected_start, 1).", now=".round($time_now, 1).", diff=".round($time_now-$our_expected_start, 1));
-				$this->log(__('Your website is visited infrequently and UpdraftPlus is not getting the resources it hoped for; please read this page:', 'updraftplus').' https://updraftplus.com/faqs/why-am-i-getting-warnings-about-my-site-not-having-enough-visitors/', 'warning', 'infrequentvisits');
+				$this->log(__('Your website is visited infrequently and UpdraftPlus is not getting the resources it hoped for; please read this page:', 'updraftplus').' https://teamupdraft.com/documentation/updraftplus/topics/backing-up/troubleshooting/why-am-i-getting-warnings-about-my-site-not-having-enough-visitors/', 'warning', 'infrequentvisits');
 			}
 		}
 
@@ -2671,7 +2655,7 @@ class UpdraftPlus {
 
 		}
 
-		do_action('pre_database_backup_setup');
+		do_action('updraftplus_pre_database_backup_setup');
 
 		$backup_databases = $this->jobdata_get('backup_database');
 
@@ -3254,7 +3238,7 @@ class UpdraftPlus {
 		// doing_action() was added in WP 3.9
 		// wp_cron() can be called from the 'init' action
 		
-		if (function_exists('doing_action') && (doing_action('init') || (defined('DOING_CRON') && DOING_CRON)) && (doing_action('updraft_backup_database') || doing_action('updraft_backup'))) {// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- Silenced to suppress errors that may arise because of the function.
+		if (function_exists('doing_action') && (doing_action('init') || (defined('DOING_CRON') && DOING_CRON)) && (doing_action('updraft_backup_database') || doing_action('updraft_backup'))) {// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, wp_function_not_compatible_with_requires_wp -- Silenced to suppress errors that may arise because of the function. False positive: we've already checked whether the 'doing_action()' function exists using 'function_exists()' before calling it.
 			$last_scheduled_action_called_at = get_option("updraft_last_scheduled_$semaphore");
 			// 11 minutes - so, we're assuming that they haven't custom-modified their schedules to run scheduled backups more often than that. If they have, they need also to use the filter to over-ride this check.
 			$seconds_ago = time() - $last_scheduled_action_called_at;
@@ -4547,6 +4531,11 @@ class UpdraftPlus {
 		return (empty($exclude) || !is_array($exclude)) ? array() : $exclude;
 	}
 
+	/**
+	 * Indicate the current blog's upload directory
+	 *
+	 * @return String
+	 */
 	public function wp_upload_dir() {
 		if (is_multisite()) {
 			global $current_site;
@@ -4945,7 +4934,7 @@ class UpdraftPlus {
 		// index.php is for a sanity check - make sure that we're not somewhere unexpected
 		if ((!is_dir($updraft_dir) || !is_file($updraft_dir.'/index.html') || !is_file($updraft_dir.'/.htaccess')) && !is_file($updraft_dir.'/index.php') || !is_file($updraft_dir.'/web.config')) {
 			@mkdir($updraft_dir, 0775, true);// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- Silenced to suppress errors that may arise because of the function.
-			@file_put_contents($updraft_dir.'/index.html', "<html><body><a href=\"https://updraftplus.com\" target=\"_blank\">WordPress backups by UpdraftPlus</a></body></html>");// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- Silenced to suppress errors that may arise because of the function. False positive: the 'file_put_contents()' function doesn't put the file in the plugin directory, it puts it in the UpdraftPlus backup directory instead.
+			@file_put_contents($updraft_dir.'/index.html', "<html><body><a href=\"https://teamupdraft.com/updraftplus/\" target=\"_blank\">WordPress backups by UpdraftPlus</a></body></html>");// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- Silenced to suppress errors that may arise because of the function. False positive: the 'file_put_contents()' function doesn't put the file in the plugin directory, it puts it in the UpdraftPlus backup directory instead.
 			if (!is_file($updraft_dir.'/.htaccess')) @file_put_contents($updraft_dir.'/.htaccess', 'deny from all');// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- Silenced to suppress errors that may arise because of the function. False positive: the 'file_put_contents()' function doesn't put the file in the plugin directory, it puts it in the UpdraftPlus backup directory instead.
 			if (!is_file($updraft_dir.'/web.config')) @file_put_contents($updraft_dir.'/web.config', "<configuration>\n<system.webServer>\n<authorization>\n<deny users=\"*\" />\n</authorization>\n</system.webServer>\n</configuration>\n");// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- Silenced to suppress errors that may arise because of the function. False positive: the 'file_put_contents()' function doesn't put the file in the plugin directory, it puts it in the UpdraftPlus backup directory instead.
 		}
@@ -5091,7 +5080,7 @@ class UpdraftPlus {
 		wp_deregister_style('select2');
 		$select2_version = $this->use_unminified_scripts() ? '4.1.0-rc.0'.'.'.time() : '4.1.0-rc.0';
 		$min_or_not = $this->use_unminified_scripts() ? '' : '.min';
-		wp_enqueue_script('select2', UPDRAFTPLUS_URL."/includes/select2/select2".$min_or_not.".js", array('jquery'), $select2_version);
+		wp_enqueue_script('select2', UPDRAFTPLUS_URL."/includes/select2/select2".$min_or_not.".js", array('jquery'), $select2_version, false);
 		wp_enqueue_style('select2', UPDRAFTPLUS_URL."/includes/select2/select2".$min_or_not.".css", array(), $select2_version);
 	}
 	
@@ -5339,7 +5328,7 @@ class UpdraftPlus {
 								$info['url_scheme_change'] = false;
 								$warn[] = apply_filters(
 									'updraftplus_dbscan_urlchange',
-									'<a href="https://updraftplus.com/shop/migrator/" target="_blank">'.
+									'<a href="https://teamupdraft.com/updraftplus/wordpress-migration-plugin/" target="_blank">'.
 									sprintf(
 										/* translators: %s: Old site URL */
 										__('This backup set is from a different site (%s) - this is not a restoration, but a migration.', 'updraftplus'),
@@ -5368,7 +5357,7 @@ class UpdraftPlus {
 					// Check for should-be migration
 					if (!$migration_warning && UpdraftPlus_Manipulation_Functions::normalise_url(home_url()) != UpdraftPlus_Manipulation_Functions::normalise_url($old_home)) {
 						$migration_warning = true;
-						$powarn = apply_filters('updraftplus_dbscan_urlchange', '<a href="https://updraftplus.com/shop/migrator/" target="_blank">'.sprintf(
+						$powarn = apply_filters('updraftplus_dbscan_urlchange', '<a href="https://teamupdraft.com/updraftplus/wordpress-migration-plugin/" target="_blank">'.sprintf(
 							/* translators: %s: Old home URL */
 							__('This backup set is from a different site (%s) - this is not a restoration, but a migration.', 'updraftplus'),
 							htmlspecialchars($old_home.' / '.home_url())
@@ -5428,7 +5417,7 @@ class UpdraftPlus {
 							// $err[] =  sprintf(__('Error: %s', 'updraftplus'), __('You are running on WordPress multisite - but your backup is not of a multisite site.', 'updraftplus'));
 							// return array($mess, $warn, $err, $info);
 							// } else {
-							$warn[] = __('You are running on WordPress multisite - but your backup is not of a multisite site.', 'updraftplus').' '.__('It will be imported as a new site.', 'updraftplus').' <a href="https://updraftplus.com/information-on-importing-a-single-site-wordpress-backup-into-a-wordpress-network-i-e-multisite/" target="_blank">'.__('Please read this link for important information on this process.', 'updraftplus').'</a>';
+							$warn[] = __('You are running on WordPress multisite - but your backup is not of a multisite site.', 'updraftplus').' '.__('It will be imported as a new site.', 'updraftplus').' <a href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/how-do-i-restore-a-single-sub-site-on-a-multisite-network/" target="_blank">'.__('Please read this link for important information on this process.', 'updraftplus').'</a>';
 							// }
 							// Got the needed code?
 							if (!class_exists('UpdraftPlusAddOn_MultiSite') || !class_exists('UpdraftPlus_Addons_Migrator')) {
@@ -5550,7 +5539,7 @@ class UpdraftPlus {
 					_n("The database server that this WordPress site is running on doesn't support the character set (%s) which you are trying to import.", "The database server that this WordPress site is running on doesn't support the character sets (%s) which you are trying to import.", count($db_unsupported_charset_unique), 'updraftplus'),
 					implode(', ', $db_unsupported_charset_unique)
 				).' '.
-				__('You can choose another suitable character set instead and continue with the restoration at your own risk.', 'updraftplus').' <a target="_blank" href="https://updraftplus.com/faqs/implications-changing-tables-character-set/" target="_blank">'.__('Go here for more information.', 'updraftplus').'</a>';
+				__('You can choose another suitable character set instead and continue with the restoration at your own risk.', 'updraftplus').' <a target="_blank" href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/what-are-the-implications-of-changing-a-tables-character-set/" target="_blank">'.__('Go here for more information.', 'updraftplus').'</a>';
 				$db_supported_character_sets = array_keys($db_supported_character_sets);
 				$similar_type_charset = UpdraftPlus_Manipulation_Functions::get_matching_str_from_array_elems($db_unsupported_charset_unique, $db_supported_character_sets, true);
 				if (empty($similar_type_charset)) {
@@ -5914,6 +5903,7 @@ class UpdraftPlus {
 	public function get_settings_keys() {
 		$general_keys = self::get_system_identifiers_list();
 		$general_keys = array_merge($general_keys['options'], array(
+			'updraftplus_dismiss_azure_legacy_storage_notice',
 			'updraftplus_tmp_googledrive_access_token',
 			'updraftplus_dismissedautobackup',
 			'updraftplus_dismissedexpiry',
@@ -6187,19 +6177,16 @@ class UpdraftPlus {
 
 		switch ($which_page) {
 			case 'my-account':
-				return apply_filters('updraftplus_com_myaccount', 'https://updraftplus.com/my-account/');
+				return apply_filters('updraftplus_com_myaccount', 'https://teamupdraft.com/my-account/');
 				break;
 			case 'register-product':
 				return apply_filters('updraftplus_com_register_product', 'https://teamupdraft.com/register-product/');
-				break;
-			case 'shop':
-				return apply_filters('updraftplus_com_shop', 'https://updraftplus.com/shop/');
 				break;
 			case 'premium':
 				return apply_filters('updraftplus_com_premium', 'https://teamupdraft.com/updraftplus/pricing/?utm_source=udp-plugin&utm_medium=referral&utm_campaign='.$utm_campaign.'&utm_content=updraftplus-premium&utm_creative_format=text'.$affiliate_param);
 				break;
 			case 'buy-tokens':
-				return apply_filters('updraftplus_com_updraftclone_tokens', 'https://updraftplus.com/shop/updraftclone-tokens/');
+				return apply_filters('updraftplus_com_updraftclone_tokens', 'https://teamupdraft.com/updraftplus/updraftclone/#pricing-block');
 				break;
 			case 'lost-password':
 				return apply_filters('updraftplus_com_myaccount_lostpassword', 'https://teamupdraft.com/my-account/lost-password/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=forgotten-details&utm_creative_format=text');
@@ -6229,7 +6216,7 @@ class UpdraftPlus {
 				return apply_filters('updraftplus_com_anon_backups', 'https://teamupdraft.com/blog/upcoming-updraftplus-feature-anonymise-data-before-cloning-your-site/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=unknown&utm_creative_format=unknown');
 				break;
 			case 'clone_packages':
-				return apply_filters('updraftplus_com_clone_packages', 'https://updraftplus.com/faqs/what-is-the-largest-site-that-i-can-clone-with-updraftclone/');
+				return apply_filters('updraftplus_com_clone_packages', 'https://teamupdraft.com/documentation/updraftplus/topics/updraftclone/faqs/what-is-the-largest-site-that-i-can-clone-with-updraftclone/');
 				break;
 			case 'premium_more_than_one_storage':
 				return apply_filters('updraftplus_premium_more_than_one_storage', 'https://teamupdraft.com/updraftplus/pricing/?utm_source=udp-plugin&utm_medium=referral&utm_campaign='.$utm_campaign.'&utm_content=more-than-one&utm_creative_format=text'.$affiliate_param);
@@ -6339,6 +6326,15 @@ class UpdraftPlus {
 			case 'plugin_page':
 				$affiliate_param = str_replace('&', '?', $affiliate_param);
 				return apply_filters('updraftplus_com_plugin_page', 'https://teamupdraft.com/updraftplus/pricing/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=wp-dash-get-premium'.$affiliate_param);
+				break;
+			case 'privacy':
+				return apply_filters('updraftplus_com_privacy', 'https://teamupdraft.com/privacy/');
+				break;
+			case 'documentation':
+				return apply_filters('updraftplus_com_documentation', 'https://teamupdraft.com/documentation/updraftplus/');
+				break;
+			case 'newsletter':
+				return apply_filters('updraftplus_com_newsletter', 'https://teamupdraft.com/newsletter/signup/');
 				break;
 			default:
 				return 'URL not found ('.$which_page.')';
@@ -6722,8 +6718,8 @@ class UpdraftPlus {
 	 * @return Boolean True if the minimum system requirements are met, false otherwise
 	 */
 	public function phpseclib_requirements_met() {
-		if (version_compare(PHP_VERSION, '5.3', '>=')) return true;
-		$active_phpseclib_related_features = array_intersect($this->list_active_features_requiring_phpseclib(), array('dropbox', 'sftp', 'dbencryption', 'updraftcentral'));
+		if (version_compare(PHP_VERSION, UPDRAFTPLUS_PHPSECLIB_MIN_PHP_VERSION, '>=')) return true;
+		$active_phpseclib_related_features = array_intersect($this->list_active_features_requiring_phpseclib(), array('dropbox', 'sftp', 'dbencryption', 'updraftcentral', 'migrator'));
 		if (!empty($active_phpseclib_related_features)) return false;
 		return true;
 	}
@@ -6752,16 +6748,25 @@ class UpdraftPlus {
 			'sftp' => 'SFTP/SCP',
 			'dbencryption' => 'Database Encryption',
 			'updraftcentral' => 'UpdraftCentral',
+			'migrator' => 'Migrator',
 		);
 		$active_phpseclib_related_features = array_intersect_key($phpseclib_related_features, array_flip($this->list_active_features_requiring_phpseclib()));
 		return sprintf(
-			/* translators: 1: PHP version, 2: Deprecated features */
-			__('Your site is running on PHP version %1$s and has feature(s) currently enabled (%2$s) which are deprecated upon this PHP version.', 'updraftplus'),
-			PHP_VERSION,
+			/* translators: %s: PHP version */
+			__('Your site is running PHP version %s.', 'updraftplus'),
+			PHP_VERSION
+		).' '.
+		__('Some functionality you have enabled is deprecated on this PHP version, and future releases of UpdraftPlus will require a newer version of PHP to keep it working.', 'updraftplus').' '.
+		sprintf(
+			/* translators: %s: Affected feature list */
+			__('This affects: %s.', 'updraftplus'),
 			implode(', ', $active_phpseclib_related_features)
 		).' '.
-		/* translators: %s: Recommended PHP version */
-		sprintf(__('Future releases of UpdraftPlus will require a more recent PHP version to use these features; we recommend that you speak to your web hosting company about updating to version %s or higher.', 'updraftplus'), '5.3');
+		sprintf(
+			/* translators: %s: Minimum recommended PHP version */
+			__('We recommend asking your web host about updating PHP to version %s or higher.', 'updraftplus'),
+			UPDRAFTPLUS_PHPSECLIB_MIN_PHP_VERSION
+		);
 	}
 
 	/**
@@ -6774,10 +6779,14 @@ class UpdraftPlus {
 		$encryptionphrase = UpdraftPlus_Options::get_updraft_option('updraft_encryptionphrase', '');
 		$updraft_services = $this->get_canonical_service_list();
 		$updraft_central_localkeys = UpdraftPlus_Options::get_updraft_option('updraft_central_localkeys', '');
+		$updraft_migrator_localkeys = UpdraftPlus_Options::get_updraft_option('updraft_migrator_localkeys', '');
+		$updraft_remotesites = UpdraftPlus_Options::get_updraft_option('updraft_remotesites', '');
 		if (in_array('dropbox', $updraft_services)) $active_features[] = 'dropbox';
 		if ((class_exists('UpdraftPlus_Addons_RemoteStorage_sftp') && in_array('sftp', $updraft_services))) $active_features[] = 'sftp';
 		if (class_exists('UpdraftPlus_Addon_MoreDatabase') && '' !== $encryptionphrase) $active_features[] = 'dbencryption';
 		if (!empty($updraft_central_localkeys)) $active_features[] = 'updraftcentral';
+		// Migrator remote-send uses phpseclib on both sides: localkeys (receive) and remotesites (send)
+		if (class_exists('UpdraftPlus_Addons_Migrator') && (!empty($updraft_migrator_localkeys) || !empty($updraft_remotesites))) $active_features[] = 'migrator';
 		return $active_features;
 	}
 
@@ -6896,5 +6905,37 @@ class UpdraftPlus {
 			$result = call_user_func(array('Brumann\Polyfill\Unserialize', 'unserialize'), $serialized_data, array('allowed_classes' => $allowed_classes, 'max_depth' => $max_depth));
 		}
 		return $result;
+	}
+
+	/**
+	 * Sets the onboarding flag for eligible new users.
+	 *
+	 * @return void
+	 */
+	public function maybe_set_onboarding_flag() {
+		if (!class_exists('UpdraftPlus_Options')
+			|| !$this->is_onboarding_supported()
+			// Onboarding already completed.
+			|| false !== get_site_option('updraftplus_completed_onboarding', false)
+			|| false !== get_site_option('updraftplus_onboarding_free_completed', false)
+			// Existing user with configured settings.
+			|| false !== UpdraftPlus_Options::get_updraft_option('updraft_interval', false)
+			|| false !== UpdraftPlus_Options::get_updraft_option('updraft_interval_database', false)
+			|| false !== UpdraftPlus_Options::get_updraft_option('updraft_retain', false)
+			|| false !== UpdraftPlus_Options::get_updraft_option('updraft_retain_db', false)
+			|| false !== UpdraftPlus_Options::get_updraft_option('updraft_service', false)
+		) return;
+
+		update_site_option('updraftplus_start_onboarding', true);
+	}
+
+	/**
+	 * Checks whether the current environment supports onboarding.
+	 * Requires PHP 7.4+, WordPress 6.2+, and the UpdraftPlusAddOn_MultiSite class to be available on multisite installations.
+	 *
+	 * @return bool
+	 */
+	private function is_onboarding_supported() {
+		return version_compare(PHP_VERSION, '7.4', '>=') && version_compare($this->get_wordpress_version(), '6.2', '>=') && (!is_multisite() || class_exists('UpdraftPlusAddOn_MultiSite', false));
 	}
 }

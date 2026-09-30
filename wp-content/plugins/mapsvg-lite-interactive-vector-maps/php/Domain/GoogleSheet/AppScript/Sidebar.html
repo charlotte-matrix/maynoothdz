@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * { box-sizing: border-box; font-family: Google Sans, Arial, sans-serif; font-size: 13px; }
+    body { margin: 0; padding: 16px; background: #fff; }
+
+    h3 { font-size: 14px; font-weight: 600; margin: 0 0 6px; color: #1a73e8; }
+    p.hint { color: #5f6368; margin: 0 0 14px; font-size: 12px; line-height: 1.5; }
+
+    .key-box {
+      background: #f1f3f4; border: 1px solid #dadce0; border-radius: 4px;
+      padding: 10px 12px; font-family: monospace; font-size: 12px;
+      word-break: break-all; user-select: all; margin: 8px 0 12px;
+      cursor: text;
+    }
+    .badge {
+      display: inline-block; padding: 2px 10px; border-radius: 10px;
+      font-size: 11px; font-weight: 600; margin-bottom: 14px;
+    }
+    .badge-ok  { background: #e6f4ea; color: #137333; }
+    .badge-new { background: #fce8e6; color: #c5221f; }
+
+    .info-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    .info-table td { padding: 4px 0; vertical-align: top; font-size: 12px; }
+    .info-table td.lbl { color: #5f6368; white-space: nowrap; padding-right: 12px; width: 40%; }
+    .info-table td.val { font-weight: 500; word-break: break-all; }
+
+    .btn {
+      display: inline-block; padding: 7px 16px; border-radius: 4px;
+      border: none; cursor: pointer; font-size: 13px; font-weight: 500;
+    }
+    .btn-danger  { background: #fff; color: #c5221f; border: 1px solid #c5221f; }
+    .btn-danger:hover { background: #fce8e6; }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+
+    .msg { margin-top: 10px; font-size: 12px; }
+    .msg.error { color: #c5221f; }
+
+    hr { border: none; border-top: 1px solid #e8eaed; margin: 16px 0; }
+
+    /* ── Overlay modal ─────────────────────────────────────────────────────── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .overlay.show { display: flex; }
+    .modal-dialog {
+      background: #fff; border-radius: 8px; width: calc(100% - 32px);
+      max-width: 300px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden;
+    }
+    .modal-header {
+      padding: 14px 18px 10px; font-weight: 600; font-size: 14px; color: #202124;
+      border-bottom: 1px solid #e8eaed;
+    }
+    .modal-body-text { padding: 14px 18px; font-size: 13px; color: #5f6368; line-height: 1.5; }
+    .modal-footer-btns {
+      padding: 10px 18px 14px; display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .btn-outline {
+      background: #fff; color: #5f6368; border: 1px solid #dadce0;
+      padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500;
+    }
+    .btn-outline:hover { background: #f1f3f4; }
+    .btn-confirm-danger {
+      background: #c5221f; color: #fff; border: none;
+      padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500;
+    }
+    .btn-confirm-danger:hover { background: #a50e0e; }
+  </style>
+</head>
+<body>
+
+<div id="app">Loading&hellip;</div>
+
+<!-- Overlay confirmation modal -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal-dialog">
+    <div class="modal-header">Reset connection</div>
+    <div class="modal-body-text">This will clear the connection and all settings. This cannot be undone.</div>
+    <div class="modal-footer-btns">
+      <button class="btn-outline" onclick="hideResetConfirm()">Cancel</button>
+      <button class="btn-confirm-danger" onclick="doReset()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var pollTimer = null;
+
+  google.script.run
+    .withSuccessHandler(render)
+    .withFailureHandler(function (err) {
+      document.getElementById("app").innerHTML =
+        '<p style="color:#c5221f">Failed to load: ' + err.message + '</p>';
+    })
+    .getSetupData();
+
+  function startPolling() {
+    if (pollTimer) return;
+    pollTimer = setInterval(function () {
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (data.initialized) { stopPolling(); render(data); }
+        })
+        .getSetupData();
+    }, 3000);
+  }
+
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  window.checkNow = function () {
+    google.script.run.withSuccessHandler(render).getSetupData();
+  };
+
+  function render(data) {
+    var html = '';
+
+    if (data.initialized) {
+      stopPolling();
+      html += '<span class="badge badge-ok">&#9679; Connected</span>';
+      html += '<table class="info-table">'
+            + '<tr><td class="lbl">Sheet</td><td class="val">' + escHtml(data.sheetName) + '</td></tr>'
+            + '<tr><td class="lbl">ID column</td><td class="val">' + escHtml(data.idColumn) + '</td></tr>'
+            + '<tr><td class="lbl">Sync URL</td><td class="val">' + escHtml(data.syncUrl) + '</td></tr>'
+            + '</table>';
+      html += '<p class="hint">All settings are managed in MapSVG &rarr; Database &rarr; Auto-sync.</p>';
+      html += '<hr>';
+      html += '<button class="btn btn-danger" id="resetBtn" onclick="showResetConfirm()">Reset connection</button>'
+            + '<div class="msg" id="msg"></div>';
+    } else {
+      startPolling();
+      html += '<span class="badge badge-new">&#9675; Not connected</span>'
+            + ' <a href="#" onclick="checkNow();return false;" style="font-size:11px;color:#5f6368;text-decoration:none;margin-left:4px" title="Refresh">&#8635;</a>';
+      html += '<h3>Copy this setup key</h3>';
+      html += '<p class="hint">Paste it into MapSVG &rarr; Database &rarr; Auto-sync &rarr; Google Sheets &rarr; Setup key, then click Connect. All other settings will be configured automatically.</p>';
+      html += '<div class="key-box" title="Click to select all">' + escHtml(data.setupKey) + '</div>';
+      html += '<p class="hint" style="font-style:italic">Waiting for MapSVG to connect&hellip;</p>';
+    }
+
+    document.getElementById("app").innerHTML = html;
+  }
+
+  window.showResetConfirm = function () {
+    document.getElementById("confirmOverlay").classList.add("show");
+  };
+
+  window.hideResetConfirm = function () {
+    document.getElementById("confirmOverlay").classList.remove("show");
+  };
+
+  window.doReset = function () {
+    hideResetConfirm();
+    document.getElementById("resetBtn").disabled = true;
+    google.script.run
+      .withSuccessHandler(function () {
+        google.script.run.withSuccessHandler(render).getSetupData();
+      })
+      .withFailureHandler(function (err) {
+        document.getElementById("resetBtn").disabled = false;
+        var el = document.getElementById("msg");
+        el.textContent = err.message;
+        el.className = "msg error";
+      })
+      .resetSetupFromSidebar();
+  };
+
+  function escHtml(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+}());
+</script>
+</body>
+</html>

@@ -110,11 +110,38 @@ class UpdraftPlus_Addon_MoreDatabase {
 	 */
 	public function extradb_testconnection_go($results_initial_value_ignored, $posted_data) {// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Unused parameter is present because the method is used as a WP filter.
 	
-		if (empty($posted_data['user'])) return(array('r' => $posted_data['row'], 'm' => '<p>'.sprintf(__("Failure: No %s was given.", 'updraftplus').'</p>', __('user', 'updraftplus'))));
+		if (empty($posted_data['user'])) {
+			return array(
+				'r' => $posted_data['row'],
+				'm' => '<p>'.sprintf(
+					/* translators: %s: Translated string "user". */
+					__("Failure: No %s was given.", 'updraftplus'),
+					__('user', 'updraftplus')
+				).'</p>'
+			);
+		}
 
-		if (empty($posted_data['host'])) return(array('r' => $posted_data['row'], 'm' => '<p>'.sprintf(__("Failure: No %s was given.", 'updraftplus').'</p>', __('host', 'updraftplus'))));
+		if (empty($posted_data['host'])) {
+			return array(
+				'r' => $posted_data['row'],
+				'm' => '<p>'.sprintf(
+					/* translators: %s: Translated string "host". */
+					__("Failure: No %s was given.", 'updraftplus'),
+					__('host', 'updraftplus')
+				).'</p>'
+			);
+		}
 
-		if (empty($posted_data['name'])) return(array('r' => $posted_data['row'], 'm' => '<p>'.sprintf(__("Failure: No %s was given.", 'updraftplus').'</p>', __('database name', 'updraftplus'))));
+		if (empty($posted_data['name'])) {
+			return array(
+				'r' => $posted_data['row'],
+				'm' => '<p>'.sprintf(
+					/* translators: %s: Translated string "database name". */
+					__("Failure: No %s was given.", 'updraftplus'),
+					__('database name', 'updraftplus')
+				).'</p>'
+			);
+		}
 
 		global $updraftplus_admin;
 		$updraftplus_admin->logged = array();
@@ -152,13 +179,15 @@ class UpdraftPlus_Addon_MoreDatabase {
 			$all_tables = $wpdb_obj->get_results("SHOW TABLES", ARRAY_N);
 			$all_tables = array_map(array($this, 'cb_get_first_item'), $all_tables);
 			if (empty($posted_data['prefix'])) {
+				/* translators: %s: Table count. */
 				$ret_info .= sprintf(__('%s table(s) found.', 'updraftplus'), count($all_tables));
 			} else {
 				$our_prefix = 0;
 				foreach ($all_tables as $table) {
 					if (0 === strpos($table, $posted_data['prefix'])) $our_prefix++;
 				}
-				$ret_info .= sprintf(__('%s total table(s) found; %s with the indicated prefix.', 'updraftplus'), count($all_tables), $our_prefix);
+				/* translators: 1: Table count, 2: Prefix before table name. */
+				$ret_info .= sprintf(__('%1$s total table(s) found; %2$s with the indicated prefix.', 'updraftplus'), count($all_tables), $our_prefix);
 			}
 		}
 
@@ -199,7 +228,14 @@ class UpdraftPlus_Addon_MoreDatabase {
 		$tp = $updraftplus->get_table_prefix(false);
 		$updraft_backupdb_nonwp = UpdraftPlus_Options::get_updraft_option('updraft_backupdb_nonwp');
 
-		$ret .= '<input type="checkbox"'.(($updraft_backupdb_nonwp) ? ' checked="checked"' : '').' id="updraft_backupdb_nonwp" name="updraft_backupdb_nonwp" value="1"><label for="updraft_backupdb_nonwp" title="'.esc_attr(sprintf(__('This option will cause tables stored in the MySQL database which do not belong to WordPress (identified by their lacking the configured WordPress prefix, %s) to also be backed up.', 'updraftplus'), $tp)).'">'.esc_html__('Backup non-WordPress tables contained in the same database as WordPress', 'updraftplus').'</label><br>';
+		$ret .= '<input type="checkbox"'.(($updraft_backupdb_nonwp) ? ' checked="checked"' : '').' id="updraft_backupdb_nonwp" name="updraft_backupdb_nonwp" value="1" title="'.esc_attr(sprintf(
+			/* translators: %s: Table prefix. */
+			__('This option will cause tables stored in the MySQL database which do not belong to WordPress (identified by their lacking the configured WordPress prefix, %s) to also be backed up.', 'updraftplus'),
+			$tp
+		)).'">'.
+				'<label for="updraft_backupdb_nonwp">'.
+				esc_html__('Backup non-WordPress tables contained in the same database as WordPress', 'updraftplus').
+				'</label><br>';
 			$ret .= '<p><em>'.esc_html__('If your database includes extra tables that are not part of this WordPress site (you will know if this is the case), then activate this option to also back them up.', 'updraftplus').'</em></p>';
 	
 			$ret .= '<div id="updraft_backupextradbs"></div>';
@@ -340,12 +376,19 @@ class UpdraftPlus_Addon_MoreDatabase {
 		$ret = '';
 
 		if (!function_exists('mcrypt_encrypt') && !extension_loaded('openssl')) {
-			$ret .= '<p><strong>'.sprintf(__('Your web-server does not have the %s module installed.', 'updraftplus'), 'PHP/mcrypt / PHP/OpenSSL').' '.__('Without it, encryption will be a lot slower.', 'updraftplus').'</strong></p>';
+			$ret .= '<p><strong>'.
+					/* translators: %s: Untranslated string "PHP/mcrypt / PHP/OpenSSL". */
+					sprintf(__('Your web-server does not have the %s module installed.', 'updraftplus'), 'PHP/mcrypt / PHP/OpenSSL').' '.
+					__('Without it, encryption will be a lot slower.', 'updraftplus').
+					'</strong></p>';
 		}
 
 		$ret .= '<input type="'.apply_filters('updraftplus_admin_secret_field_type', 'text').'" name="updraft_encryptionphrase" id="updraft_encryptionphrase" value="'.esc_attr($updraft_encryptionphrase).'" class="updraft_input--wide">';
 
-		$ret .= '<p>'.__('If you enter text here, it is used to encrypt database backups (Rijndael).', 'updraftplus').' '.__('<strong>Do make a separate record of it and do not lose it, or all your backups <em>will</em> be useless.</strong>', 'updraftplus').' '.__('This is also the key used to decrypt backups from this admin interface (so if you change it, then automatic decryption will not work until you change it back).', 'updraftplus').'</p>';
+		$ret .= '<p>'.__('If you enter text here, it is used to encrypt database backups (Rijndael).', 'updraftplus').
+				/* translators: 1: Opening <em> tag, 2: Closing </em> tag. */
+				' <strong>'.sprintf(__('Do make a separate record of it and do not lose it, or all your backups %1$swill%2$s be useless.', 'updraftplus'), '<em>', '</em>').'</strong> '.
+				__('This is also the key used to decrypt backups from this admin interface (so if you change it, then automatic decryption will not work until you change it back).', 'updraftplus').'</p>';
 
 		return $ret;
 

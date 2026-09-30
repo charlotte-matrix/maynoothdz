@@ -447,7 +447,7 @@ class UpdraftPlus_AddOn_FixTime {
 		} else {
 			// wp_json_encode() was added in WP 4.1
 			$processed_rules_json = function_exists('wp_json_encode') ? wp_json_encode($processed_rules) : json_encode($processed_rules);
-			echo "var retain_rules_".esc_js($type)." = ".$processed_rules_json.";\n";
+			echo "var retain_rules_".esc_js($type)." = ".$processed_rules_json.";\n";// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON generated via wp_json_encode().
 		}
 	}
 
@@ -514,18 +514,18 @@ class UpdraftPlus_AddOn_FixTime {
 		$now_timestring_blogzone = get_date_from_gmt($now_timestring_gmt, 'Y-m-d H:i:s');
 
 		$int_key = ('db' == $whichtime) ? '_database' : '';
-		$sched = (isset($_POST['updraft_interval'.$int_key])) ? $_POST['updraft_interval'.$int_key] : $interval;
-		$startday = (isset($_POST['updraft_startday_'.$whichtime])) ? $_POST['updraft_startday_'.$whichtime] : $startday;
+		$sched = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'updraft_interval'.$int_key, $interval);
+		$startday = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'updraft_startday_'.$whichtime, $startday);
 
 		// HH:MM, in blog time zone
 		// This function is only called from the options validator, so we don't read the current option
 		// $start_time = UpdraftPlus_Options::get_updraft_option('updraft_starttime_'.$whichtime);
-		$start_time = (isset($_POST['updraft_starttime_'.$whichtime])) ? $_POST['updraft_starttime_'.$whichtime] : $start_time;
+		$start_time = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'updraft_starttime_'.$whichtime, $start_time);
 
 		list ($start_hour, $start_minute) = $this->parse($start_time);
 
 		// Was a particular week-day specified?
-		if (isset($startday) && ('weekly' == $sched || 'monthly' == $sched || 'fortnightly' == $sched)) {
+		if (isset($startday) && is_numeric($startday) && ('weekly' == $sched || 'monthly' == $sched || 'fortnightly' == $sched)) {
 			// All the monthly stuff is done here, since it has different logic
 			if ('monthly' == $sched) {
 				// Get specified day of the month in range 1-28

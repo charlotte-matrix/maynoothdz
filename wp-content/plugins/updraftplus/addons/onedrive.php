@@ -181,7 +181,8 @@ class UpdraftPlus_Addons_RemoteStorage_onedrive extends UpdraftPlus_RemoteStorag
 
 				if (isset($available) && -1 != $available && $available < $filesize) {
 					$this->log("File upload expected to fail: file data remaining to upload ($file) size is ".($filesize)." b (overall file size; $filesize b), whereas available quota is only $available b");
-					$this->log(sprintf(__("Account full: your %s account has only %d bytes left, but the file to be uploaded has %d bytes remaining (total size: %d bytes)", 'updraftplus'), 'OneDrive', $available, $filesize, $filesize), 'warning', 'onedrive_expect_to_fail');
+					/* translators: 1: Service name, 2: Available bytes, 3: Remaining bytes, 4: Total file size */
+					$this->log(sprintf(__("Account full: your %1\$s account has only %2\$d bytes left, but the file to be uploaded has %3\$d bytes remaining (total size: %4\$d bytes)", 'updraftplus'), 'OneDrive', $available, $filesize, $filesize), 'warning', 'onedrive_expect_to_fail');
 				}
 			}
 			
@@ -932,24 +933,30 @@ class UpdraftPlus_Addons_RemoteStorage_onedrive extends UpdraftPlus_RemoteStorag
 	 * Is a multipurpose function for getting request
 	 */
 	public function action_auth() {
-		if (isset($_GET['code'])) {
+		list($code, $state, $token, $updraftplus_onedriveauth) = array_values(UpdraftPlus_Manipulation_Functions::fetch_superglobal_array(
+			array('get', 'code'),
+			array('get', 'state'),
+			array('get', 'token'),
+			array('get', 'updraftplus_onedriveauth')
+		));
+		if (isset($code)) {
 			// Shouldn't need to change this for user_master, as should never arrive here is that is set
-			$this->auth_token($_GET['code']);
-		} elseif (isset($_GET['state'])) {
-			$parts = explode(':', $_GET['state']);
+			$this->auth_token($code);
+		} elseif (isset($state)) {
+			$parts = explode(':', $state);
 			$state = $parts[0];
 			if ('success' == $state) {
 				add_action('all_admin_notices', array($this, 'show_authed_admin_warning'));
 			} elseif ('token' == $state) {
 				// For when master OneDrive app used
-				$encoded_token = stripslashes($_GET['token']);
-				$token = json_decode($encoded_token);
-				$this->do_complete_authentication($state, $token, false);
+				$encoded_token = stripslashes($token);
+				$decoded_token = json_decode($encoded_token);
+				$this->do_complete_authentication($state, $decoded_token, false);
 			}
-		} elseif (isset($_GET['updraftplus_onedriveauth'])) {
-			if ('doit' == $_GET['updraftplus_onedriveauth']) {
+		} elseif (isset($updraftplus_onedriveauth)) {
+			if ('doit' == $updraftplus_onedriveauth) {
 				$this->action_authenticate_storage();
-			} elseif ('deauth' == $_GET['updraftplus_onedriveauth']) {
+			} elseif ('deauth' == $updraftplus_onedriveauth) {
 				$this->action_deauthenticate_storage();
 			}
 		}
@@ -970,7 +977,8 @@ class UpdraftPlus_Addons_RemoteStorage_onedrive extends UpdraftPlus_RemoteStorag
 		try {
 			$this->auth_request();
 		} catch (Exception $e) {
-			$this->log(sprintf(__("%s error: %s", 'updraftplus'), __("Authentication", 'updraftplus'), $e->getMessage()), 'error');
+			/* translators: 1: Error type, 2: Error message */
+			$this->log(sprintf(__("%1\$s error: %2\$s", 'updraftplus'), __("Authentication", 'updraftplus'), $e->getMessage()), 'error');
 		}
 	}
 
@@ -1013,7 +1021,8 @@ class UpdraftPlus_Addons_RemoteStorage_onedrive extends UpdraftPlus_RemoteStorag
 				if (is_numeric($total) && is_numeric($available)) {
 					$used = $total - $available;
 					$used_perc = $total ? round($used*100/$total, 1) : 'n/a';
-					$message .= sprintf(__('Your %s quota usage: %s %% used, %s available', 'updraftplus'), 'OneDrive', $used_perc, round($available/1048576, 1).' MB');
+					/* translators: 1: Service name, 2: Percentage of quota used, 3: Available space */
+					$message .= sprintf(__('Your %1$s quota usage: %2$s %% used, %3$s available', 'updraftplus'), 'OneDrive', $used_perc, round($available/1048576, 1).' MB');
 				}
 
 				$account_info = $storage->fetchAccountInfo();
@@ -1021,7 +1030,8 @@ class UpdraftPlus_Addons_RemoteStorage_onedrive extends UpdraftPlus_RemoteStorag
 				$opts['ownername'] = '';
 				if (!empty($account_info->user)) {
 					$opts['ownername'] = $account_info->user->displayName;
-					$message .= ". <br>".sprintf(__('Your %s account name: %s', 'updraftplus'), 'OneDrive', htmlspecialchars($account_info->user->displayName));
+					/* translators: 1: Service name, 2: Account name */
+					$message .= ". <br>".sprintf(__('Your %1$s account name: %2$s', 'updraftplus'), 'OneDrive', htmlspecialchars($account_info->user->displayName));
 				}
 				$this->set_options($opts, true);
 
@@ -1214,6 +1224,7 @@ class UpdraftPlus_Addons_RemoteStorage_onedrive extends UpdraftPlus_RemoteStorag
 			// remove our flag so we know this authentication is complete
 			if (isset($opts['auth_in_progress'])) unset($opts['auth_in_progress']);
 			$this->set_options($opts, true);
+			$this->set_connection_status(true);
 
 			if ($return_instead_of_echo) {
 				return $this->show_authed_admin_warning($return_instead_of_echo);
@@ -1348,10 +1359,24 @@ class UpdraftPlus_Addons_RemoteStorage_onedrive extends UpdraftPlus_RemoteStorag
 		$properties = array(
 			'storage_image_url' => UPDRAFTPLUS_URL.'/images/onedrive.png',
 			'curl_existence_label' => wp_kses($updraftplus_admin->curl_check('OneDrive', true, 'onedrive hide-in-udc', false), $this->allowed_html_for_content_sanitisation()),
-			'privacy_policy' => wp_kses(sprintf(__('Please read %s for use of our %s authorization app (none of your backup data is sent to us).', 'updraftplus'), '<a target="_blank" href="https://teamupdraft.com/documentation/updraftplus/topics/cloud-storage/dropbox/faqs/what-is-your-privacy-policy-for-the-use-of-your-dropbox-app?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=dropbox-privacy&utm_creative_format=text">'.__('this privacy policy', 'updraftplus').'</a>', 'OneDrive'), $this->allowed_html_for_content_sanitisation()),
+			'privacy_policy' => wp_kses(
+				sprintf(
+					/* translators: 1: Privacy policy link, 2: Service name */
+					__('Please read %1$s for use of our %2$s authorization app (none of your backup data is sent to us).', 'updraftplus'),
+					'<a target="_blank" href="https://teamupdraft.com/documentation/updraftplus/topics/cloud-storage/dropbox/faqs/what-is-your-privacy-policy-for-the-use-of-your-dropbox-app?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=dropbox-privacy&utm_creative_format=text">'.__('this privacy policy', 'updraftplus').'</a>',
+					'OneDrive'
+				),
+				$this->allowed_html_for_content_sanitisation()
+			),
 			'developer_console_link_text' => __('Create OneDrive credentials in your OneDrive developer console.', 'updraftplus'),
 			'setup_guide_link_text' => __('For more detailed instructions, follow this link.', 'updraftplus'),
-			'ip_host_label' => __('This site uses a URL which is either non-HTTPS, or is localhost or 127.0.0.1 URL.', 'updraftplus').' '.sprintf(__('As such, you must use the main %s %s App to authenticate with your account.', 'updraftplus'), 'UpdraftPlus', 'OneDrive'),
+			'ip_host_label' => __('This site uses a URL which is either non-HTTPS, or is localhost or 127.0.0.1 URL.', 'updraftplus').' '.
+				sprintf(
+					/* translators: 1: Plugin name, 2: Service name */
+					__('As such, you must use the main %1$s %2$s App to authenticate with your account.', 'updraftplus'),
+					'UpdraftPlus',
+					'OneDrive'
+				),
 			'non_ip_host_label' => wp_kses(__('You must add the following as the authorized redirect URI in your OneDrive console (under "API Settings") when asked', 'updraftplus').': <kbd>'.UpdraftPlus_Options::admin_page_url().'</kbd>', $this->allowed_html_for_content_sanitisation()),
 			'input_client_id_label' => __('OneDrive', 'updraftplus').' '.__('Client ID', 'updraftplus'),
 			'input_client_id_title' => __('If OneDrive later shows you the message "unauthorized_client", then you did not enter a valid client ID here.', 'updraftplus'),

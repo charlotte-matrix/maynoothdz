@@ -1,0 +1,413 @@
+@import "../../../css/mapsvg.variables.css";
+
+.mapsvg-filters-reset-container {
+  flex-grow: 0 !important;
+  display: flex;
+}
+.mapsvg-filters-reset-container button {
+  align-self: flex-end;
+  transform: translateY(1px);
+}
+
+.mapsvg-filters-wrap {
+  z-index: 2;
+}
+
+.mapsvg-filters-wrap,
+.select2-results,
+.mapsvg-form-builder input {
+  font-family: var(--mapsvg-font-family);
+  font-size: var(--mapsvg-font-size);
+  line-height: var(--mapsvg-line-height);
+  color: var(--mapsvg-text-primary);
+}
+.select2-selection__rendered {
+  /*line-height: 32px !important;*/
+}
+.select2-search,
+.select2-selection__choice {
+  margin-bottom: 0;
+}
+.mapsvg-form-builder input[type="text"] {
+  width: 100%;
+}
+.mapsvg-form-builder input[type="text"] {
+  height: var(--mapsvg-input-height);
+  font-family: var(--mapsvg-font-family);
+  font-size: var(--mapsvg-font-size);
+  line-height: var(--mapsvg-line-height);
+  color: var(--mapsvg-text-primary);
+  background-color: var(--mapsvg-bg-primary);
+  border: var(--mapsvg-border);
+  border-radius: var(--mapsvg-border-radius);
+  padding: 0 10px;
+  outline: none;
+}
+.mapsvg-form-builder .input-group > .form-control,
+.mapsvg-form-builder .input-group > .form-floating,
+.mapsvg-form-builder .input-group > .form-select {
+  position: relative;
+  flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+}
+.mapsvg-form-builder input::placeholder,
+.mapsvg-form-builder
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__placeholder,
+.mapsvg-form-builder textarea::placeholder {
+  color: #ccc;
+  opacity: 1; /* чтобы цвет был именно таким, а не выцветшим */
+}
+
+.mapsvg-form-builder
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__arrow {
+  width: 30px;
+}
+
+/* .mapsvg-form-builder .select2-selection.select2-selection--multiple {
+  height: 35px;
+} */
+.mapsvg-form-builder .select2-selection.select2-selection--multiple .select2-search__field {
+  height: 33px;
+  margin: 0;
+}
+.mapsvg-form-builder
+  .select2-container--default
+  .select2-selection--multiple
+  .select2-selection__choice {
+  margin-top: 6px;
+}
+.mapsvg-form-builder .select2-container .select2-search__field {
+  height: 35px;
+  color: #333;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  padding: 0 10px;
+  outline: none;
+}
+
+.mapsvg-filters-wrap input[type="text"]:focus,
+.mapsvg-filters-wrap input[type="text"]:active {
+  border: var(--mapsvg-border) !important;
+  outline: 0 !important;
+  -webkit-appearance: none !important;
+  border: 0;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+.mapsvg-form-builder .select2-container--default .select2-selection--multiple {
+  border: var(--mapsvg-border);
+}
+.mapsvg-form-builder
+  .select2-container--default.select2-container--focus
+  .select2-selection--multiple {
+  border: var(--mapsvg-border);
+}
+.mapsvg-form-builder .select2-selection--multiple .select2-search__field {
+  height: auto;
+  padding: 0;
+  border: 0;
+}
+
+.mapsvg-form-builder
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__rendered {
+  line-height: var(--mapsvg-input-line-height);
+  padding: 0 24px 0 12px;
+}
+.mapsvg-form-builder
+  .select2-container--default
+  .select2-selection--multiple
+  .select2-selection__rendered {
+  padding: 0 10px;
+}
+
+.mapsvg-form-builder .form-switch .form-check-label {
+  line-height: var(--mapsvg-input-height);
+  padding-left: 7px;
+}
+.mapsvg-filters-wrap .form-group {
+  /* margin-bottom: var(--mapsvg-space-lg); */
+}
+.mapsvg-filters-wrap .form-group:last-child {
+  /* margin-bottom: 0; */
+}
+
+#mapsvg-admin-content-filters-structure .mapsvg-data-preview .mapsvg-filter-label,
+.mapsvg-filters-wrap .mapsvg-filter-label {
+  text-transform: none;
+  font-weight: normal;
+  color: #aaa;
+  margin: 0px 0px 4px 0;
+  display: block;
+  line-height: 12px;
+  text-align: left;
+}
+
+.mapsvg-directory .mapsvg-filters-wrap label {
+  cursor: pointer;
+}
+
+.mapsvg-filters-wrap .form-group:first-child label {
+  margin-top: 0;
+}
+.mapsvg-filters-wrap .select2-container .select2-selection--single {
+  height: var(--mapsvg-input-height);
+  border: var(--mapsvg-border);
+}
+
+.mapsvg-filters-wrap
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__rendered {
+  line-height: var(--mapsvg-input-height);
+}
+.mapsvg-filters-wrap
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__arrow {
+  height: var(--mapsvg-input-height);
+}
+.mapsvg-filters-wrap .mapsvg-show-filters {
+  text-align: center;
+  flex-direction: column-reverse;
+  display: flex;
+  /*padding: 10px;*/
+}
+.mapsvg-data-form-view {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.mapsvg-map-container .mapsvg-filters-wrap {
+  padding: 10px;
+}
+.mapsvg-sidebar .mapsvg-data-form-view {
+  flex-direction: column;
+}
+.mapsvg-sidebar .mapsvg-data-form-view .form-group {
+  width: 100%;
+}
+
+.form-group.mapsvg-form-field-distance {
+  z-index: 2;
+}
+.mapsvg-filters-wrap .form-group {
+  flex-grow: 1;
+  flex-shrink: 1;
+  /*max-height: 50px;*/
+  /* align-self: flex-end; */
+}
+.mapsvg-sidebar.mapsvg-sidebar-left .mapsvg-form-builder {
+  padding-right: 10px;
+}
+.mapsvg-sidebar.mapsvg-sidebar-right .mapsvg-form-builder {
+  padding-left: 10px;
+}
+.mapsvg-header .mapsvg-form-builder {
+  padding-bottom: 20px;
+}
+.mapsvg-header .mapsvg-show-filters,
+.mapsvg-footer .mapsvg-show-filters,
+.mapsvg-map-container .mapsvg-show-filters {
+  flex-grow: 0 !important;
+}
+
+#mapsvg-admin-content-filters-structure .mapsvg-data-preview [class^="col-"],
+#mapsvg-admin-content-filters-structure .mapsvg-data-preview [class*=" col-"],
+.mapsvg-filters-wrap [class^="col-"],
+.mapsvg-filters-wrap [class*=" col-"] {
+  float: none;
+  width: auto;
+  padding: 0;
+}
+.mapsvg-details-container.mapsvg-filters-wrap .mapsvg-data-form-view {
+  background-color: transparent;
+}
+
+.mapsvg-distance-fields {
+  display: flex;
+  flex-direction: row;
+}
+.mapsvg-distance-fields > div:first-child {
+  flex-grow: 2;
+  margin-right: var(--mapsvg-space-sm);
+}
+/* .mapsvg-distance-fields > .mapsvg-distance-field-2 {
+  margin-top: var(--mapsvg-space-sm);
+} */
+.mapsvg-distance-fields.search-by-zip .tt-menu {
+  display: none !important;
+}
+.mapsvg-header .mapsvg-distance-fields > .mapsvg-distance-field-2,
+.mapsvg-footer .mapsvg-distance-fields > .mapsvg-distance-field-2 {
+  margin-top: 0;
+}
+.mapsvg-filters-wrap .btn,
+.mapsvg-btn {
+  /*.filter-wrap .mapsvg-show-filters .btn {*/
+  border: var(--mapsvg-border-width) solid var(--mapsvg-border-color-light);
+  color: var(--mapsvg-text-primary);
+  background-color: var(--mapsvg-bg-primary);
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: var(--mapsvg-font-size);
+  font-weight: var(--mapsvg-font-weight-normal);
+  line-height: var(--mapsvg-line-height);
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border-radius: var(--mapsvg-border-radius);
+  width: auto;
+  height: var(--mapsvg-button-height);
+}
+.mapsvg-filters-wrap .btn:hover,
+.mapsvg-btn:hover {
+  /*.filter-wrap .mapsvg-show-filters .btn:hover {*/
+  color: var(--mapsvg-text-primary);
+  background-color: var(--mapsvg-hover-bg);
+  border-color: var(--mapsvg-hover-border);
+  text-decoration: none;
+}
+.mapsvg-filters-wrap .btn:active,
+.mapsvg-btn:active {
+  /*.filter-wrap .mapsvg-show-filters .btn:active {*/
+  color: var(--mapsvg-text-primary);
+  background-color: var(--mapsvg-hover-bg);
+  border-color: var(--mapsvg-hover-border);
+  background-image: none;
+  outline: 0;
+  -webkit-box-shadow: inset 0 3px 5px var(--mapsvg-shadow-inset);
+  box-shadow: inset 0 3px 5px var(--mapsvg-shadow-inset);
+}
+
+/* .mapsvg-directory-search {
+  height: var(--mapsvg-input-height);
+  border: var(--mapsvg-border);
+  border-radius: var(--mapsvg-border-radius);
+  padding: var(--mapsvg-space-xs) 15px var(--mapsvg-space-xs) 15px;
+  font-weight: normal;
+  width: 100%;
+  font-family: var(--mapsvg-font-family);
+  font-size: var(--mapsvg-font-size);
+  line-height: var(--mapsvg-line-height);
+  color: var(--mapsvg-text-primary); */
+/* } */
+/* .mapsvg-directory-search {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: block;
+  box-sizing: border-box; */
+/* } */
+
+.mapsvg-filter-btn-ok {
+  display: none;
+}
+
+.typeahead {
+  background-color: var(--mapsvg-bg-primary);
+}
+.twitter-typeahead {
+  display: block !important;
+}
+input.typeahead.form-control.tt-input {
+  background-color: var(--mapsvg-bg-primary);
+}
+.twitter-typeahead {
+  width: 100%;
+}
+.tt-input,
+.tt-hint {
+  width: 100%;
+  outline: none;
+}
+
+.tt-input {
+}
+
+.tt-hint {
+  color: var(--mapsvg-text-hint);
+}
+
+.tt-menu {
+  width: 100%;
+  margin-top: 0px;
+  background-color: var(--mapsvg-bg-primary);
+  border: var(--mapsvg-border);
+  border: 1px solid var(--mapsvg-shadow-color);
+  border-radius: var(--mapsvg-border-radius-dropdown);
+  box-shadow: 0 5px 10px var(--mapsvg-shadow-color);
+}
+
+.tt-suggestion {
+  padding: var(--mapsvg-space-xs) 15px;
+}
+
+.tt-suggestion.tt-cursor,
+.tt-suggestion.tt-selectable:hover {
+  color: #fff;
+  background-color: var(--mapsvg-accent);
+  cursor: pointer;
+}
+.tt-suggestion p {
+  margin: 0;
+}
+
+.twitter-typeahead .spinner-border,
+.distance-search-wrap .spinner-border {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.distance-search-wrap {
+  position: relative;
+}
+.distance-search-wrap.with-user-location-button {
+}
+.distance-search-wrap.with-user-location-button .mapsvg-address-search {
+  padding-right: 30px !important;
+}
+.distance-search-wrap .user-location-button {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 11px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+  cursor: pointer;
+}
+.distance-search-wrap .user-location-button:hover {
+  opacity: 0.6;
+}
+.distance-search-wrap.with-user-location-button .user-location-button {
+  display: block;
+}
+
+.select2-dropdown.select2-dropdown--below {
+  border: var(--mapsvg-border);
+  border-top: 0;
+  box-shadow: 0 15px 15px var(--mapsvg-shadow-color);
+}

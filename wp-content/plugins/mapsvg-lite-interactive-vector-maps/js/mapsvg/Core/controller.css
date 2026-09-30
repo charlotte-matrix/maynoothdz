@@ -1,0 +1,180 @@
+.mapsvg-controller {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mapsvg-popover-close {
+  position: absolute;
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  overflow: hidden;
+  transform-origin: 100% 0;
+  -webkit-transform-origin: 100% 0;
+  transform: scale(0.45);
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  z-index: 1200;
+}
+.mapsvg-popover-close:hover::before,
+.mapsvg-popover-close:hover::after {
+  background: #666;
+}
+.mapsvg-popover-close::before,
+.mapsvg-popover-close::after {
+  content: "";
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  top: 50%;
+  left: 0;
+  margin-top: -1px;
+  background: #000;
+}
+@-moz-document url-prefix() {
+  .mapsvg-popover-close::before,
+  .mapsvg-popover-close::after {
+    height: 3px;
+  }
+}
+.mapsvg-popover-close::before {
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+.mapsvg-popover-close::after {
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+.mapsvg-popover-close.big {
+  -webkit-transform: scale(3);
+  -moz-transform: scale(3);
+  -ms-transform: scale(3);
+  -o-transform: scale(3);
+  transform: scale(3);
+}
+.mapsvg-popover-close.hairline::before,
+.mapsvg-popover-close.hairline::after {
+  height: 2px;
+}
+.mapsvg-popover-close.thick::before,
+.mapsvg-popover-close.thick::after {
+  height: 4px;
+  margin-top: -2px;
+}
+.mapsvg-popover-close.black::before,
+.mapsvg-popover-close.black::after {
+  height: 8px;
+  margin-top: -4px;
+}
+.mapsvg-popover-close.heavy::before,
+.mapsvg-popover-close.heavy::after {
+  height: 12px;
+  margin-top: -6px;
+}
+.mapsvg-popover-close.pointy::before,
+.mapsvg-popover-close.pointy::after {
+  width: 200%;
+  left: -50%;
+}
+.mapsvg-popover-close.rounded::before,
+.mapsvg-popover-close.rounded::after {
+  border-radius: 5px;
+}
+.mapsvg-popover-close.blades::before,
+.mapsvg-popover-close.blades::after {
+  border-radius: 5px 0;
+}
+.mapsvg-popover-close.warp::before,
+.mapsvg-popover-close.warp::after {
+  border-radius: 120% 0;
+}
+.mapsvg-popover-close.fat::before,
+.mapsvg-popover-close.fat::after {
+  border-radius: 100%;
+}
+.mapsvg-container-custom .mapsvg-popover-close {
+  display: none;
+}
+.mapsvg-controller-view-content img {
+  max-width: 100%;
+}
+
+.mapsvg-auto-height {
+  position: relative;
+}
+.mapsvg-controller-view-toolbar {
+  /*padding: 7px;*/
+  box-sizing: border-box;
+}
+.mapsvg-controller-view-toolbar:empty {
+  display: none;
+}
+.mapsvg-controller-view-toolbar:after {
+  visibility: hidden;
+  display: block;
+  font-size: 0;
+  content: " ";
+  clear: both;
+  height: 0;
+}
+
+.mapsvg-mobile-modal-close {
+  display: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 30px;
+  outline: none;
+  background: #2196f3;
+  color: #fff;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  border-radius: 21px;
+  padding: 0 20px;
+  line-height: 40px;
+  font-size: 16px;
+}
+
+body.admin-bar .mapsvg-controller-container.mapsvg-fullscreen {
+  top: 32px;
+}
+@media screen and (max-width: 782px) {
+  body.admin-bar .mapsvg-controller-container.mapsvg-fullscreen {
+    top: 46px;
+  }
+}
+
+.mapsvg-controller-container.mapsvg-fullscreen {
+  border: none;
+  box-shadow: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483631 !important;
+  max-width: none !important;
+  max-height: none !important;
+  transition: none !important;
+}
+
+@media screen and (max-width: 767px) {
+  .mapsvg-controller-container.mapsvg-fullscreen .mapsvg-mobile-modal-close {
+    display: block;
+  }
+  .mapsvg-controller-container.mapsvg-fullscreen .mapsvg-popover-close {
+    display: none;
+  }
+  .mapsvg-controller-container.mapsvg-fullscreen .mapsvg-controller-view-toolbar {
+    display: none;
+  }
+}

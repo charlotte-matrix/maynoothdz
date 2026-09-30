@@ -178,13 +178,16 @@ class UpdraftPlus_Addon_CloudFilesEnhanced {
 			} elseif (409 == $code && 'Conflict' == $reason) {
 				return array('e' => 1, 'm' => __('Conflict: that user or email address already exists', 'updraftplus'));
 			} else {
+				/* translators: %s: Custom Error Code */
 				return array('e' => 1, 'm' => sprintf(__('Cloud Files operation failed (%s)', 'updraftplus'), 5)." (".$e->getMessage().') ('.get_class($e).')');
 			}
 		} catch (Exception $e) {
+			/* translators: %s: Custom Error Code */
 			return array('e' => 1, 'm' => sprintf(__('Cloud Files operation failed (%s)', 'updraftplus'), 4).' ('.$e->getMessage().') ('.get_class($e).')');
 		}
 		
 		if (empty($response['user']['id']) || empty($response['user']['OS-KSADM:password']) || empty($response['user']['username'])) {
+			/* translators: %s: Custom Error Code */
 			return array('e' => 1, 'm' => sprintf(__('Cloud Files operation failed (%s)', 'updraftplus'), 3));
 		}
 		
@@ -201,6 +204,7 @@ class UpdraftPlus_Addon_CloudFilesEnhanced {
 			$headers = array('X-Container-Write' => $container_write_users, 'X-Container-Read' => $container_read_users);
 			$container_object->getClient()->post($container_object->getUrl(), $headers)->send();
 		} catch (Exception $e) {
+			/* translators: %s: Custom Error Code */
 			return array('e' => 1, 'm' => sprintf(__('Cloud Files operation failed (%s)', 'updraftplus'), 1).' ('.$e->getMessage().') ('.get_class($e).')');
 		}
 		
@@ -208,10 +212,12 @@ class UpdraftPlus_Addon_CloudFilesEnhanced {
 		try {
 			$response = $container_object->getClient()->post($auth_url."users/$id/OS-KSADM/credentials/RAX-KSKEY:apiKeyCredentials/RAX-AUTH/reset", array())->send()->json();
 			if (empty($response['RAX-KSKEY:apiKeyCredentials']['apiKey'])) {
+				/* translators: %s: Custom Error Code */
 				return array('e' => 1, 'm' => sprintf(__('Cloud Files operation failed (%s)', 'updraftplus'), 8));
 			}
 			$apikey = $response['RAX-KSKEY:apiKeyCredentials']['apiKey'];
 		} catch (Exception $e) {
+			/* translators: %s: Custom Error Code */
 			return array('e' => 1, 'm' => sprintf(__('Cloud Files operation failed (%s)', 'updraftplus'), 7).' ('.$e->getMessage().') ('.get_class($e).')');
 		}
 		
@@ -223,7 +229,12 @@ class UpdraftPlus_Addon_CloudFilesEnhanced {
 			'a' => $auth_url = ('uk' == $use_settings['location']) ? 'https://lon.auth.api.rackspacecloud.com' : 'https://auth.api.rackspacecloud.com',
 			'r' => $use_settings['region'],
 			'c' => $use_settings['container'],
-			'm' => htmlspecialchars(sprintf(__("Username: %s", 'updraftplus'), $user))."<br>".htmlspecialchars(sprintf(__("Password: %s", 'updraftplus'), $pass))."<br>".htmlspecialchars(sprintf(__("API Key: %s", 'updraftplus'), $apikey))
+					/* translators: %s: Username */
+			'm' => htmlspecialchars(sprintf(__("Username: %s", 'updraftplus'), $user))."<br>".
+					/* translators: %s: Password */
+					htmlspecialchars(sprintf(__("Password: %s", 'updraftplus'), $pass))."<br>".
+					/* translators: %s: API Key */
+					htmlspecialchars(sprintf(__("API Key: %s", 'updraftplus'), $apikey))
 		);
 	}
 	

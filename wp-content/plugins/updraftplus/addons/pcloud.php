@@ -10,7 +10,7 @@ IncludePHP: methods/backup-module.php
 Latest Change: 1.22.23
 */
 // @codingStandardsIgnoreEnd
-
+// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fclose, WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fgets, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_mkdir, WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.WP.AlternativeFunctions.file_system_operations_fputs, WordPress.WP.AlternativeFunctions.file_system_operations_is_writeable, WordPress.WP.AlternativeFunctions.file_system_operations_chown, WordPress.WP.AlternativeFunctions.file_system_operations_chgrp, WordPress.WP.AlternativeFunctions.file_system_operations_touch, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir, WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Native PHP fileystem function is used for direct control and performance because it can bypass additional layers of abstraction so that no overhead from the WordPress filesystem API's internal handling
 if (!defined('UPDRAFTPLUS_DIR')) die('No direct access allowed');
 
 if (!class_exists('UpdraftPlus_BackupModule')) updraft_try_include_file('methods/backup-module.php', 'require_once');
@@ -563,8 +563,20 @@ class UpdraftPlus_Addons_RemoteStorage_pcloud extends UpdraftPlus_BackupModule {
 		global $updraftplus;
 		$properties = array(
 			'storage_image_url' => UPDRAFTPLUS_URL.'/images/pcloud-logo.png',
-			'storage_image_title' => __(sprintf(__('%s logo', 'updraftplus'), $updraftplus->backup_methods[$this->get_id()])),
-			'storage_long_description' => wp_kses(sprintf(__('Please read %s for use of our %s authorization app (none of your backup data is sent to us).', 'updraftplus'), '<a target="_blank" href="https://teamupdraft.com/privacy?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=pcloud-privacy&utm_creative_format=text">'.__('this privacy policy', 'updraftplus').'</a>', $updraftplus->backup_methods[$this->get_id()]), $this->allowed_html_for_content_sanitisation()),
+			'storage_image_title' => sprintf(
+				/* translators: %s: Storage provider name */
+				__('%s logo', 'updraftplus'),
+				$updraftplus->backup_methods[$this->get_id()]
+			),
+			'storage_long_description' => wp_kses(
+				sprintf(
+					/* translators: 1: Privacy policy link, 2: Service name */
+					__('Please read %1$s for use of our %2$s authorization app (none of your backup data is sent to us).', 'updraftplus'),
+					'<a target="_blank" href="https://teamupdraft.com/privacy?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=pcloud-privacy&utm_creative_format=text">'.__('this privacy policy', 'updraftplus').'</a>',
+					$updraftplus->backup_methods[$this->get_id()]
+				),
+				$this->allowed_html_for_content_sanitisation()
+			),
 			'authentication_label' => sprintf(__('Authenticate with %s', 'updraftplus'),  $updraftplus->backup_methods[$this->get_id()]),
 			'already_authenticated_label' => __('(You are already authenticated).', 'updraftplus'),
 			'deauthentication_link_text' => sprintf(__("Follow this link to remove these settings for %s.", 'updraftplus'), $updraftplus->backup_methods[$this->get_id()]),
@@ -623,22 +635,27 @@ class UpdraftPlus_Addons_RemoteStorage_pcloud extends UpdraftPlus_BackupModule {
 	 * @return null
 	 */
 	public function action_auth() {
-		if (isset($_GET['updraftplus_pcloudauth'])) {
-			if ('doit' == stripslashes($_GET['updraftplus_pcloudauth'])) {
+		list($updraftplus_pcloudauth, $state, $code) = array_values(UpdraftPlus_Manipulation_Functions::fetch_superglobal_array(
+			array('get', 'updraftplus_pcloudauth'),
+			array('get', 'state'),
+			array('get', 'code')
+		));
+
+		if (isset($updraftplus_pcloudauth)) {
+			if ('doit' == stripslashes($updraftplus_pcloudauth)) {
 				$this->action_authenticate_storage();
 				return;
-			} elseif ('deauth' == stripslashes($_GET['updraftplus_pcloudauth'])) {
+			} elseif ('deauth' == stripslashes($updraftplus_pcloudauth)) {
 				$this->action_deauthenticate_storage();
 				return;
 			}
-		} elseif (isset($_REQUEST['state'])) {
+		} elseif (isset($state)) {
 
-			$parts = explode(':', stripslashes($_GET['state']));
-			$state = $parts[0];
+			$parts = explode(':', stripslashes($state));
 
-			if ('success' == $state) {
-				$raw_state = stripslashes($_GET['state']);
-				if (isset($_GET['code'])) $raw_code = urldecode(stripslashes($_GET['code']));
+			if ('success' == $parts[0]) {
+				$raw_state = stripslashes($state);
+				if (isset($code)) $raw_code = urldecode(stripslashes($code));
 
 				$this->do_complete_authentication($raw_state, $raw_code);
 			}
@@ -697,6 +714,7 @@ class UpdraftPlus_Addons_RemoteStorage_pcloud extends UpdraftPlus_BackupModule {
 			// remove our flag so we know this authentication is complete
 			if (isset($opts['auth_in_progress'])) unset($opts['auth_in_progress']);
 			$this->set_options($opts, true);
+			$this->set_connection_status(true);
 		}
 
 		if ($return_instead_of_echo) {
@@ -723,7 +741,8 @@ class UpdraftPlus_Addons_RemoteStorage_pcloud extends UpdraftPlus_BackupModule {
 				$this->log('pCloud ('.$info->get_error_code().'): '.$info->get_error_message(), 'error');
 			}
 		} catch (Exception $e) {
-			$accountinfo_err = sprintf(__("%s error: %s", 'updraftplus'), 'pCloud', $e->getMessage()).' ('.$e->getCode().')';
+			/* translators: 1: Service name, 2: Error message */
+			$accountinfo_err = sprintf(__("%1\$s error: %2\$s", 'updraftplus'), 'pCloud', $e->getMessage()).' ('.$e->getCode().')';
 			$this->log('pCloud error: ' . $e->getMessage() . ' (line: ' . $e->getLine() . ', file: ' . $e->getFile() . ')');
 			$this->log(sprintf(__('error: %s (see log file for more)', 'updraftplus'), $e->getMessage()), 'error');
 		}
@@ -738,9 +757,11 @@ class UpdraftPlus_Addons_RemoteStorage_pcloud extends UpdraftPlus_BackupModule {
 			$opts['ownername'] = $info['email'];
 			$this->set_options($opts, true);
 
-			$message .= ". <br>".sprintf(__('Your %s account name: %s', 'updraftplus'), 'pCloud', htmlspecialchars($info['email']));
+			/* translators: 1: Service name, 2: Account name */
+			$message .= ". <br>".sprintf(__('Your %1$s account name: %2$s', 'updraftplus'), 'pCloud', htmlspecialchars($info['email']));
 
-			$message .= ' <br>'.sprintf(__('Your %s quota usage: %s %% used, %s available', 'updraftplus'), 'pCloud', $used_perc, round($available_quota/1048576, 1).' MB');
+			/* translators: 1: Service name, 2: Percentage of quota used, 3: Available space */
+			$message .= ' <br>'.sprintf(__('Your %1$s quota usage: %2$s %% used, %3$s available', 'updraftplus'), 'pCloud', $used_perc, round($available_quota/1048576, 1).' MB');
 		} else {
 			$message .= " (".__('though part of the returned information was not as expected - whether this indicates a real problem cannot be determined', 'updraftplus').")";
 			if (!empty($accountinfo_err)) $message .= "<br>".htmlspecialchars($accountinfo_err);

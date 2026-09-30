@@ -153,6 +153,17 @@ class UpdraftPlus_Addons_MoreFiles {
 
 			<input name="updraft_restorer_wpcore_includewpconfig" id="updraft_restorer_wpcore_includewpconfig" type="checkbox" value="1"><label for="updraft_restorer_wpcore_includewpconfig"> <?php esc_html_e('Over-write wp-config.php', 'updraftplus'); ?></label> <a href="https://teamupdraft.com/documentation/updraftplus/topics/restoration/faqs/should-i-include-wp-config-php-when-i-restore-wordpress-core/" target="_blank"><?php esc_html_e('(learn more about this significant option)', 'updraftplus'); ?></a>
 
+			<div class="updraftplus-notice--warning">
+				<strong><?php esc_html_e('Note:', 'updraftplus'); ?></strong>
+				<?php
+					printf(
+						/* translators: %s: Constant name (DISALLOW_FILE_MODS) */
+						esc_html__('If the backed-up wp-config.php contains %s set to true, all future restore operations will be blocked (including database and other components).', 'updraftplus'),
+						'DISALLOW_FILE_MODS'
+					);
+				?> <?php esc_html_e('This is a WordPress security restriction.', 'updraftplus'); ?> <?php esc_html_e('You may need to remove or modify this setting after restoring to proceed.', 'updraftplus'); ?>
+			</div>
+
 			<script>
 				jQuery('#updraft_restore_wpcore').on('change', function(){
 					if (jQuery('#updraft_restore_wpcore').is(':checked')) {

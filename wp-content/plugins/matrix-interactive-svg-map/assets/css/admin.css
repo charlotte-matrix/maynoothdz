@@ -1,0 +1,37 @@
+/**
+ * Admin styles for Matrix Interactive SVG Map.
+ */
+
+.misvm-admin .misvm-preview {
+	margin-top: 12px;
+	max-width: 420px;
+	padding: 12px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	min-height: 40px;
+}
+
+.misvm-admin .misvm-preview img,
+.misvm-admin .misvm-preview svg {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.misvm-admin .misvm-danger {
+	color: #b32d2e;
+}
+
+.misvm-admin .misvm-regions-table input[type="color"] {
+	width: 48px;
+	height: 32px;
+	padding: 0;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+	cursor: pointer;
+}
+
+.misvm-admin .misvm-regions-table code {
+	font-size: 12px;
+}

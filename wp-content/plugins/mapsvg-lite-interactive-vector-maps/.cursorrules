@@ -1,0 +1,65 @@
+- You are operating in a WordPress plugin context, the plugin name is MapSVG, which is a mapping plugin
+- If a question is unclear or ambiguous, ask for more details to confirm your understanding before answering.
+- Suggest solutions that I didn’t think about - be proactive and anticipate my needs
+- If my message has /s command, it means I need very short answer, 1-2 sentences
+- Use “async await” instead of “then”
+- The root directory of the project is WordPress folder, $PROJECT_DIR$
+- The MapSVG root directory is $PROJECT_DIR$/wp-content/plugins/mapsvg/
+- Always use WordPress coding standards when writing PHP, JavaScript, and TypeScript. If you see any violations, please fix them.
+- Write PHP code compatible with PHP 7.4+
+- Always type hint PHP code.
+- Prefer writing TypeScript over JavaScript
+- Prefer writing Vanilla JS over jQuery
+- In PHP MapSVG files, prefer using MapSVG's Database class ($PROJECT_DIR$/wp-content/plugins/mapsvg/php/Core/Database.php) over WP default $wpdb
+- Optimize for readability
+- Keep methods focused on a single responsibility. If a method name describes one thing (e.g. setEventHandlers, render, save), it must only do that one thing — no mixing of initialization, business logic, and bindings in the same method.
+- Business logic belongs in named methods on the prototype (or as named functions in modules/classes), never as anonymous closures buried inside another method.
+- Initialization side-effects (DOM setup, auto-checks, resuming state) belong in a dedicated init/setup/viewLoaded lifecycle method, not in event-binding or render methods.
+- Data shared across multiple methods belongs on the instance (this.schema, this.server, etc.), set in the constructor. Closures inside a method are acceptable only for state that is strictly local to that method and its inner callbacks.
+- Always use "pnpm" instead of "npm" when suggesting to install something.
+- When providing file paths for mapsvg plugin, use the short format: use "mapsvg/..." instead of "wp-content/plugins/mapsvg/..."
+- If you want to work on managing gulp tasks, note that they are located in MapSVG root directory, gulpfile/tasks folder. There are a few file tasks, such as build.js, bump.js, and others.
+- mapsvg uses composer to manage its PHP dependencies. Files are in $PROJECT_DIR$/wp-content/plugins/mapsvg/vendor
+- mapsvg uses TypeScript, the files are in $PROJECT_DIR$/wp-content/plugins/mapsvg/js
+- Besides npm libs, mapsvg uses 3rd party JS libs, located in $PROJECT_DIR$/wp-content/plugins/mapsvg/js/vendor/
+- mapsvg TS frontend code is in $PROJECT_DIR$/wp-content/plugins/mapsvg/js/mapsvg
+- mapsvg TS admin panel code is in $PROJECT_DIR$/wp-content/plugins/mapsvg/js/mapsvg-admin
+- mapsvg marker images are in $PROJECT_DIR$/wp-content/plugins/mapsvg/markers
+- mapsvg PHP code is in $PROJECT_DIR$/wp-content/plugins/mapsvg/php
+- In JS/TS files, include all required "import X from Y" statements, never use "require"
+- NEVER use raw fetch() for MapSVG REST API calls. Always use the Server class (mapsvg/js/mapsvg/Infrastructure/Server/Server.ts): server.get(), server.post(), server.put(), server.delete(). These return jQuery Promises and handle nonce headers automatically. Raw fetch() is only acceptable for external URLs (e.g. fetching a third-party CSV). Access the server via repository.server (e.g. \_this.database.server in admin controllers).
+- All MapSVG collection REST API paths must use the unified route prefix "collection/{schemaName}/..." (backed by CollectionController.php), NOT "objects/{schemaName}/..." or "regions/{schemaName}/...". The legacy prefixes still work but must not be used in new code.
+- For schema saves in admin JS, always call schema.update({...}) then schemaRepo.update(schema) using the repository pattern (mapsvg.useRepository("schemas", \_this.mapsvg)), never direct fetch/PUT to /schemas/{id}.
+- In PHP files you don't need "require" or "include" statements, as there'a autoloader
+- besides gulp, mapsvg also uses rollup, the config is in $PROJECT_DIR$/wp-content/plugins/mapsvg/rollup.config.js
+- You may ask about stack assumptions if writing code
+- If needed, interrupt yourself and ask to continue
+- When asked to create a file and add content to it, first check if the file already exists. If it does, add the content at the best location in the file body — never fully overwrite the existing file.
+- When suggesting any OS-installations, note that I'm on MacOS, 8Gb RAM, using Homebrew and zsh, username is roma.
+- In mapsvg plugin you will see comments like:
+
+// START
+code()
+// REPLACE
+// anotherCde()
+// END
+
+OR:
+
+<!-- START -->
+
+code()
+
+<!-- END REPLACE
+ anotherCode()
+-->
+
+These are used to mark the code that will be stripped out in Lite version of the plugin. Don't remove those comments.
+
+# For paths relative to the plugin directory
+
+mapsvg/(.\*) -> $PROJECT_DIR$/wp-content/plugins/mapsvg/$1
+
+# For paths relative to the WordPress root
+
+(.\*) -> $PROJECT_DIR$/$1

@@ -172,7 +172,8 @@ class UpdraftPlus_Addon_Reporting {
 		$history = $this->history;
 		$debug = UpdraftPlus_Options::get_updraft_option('updraft_debug_mode');
 
-		$errors_and_warns = sprintf(__('%d errors, %d warnings', 'updraftplus'), $error_count, $warning_count);
+		/* translators: 1: Error count, 2: Warning count */
+		$errors_and_warns = sprintf(__('%1$d errors, %2$d warnings', 'updraftplus'), $error_count, $warning_count);
 
 		$file_entities = $updraftplus->get_backupable_file_entities(true, true);
 
@@ -188,7 +189,8 @@ class UpdraftPlus_Addon_Reporting {
 		$services = empty($jobdata['service']) ? array('none') : $jobdata['service'];
 		if (!is_array($services)) $services = array('none');
 
-		$time_taken = sprintf(__("%d hours, %d minutes, %d seconds", 'updraftplus'), $hrs, $mins, $secs);
+		/* translators: 1: Hours, 2: Minutes, 3: Seconds */
+		$time_taken = sprintf(__("%1\$d hours, %2\$d minutes, %3\$d seconds", 'updraftplus'), $hrs, $mins, $secs);
 
 		ob_start();
 		?>

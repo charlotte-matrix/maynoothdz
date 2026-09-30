@@ -1,0 +1,50 @@
+[data-mapsvg-theme="rounded"] {
+  /* Colors */
+  --mapsvg-text-primary: #333;
+  --mapsvg-text-muted: #aaa;
+  --mapsvg-text-hint: #999;
+  --mapsvg-bg-primary: #ffffff;
+  --mapsvg-bg-glass-white: rgba(255, 255, 255, 0.8);
+  --mapsvg-bg-glass-blur: blur(10px);
+  --mapsvg-bg-glass-border: 1px solid rgba(200, 200, 200, 0.5);
+  --mapsvg-border-color: #e5e5e5;
+  --mapsvg-border-color-light: #ccc;
+  --mapsvg-hover-bg: #e6e6e6;
+  --mapsvg-hover-border: #adadad;
+  --mapsvg-accent: #0097cf;
+
+  /* Opacity values for shadows/overlays */
+  --mapsvg-shadow-color: rgba(0, 0, 0, 0.2);
+  --mapsvg-shadow-box: 0 10px 15px var(--mapsvg-shadow-color);
+  --mapsvg-shadow-inset: rgba(0, 0, 0, 0.125);
+
+  /* Dimensions  */
+  --mapsvg-input-height: 66px;
+  --mapsvg-button-height: 45px;
+  --mapsvg-input-line-height: 64px;
+  --mapsvg-map-button-height: 30px;
+  --mapsvg-map-button-width: 30px;
+  --mapsvg-map-button-icon-size: 12px;
+  --mapsvg-map-button-border-radius: 10px;
+
+  /* Spacing Scale */
+  --mapsvg-space-xs: 3px;
+  --mapsvg-space-sm: 5px;
+  --mapsvg-space-md: 10px;
+  --mapsvg-space-lg: 15px;
+
+  /* Typography */
+  --mapsvg-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mapsvg-font-size: 14px;
+  --mapsvg-line-height: 1.42857143;
+  --mapsvg-font-weight-normal: 400;
+
+  /* Border Radius */
+  --mapsvg-border-radius: 33px;
+  --mapsvg-border-radius-sm: 8px;
+  --mapsvg-border-radius-dropdown: 8px;
+
+  /* Borders */
+  --mapsvg-border-width: 1px;
+  --mapsvg-border: 1px solid var(--mapsvg-border-color);
+}

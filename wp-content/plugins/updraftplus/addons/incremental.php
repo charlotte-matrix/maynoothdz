@@ -83,14 +83,18 @@ class UpdraftPlus_Addons_Incremental {
 				foreach ($incremental_sets as $inc_time => $entities) {
 					if ($increment_times) $increment_times .= '; ';
 					// Format the incremental backup time to users local time
-					$formatted_date = get_date_from_gmt(date('M d, Y G:i', $inc_time), 'M d, Y G:i');
+					$formatted_date = get_date_from_gmt(gmdate('M d, Y G:i', $inc_time), 'M d, Y G:i');
 					$increment_times .= $formatted_date;
 				}
 
 				if ($simple_format) {
+					/* translators: %s: Last increment date. */
 					return $date.' '.sprintf(__('(latest increment: %s)', 'updraftplus'), $formatted_date);
 				} else {
-					return '<span title="'.sprintf(__('Increments exist at: %s', 'updraftplus'), $increment_times).'">'.$date.'<br>'.sprintf(__('(latest increment: %s)', 'updraftplus'), $formatted_date).'</span>';
+					/* translators: %s: Count of increments. */
+					return '<span title="'.sprintf(__('Increments exist at: %s', 'updraftplus'), $increment_times).'">'.
+							/* translators: %s: Last increment date. */
+							$date.'<br>'.sprintf(__('(latest increment: %s)', 'updraftplus'), $formatted_date).'</span>';
 				}
 			}
 		}
@@ -340,9 +344,13 @@ class UpdraftPlus_Addons_Incremental {
 			$intervals = array(
 				'none' => __("None", 'updraftplus'),
 				'everyhour' => __("Every hour", 'updraftplus'),
+				/* translators: %s: Number of hours. */
 				'every2hours' => sprintf(__("Every %s hours", 'updraftplus'), '2'),
+				/* translators: %s: Number of hours. */
 				'every4hours' => sprintf(__("Every %s hours", 'updraftplus'), '4'),
+				/* translators: %s: Number of hours. */
 				'every8hours' => sprintf(__("Every %s hours", 'updraftplus'), '8'),
+				/* translators: %s: Number of hours. */
 				'twicedaily' => sprintf(__("Every %s hours", 'updraftplus'), '12'),
 				'daily' => __("Daily", 'updraftplus'),
 				'weekly' => __("Weekly", 'updraftplus'),

@@ -346,16 +346,16 @@ class UpdraftPlus_Addon_Autobackup {
 			$('form.upgrade').append('<input type="hidden" name="updraft_autobackup" class="updraft_autobackup_go" value="<?php echo esc_attr($godef); ?>">');
 			$('form.upgrade').append('<input type="hidden" name="updraft_autobackup_setdefault" class="updraft_autobackup_setdefault" value="yes">');
 			$('#updraft_autobackup').on('click', function() {
-				var doauto = $(this).attr('checked');
-				if ('checked' == doauto) {
+				var doauto = $(this).is(':checked');
+				if (doauto) {
 					$('.updraft_autobackup_go').attr('value', 'yes');
 				} else {
 					$('.updraft_autobackup_go').attr('value', 'no');
 				}
 			});
 			$('#updraft_autobackup_sdefault').on('click', function() {
-				var default = $(this).attr('checked');
-				if ('checked' == default) {
+				var setdefault = $(this).is(':checked');
+				if (setdefault) {
 					$('.updraft_autobackup_setdefault').attr('value', 'yes');
 				} else {
 					$('.updraft_autobackup_setdefault').attr('value', 'no');
@@ -407,9 +407,13 @@ class UpdraftPlus_Addon_Autobackup {
 	}
 
 	private function process_form() {
+		list($updraft_autobackup, $updraft_autobackup_setdefault) = array_values(UpdraftPlus_Manipulation_Functions::fetch_superglobal_array(
+			array('post', 'updraft_autobackup'),
+			array('post', 'updraft_autobackup_setdefault')
+		));
 		// We use 0 instead of false, because false is the default for get_option(), and thus setting an unset value to false with update_option() actually sets nothing (since update_option() first checks for the existing value) - which is unhelpful if you want to call get_option() with a different default (as we do)
-		$autobackup = (isset($_POST['updraft_autobackup']) && 'yes' == $_POST['updraft_autobackup']) ? 1 : 0;
-		if (!empty($_POST['updraft_autobackup_setdefault']) && 'yes' == $_POST['updraft_autobackup_setdefault']) UpdraftPlus_Options::update_updraft_option('updraft_autobackup_default', $autobackup);
+		$autobackup = 'yes' == $updraft_autobackup ? 1 : 0;
+		if ('yes' == $updraft_autobackup_setdefault) UpdraftPlus_Options::update_updraft_option('updraft_autobackup_default', $autobackup);
 
 		// Having dealt with the saving, now see if we really wanted to do it
 		if (!empty($_REQUEST['updraftplus_noautobackup'])) $autobackup = 0;
@@ -586,17 +590,17 @@ class UpdraftPlus_Addon_Autobackup {
 	public function admin_action_upgrade_plugin() {
 		if (!current_user_can('update_plugins')) return;
 
-		$plugin = isset($_REQUEST['plugin']) ? trim($_REQUEST['plugin']) : '';
-		check_admin_referer('upgrade-plugin_' . $plugin);
+		$plugin = trim(UpdraftPlus_Manipulation_Functions::fetch_superglobal('request', 'plugin', ''));
+		check_admin_referer('upgrade-plugin_'.$plugin);
 
 		$autobackup = $this->get_setting_and_check_default_setting_save();
 
 		if (!empty($_REQUEST['updraftplus_noautobackup'])) return;
 
-		$title = __('Update Plugin');// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Passed though to wp-admin/admin-header.php.
+		$title = __('Update Plugin');// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable,  WordPress.WP.I18n.MissingArgDomain -- Passed though to wp-admin/admin-header.php, the string exists within the WordPress core.
 		$parent_file = 'plugins.php';// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Passed though to wp-admin/admin-header.php.
 		$submenu_file = 'plugins.php';// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Passed though to wp-admin/admin-header.php.
-		include_once(ABSPATH . 'wp-admin/admin-header.php');
+		include_once(ABSPATH.'wp-admin/admin-header.php');
 
 		$this->inpage_restrict = 'plugins';
 
@@ -615,36 +619,38 @@ class UpdraftPlus_Addon_Autobackup {
 	}
 
 	public function get_setting_and_check_default_setting_save() {
+		list($updraft_autobackup, $updraft_autobackup_setdefault) = array_values(UpdraftPlus_Manipulation_Functions::fetch_superglobal_array(
+			array('request', 'updraft_autobackup'),
+			array('request', 'updraft_autobackup_setdefault')
+		));
 		// Do not use bools here - conflicts with get_option() with a non-default value
-		$autobackup = (isset($_REQUEST['updraft_autobackup']) && 'yes' == $_REQUEST['updraft_autobackup']) ? 1 : 0;
+		$autobackup = 'yes' == $updraft_autobackup ? 1 : 0;
 
-		if (!empty($_REQUEST['updraft_autobackup_setdefault']) && 'yes' == $_REQUEST['updraft_autobackup_setdefault']) UpdraftPlus_Options::update_updraft_option('updraft_autobackup_default', $autobackup);
+		if ('yes' == $updraft_autobackup_setdefault) UpdraftPlus_Options::update_updraft_option('updraft_autobackup_default', $autobackup);
 
 		return $autobackup;
 	}
 
 	public function request_filesystem_credentials($input) {
-		echo <<<ENDHERE
-<script>
-	jQuery(function() {
-		jQuery('#upgrade').before('<input type="hidden" name="updraft_autobackup_answer" value="1">');
-	});
-</script>
-ENDHERE;
+		echo '<script>' . "\n"
+			. '	jQuery(function() {' . "\n"
+			. '		jQuery(\'#upgrade\').before(\'<input type="hidden" name="updraft_autobackup_answer" value="1">\');' . "\n"
+			. '	});' . "\n"
+			. '</script>';
 		return $input;
 	}
 
 	public function admin_action_upgrade_theme() {
 
 		if (!current_user_can('update_themes')) return;
-		$theme = isset($_REQUEST['theme']) ? urldecode($_REQUEST['theme']) : '';
+		$theme = urldecode(UpdraftPlus_Manipulation_Functions::fetch_superglobal('request', 'theme', ''));
 		check_admin_referer('upgrade-theme_' . $theme);
 
 		$autobackup = $this->get_setting_and_check_default_setting_save();
 
 		if (!empty($_REQUEST['updraftplus_noautobackup'])) return;
 
-		$title = __('Update Theme');// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Passed though to wp-admin/admin-header.php.
+		$title = __('Update Theme');// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, WordPress.WP.I18n.MissingArgDomain -- Passed though to wp-admin/admin-header.php, the string exists within the WordPress core.
 		$parent_file = 'themes.php';// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Passed though to wp-admin/admin-header.php.
 		$submenu_file = 'themes.php';// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Passed though to wp-admin/admin-header.php.
 		include_once(ABSPATH.'wp-admin/admin-header.php');

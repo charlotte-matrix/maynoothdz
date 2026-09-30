@@ -17,7 +17,7 @@ This plugin:
 This directory should not be added to the wordpress.org SVN
 */
 // @codingStandardsIgnoreEnd
-// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fclose, WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fgets, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_mkdir, WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.WP.AlternativeFunctions.file_system_operations_fputs, WordPress.WP.AlternativeFunctions.file_system_operations_is_writeable, WordPress.WP.AlternativeFunctions.file_system_operations_chown, WordPress.WP.AlternativeFunctions.file_system_operations_chgrp, WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Native PHP fileystem function is used for direct control and performance because it can bypass additional layers of abstraction so that no overhead from the WordPress filesystem API's internal handling
+// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fclose, WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fgets, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_mkdir, WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.WP.AlternativeFunctions.file_system_operations_fputs, WordPress.WP.AlternativeFunctions.file_system_operations_is_writeable, WordPress.WP.AlternativeFunctions.file_system_operations_chown, WordPress.WP.AlternativeFunctions.file_system_operations_chgrp, WordPress.WP.AlternativeFunctions.file_system_operations_touch, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir, WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Native PHP fileystem function is used for direct control and performance because it can bypass additional layers of abstraction so that no overhead from the WordPress filesystem API's internal handling
 define('UDADDONS2_DIR', dirname(realpath(__FILE__)));
 define('UDADDONS2_URL', UPDRAFTPLUS_URL.'/udaddons');
 define('UDADDONS2_SLUG', 'updraftplus-addons');
@@ -91,6 +91,8 @@ class UpdraftPlusAddons2 {
 
 		if (class_exists('UpdraftPlusAddons')) return;
 
+		if (!class_exists('UpdraftPlus_Manipulation_Functions')) updraft_try_include_file('includes/class-manipulation-functions.php', 'include_once');
+
 		// Prevent updates from wordpress.org showing in all circumstances. Run with lower than default priority, to allow later processes to add something.
 		add_filter('site_transient_update_plugins', array($this, 'site_transient_update_plugins'), 9);
 
@@ -110,7 +112,7 @@ class UpdraftPlusAddons2 {
 			
 			// The null case is seen in HS#36382
 			if (null === $plug_updatechecker) {
-				error_log("UpdraftPlus: Puc_v4_Factory::buildUpdateChecker() return a null object");
+				UpdraftPlus_Manipulation_Functions::error_log("UpdraftPlus: Puc_v4_Factory::buildUpdateChecker() return a null object");
 			} else {
 				$plug_updatechecker->addQueryArgFilter(array($this, 'updater_queryargs_plugin'));
 				if ($this->debug) $plug_updatechecker->debugMode = true;
@@ -281,19 +283,22 @@ class UpdraftPlusAddons2 {
 	 * Runs upon the WP action admin_menu or network_admin_menu
 	 */
 	public function admin_menu() {
-		global $pagenow, $updraftplus;
+		global $pagenow, $updraftplus, $plugin_page;
 
 		// Do we want to display a notice about the upcoming or past expiry of their UpdraftPlus subscription?
 		if (!empty($this->plug_updatechecker) && !empty($this->plug_updatechecker->optionName) && current_user_can('update_plugins')) {
 			// (!is_multisite() && 'options-general.php' == $pagenow) || (is_multisite() && 'settings.php' == $pagenow) ||
-			if ('plugins.php' == $pagenow || 'update-core.php' == $pagenow || (('options-general.php' == $pagenow || 'admin.php' == $pagenow) && !empty($_REQUEST['page']) && 'updraftplus' == $_REQUEST['page'])) {
+			if ('plugins.php' == $pagenow || 'update-core.php' == $pagenow || (('options-general.php' == $pagenow || 'admin.php' == $pagenow) && 'updraftplus' == $plugin_page)) {
 				$do_expiry_check = true;
 				$dismiss = '';
 			} elseif (is_admin()) {
 				$dismissed_until = UpdraftPlus_Options::get_updraft_option('updraftplus_dismissedexpiry', 0);
 				if ($dismissed_until <= time()) {
 					$do_expiry_check = true;
-					$dismiss = '<div style="float:right; position: relative; top:-24px;" class="ud-expiry-dismiss"><a href="#" onclick="jQuery(\'.ud-expiry-dismiss\').parent().slideUp(); jQuery.post(ajaxurl, {action: \'updraft_ajax\', subaction: \'dismissexpiry\', nonce: \''.wp_create_nonce('updraftplus-credentialtest-nonce').'\' })">'.sprintf(__('Dismiss from main dashboard (for %s weeks)', 'updraftplus'), 2).'</a></div>';
+					$dismiss = '<div style="float:right; position: relative; top:-24px;" class="ud-expiry-dismiss"><a href="#" onclick="jQuery(\'.ud-expiry-dismiss\').parent().slideUp(); jQuery.post(ajaxurl, {action: \'updraft_ajax\', subaction: \'dismissexpiry\', nonce: \''.wp_create_nonce('updraftplus-credentialtest-nonce').'\' })">'.
+								/* translators: %s: Number of weeks. */
+								sprintf(__('Dismiss from main dashboard (for %s weeks)', 'updraftplus'), 2).
+								'</a></div>';
 				}
 			}
 		}
@@ -324,7 +329,12 @@ class UpdraftPlusAddons2 {
 			$compare_tested_version = $oval->update->extraProperties[$yourversionkey];
 			if (!empty($readme_says) && version_compare($readme_says, $compare_tested_version, '>')) $compare_tested_version = $readme_says;
 			if (version_compare($compare_wp_version, $compare_tested_version, '>')) {
-				$this->admin_notices['yourversiontested'] = '<strong>'.__('Warning', 'updraftplus').':</strong> '.sprintf(__('The installed version of UpdraftPlus Backup/Restore has not been tested on your version of WordPress (%s).', 'updraftplus'), $wp_version).' '.sprintf(__('It has been tested up to version %s.', 'updraftplus'), $compare_tested_version).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/general/troubleshooting/seeing-warning-versions-wordpress-updraftplus-tested/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=unknown&utm_creative_format=unknown">'.__('You should update UpdraftPlus to make sure that you have a version that has been tested for compatibility.', 'updraftplus').'</a>';
+				$this->admin_notices['yourversiontested'] = '<strong>'.__('Warning', 'updraftplus').':</strong> '.
+															/* translators: %s: User's WordPress Version. */
+															sprintf(__('The installed version of UpdraftPlus Backup/Restore has not been tested on your version of WordPress (%s).', 'updraftplus'), $wp_version).' '.
+															/* translators: %s: Latest WP version supported. */
+															sprintf(__('It has been tested up to version %s.', 'updraftplus'), $compare_tested_version).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/general/troubleshooting/seeing-warning-versions-wordpress-updraftplus-tested/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=unknown&utm_creative_format=unknown">'.
+															__('You should update UpdraftPlus to make sure that you have a version that has been tested for compatibility.', 'updraftplus').'</a>';
 			}
 		}
 
@@ -333,11 +343,17 @@ class UpdraftPlusAddons2 {
 				if (empty($matches[2])) {
 					$message = __('Your paid access to UpdraftPlus updates for this site has expired.', 'updraftplus').' '.__('You will no longer receive updates to UpdraftPlus.', 'updraftplus').' <a href="https://teamupdraft.com/documentation/account-management/orders-and-subscriptions/why-should-i-renew-my-updraftplus-wp-optimize-or-aios-licence-and-how-do-i-do-that/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=to-regain-access&utm_creative_format=notice">'.__('To regain access to updates (including future features and compatibility with future WordPress releases) and support, please renew.', 'updraftplus').'</a>';
 					if ($updraftplus->have_addons > 14 && !empty($meta_info['indirect'])) {
-						$message .= ' <br>'.sprintf(__('If you have already renewed, then you need to allocate a licence to this site - %s', 'updraftplus'), '<a href="'.UpdraftPlus_Options::admin_page().'?page=updraftplus&tab=addons">'.__('go here', 'updraftplus').'</a>');
+						$message .= ' <br>'.sprintf(
+							/* translators: %s: Link text redirecting user to Add-ons tab. */
+							__('If you have already renewed, then you need to allocate a licence to this site - %s', 'updraftplus'),
+							'<a href="'.UpdraftPlus_Options::admin_page().'?page=updraftplus&tab=addons">'.__('go here', 'updraftplus').'</a>'
+						);
 					}
 					$this->admin_notices['updatesexpired'] = $message.$dismiss;
 				} else {
-					$this->admin_notices['updatesexpired'] = sprintf(__('Your paid access to UpdraftPlus updates for %s add-ons on this site has expired.', 'updraftplus'), $matches[2]).' <a href="https://teamupdraft.com/documentation/account-management/orders-and-subscriptions/why-should-i-renew-my-updraftplus-wp-optimize-or-aios-licence-and-how-do-i-do-that/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=to-regain-access&utm_creative_format=notice">'.__('To regain access to updates (including future features and compatibility with future WordPress releases) and support, please renew.', 'updraftplus').'</a>'.$dismiss;
+															/* translators: %s: Expired Add-ons. */
+					$this->admin_notices['updatesexpired'] = sprintf(__('Your paid access to UpdraftPlus updates for %s add-ons on this site has expired.', 'updraftplus'), $matches[2]).
+															' <a href="https://teamupdraft.com/documentation/account-management/orders-and-subscriptions/why-should-i-renew-my-updraftplus-wp-optimize-or-aios-licence-and-how-do-i-do-that/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=to-regain-access&utm_creative_format=notice">'.__('To regain access to updates (including future features and compatibility with future WordPress releases) and support, please renew.', 'updraftplus').'</a>'.$dismiss;
 				}
 			}
 			$subscription_status = apply_filters('udmupdater_subscription_active', isset($oval->update->extraProperties[$subscription_activekey]) ? $oval->update->extraProperties[$subscription_activekey] : false);
@@ -345,20 +361,24 @@ class UpdraftPlusAddons2 {
 				if (preg_match('/(^|,)soonpartial_(\d+)_(\d+)($|,)/', $oval->update->extraProperties[$updateskey], $matches)) {
 					/* translators: 1: Number of add-ons whose updates are expiring soon, 2: Total number of add-ons on this site */
 					$this->admin_notices['updatesexpiringsoon'] = sprintf(__('Your paid access to UpdraftPlus updates for %1$s of the %2$s add-ons on this site will soon expire.', 'updraftplus'), $matches[2], $matches[3]);
-					$this->admin_notices['updatesexpiringsoon'] .= ' <a href="https://updraftplus.com/renewing-updraftplus-purchase/">'.__('To retain your access, and maintain access to updates (including future features and compatibility with future WordPress releases) and support, please renew.', 'updraftplus').'</a>'.$dismiss;
+					$this->admin_notices['updatesexpiringsoon'] .= ' <a href="https://teamupdraft.com/documentation/account-management/orders-and-subscriptions/why-should-i-renew-my-updraftplus-wp-optimize-or-aios-licence-and-how-do-i-do-that/">'.__('To retain your access, and maintain access to updates (including future features and compatibility with future WordPress releases) and support, please renew.', 'updraftplus').'</a>'.$dismiss;
 				} elseif (preg_match('/(^|,)soon($|,)/', $oval->update->extraProperties[$updateskey])) {
-					$message = __('Your paid access to UpdraftPlus updates for this site will soon expire.', 'updraftplus').' <a href="https://updraftplus.com/renewing-updraftplus-purchase/">'.__('To retain your access, and maintain access to updates (including future features and compatibility with future WordPress releases) and support, please renew.', 'updraftplus').'</a>';
+					$message = __('Your paid access to UpdraftPlus updates for this site will soon expire.', 'updraftplus').' <a href="https://teamupdraft.com/documentation/account-management/orders-and-subscriptions/why-should-i-renew-my-updraftplus-wp-optimize-or-aios-licence-and-how-do-i-do-that/">'.__('To retain your access, and maintain access to updates (including future features and compatibility with future WordPress releases) and support, please renew.', 'updraftplus').'</a>';
 					if ($updraftplus->have_addons > 14 && !empty($meta_info['indirect'])) {
-						$message .= ' <br>'.sprintf(__('If you have already renewed, then you need to allocate a licence to this site - %s', 'updraftplus'), '<a href="'.UpdraftPlus_Options::admin_page().'?page=updraftplus&tab=addons">'.__('go here', 'updraftplus').'</a>');
+						$message .= ' <br>'.sprintf(
+							/* translators: %s: Link text redirecting user to Addons tab. */
+							__('If you have already renewed, then you need to allocate a licence to this site - %s', 'updraftplus'),
+							'<a href="'.UpdraftPlus_Options::admin_page().'?page=updraftplus&tab=addons">'.__('go here', 'updraftplus').'</a>'
+						);
 					}
 					$this->admin_notices['updatesexpiringsoon'] = $message.$dismiss;
 				}
 			}
 		} elseif (!empty($do_expiry_check) && is_object($oval) && !empty($oval->update) && is_object($oval->update) && !empty($oval->update->extraProperties[$supportkey])) {
 			if ('expired' == $oval->update->extraProperties[$supportkey]) {
-				$this->admin_notices['supportexpired'] = __('Your paid access to UpdraftPlus support has expired.', 'updraftplus').' <a href="https://updraftplus.com/renewing-updraftplus-purchase/">'.__('To regain your access, please renew.', 'updraftplus').'</a>'.$dismiss;
+				$this->admin_notices['supportexpired'] = __('Your paid access to UpdraftPlus support has expired.', 'updraftplus').' <a href="https://teamupdraft.com/documentation/account-management/orders-and-subscriptions/why-should-i-renew-my-updraftplus-wp-optimize-or-aios-licence-and-how-do-i-do-that/">'.__('To regain your access, please renew.', 'updraftplus').'</a>'.$dismiss;
 			} elseif ('soon' == $oval->update->extraProperties[$supportkey]) {
-				$this->admin_notices['supportsoonexpiring'] = __('Your paid access to UpdraftPlus support will soon expire.', 'updraftplus').' <a href="https://updraftplus.com/renewing-updraftplus-purchase/">'.__('To maintain your access to support, please renew.', 'updraftplus').'</a>'.$dismiss;
+				$this->admin_notices['supportsoonexpiring'] = __('Your paid access to UpdraftPlus support will soon expire.', 'updraftplus').' <a href="https://teamupdraft.com/documentation/account-management/orders-and-subscriptions/why-should-i-renew-my-updraftplus-wp-optimize-or-aios-licence-and-how-do-i-do-that/">'.__('To maintain your access to support, please renew.', 'updraftplus').'</a>'.$dismiss;
 			}
 		}
 		add_action('all_admin_notices', array($this, 'admin_notices'));
@@ -366,7 +386,7 @@ class UpdraftPlusAddons2 {
 		if (!function_exists('is_plugin_active')) include_once(ABSPATH.'wp-admin/includes/plugin.php');
 		if (is_plugin_active('updraftplus-addons/updraftplus-addons.php')) {
 			deactivate_plugins('updraftplus-addons/updraftplus-addons.php');
-			if (('options-general.php' == $pagenow || 'settings.php' == $pagenow) && !empty($_REQUEST['page']) && 'updraftplus-addons' == $_REQUEST['page']) {
+			if (('options-general.php' == $pagenow || 'settings.php' == $pagenow) && 'updraftplus-addons' == $plugin_page) {
 				wp_redirect($this->addons_admin_url());
 				exit;
 			}
@@ -380,7 +400,7 @@ class UpdraftPlusAddons2 {
 		if (class_exists('UpdraftPlusAddons')) return;
 
 		// Refresh, if specifically requested
-		if ((('options-general.php' == $pagenow) || (is_multisite() && 'settings.php' == $pagenow)) && !empty($_GET['udm_refresh'])) {
+		if ((('options-general.php' == $pagenow) || (is_multisite() && 'settings.php' == $pagenow)) && !empty($_GET['udm_refresh'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- False positive: nonce verification not necessary.
 			if ($this->plug_updatechecker) $this->plug_updatechecker->checkForUpdates();
 		}
 
@@ -438,7 +458,7 @@ class UpdraftPlusAddons2 {
 	}
 
 	public function deinstall_udaddons() {
-		$del = '<a href="' . wp_nonce_url('plugins.php?action=delete-selected&amp;checked[]=updraftplus-addons/updraftplus-addons.php&amp;plugin_status=all&amp;paged=1&amp;s=', 'bulk-plugins') . '" title="' . esc_attr__('Delete plugin') . '" class="delete">' . 'delete the UpdraftPlus Addons Manager plugin' . '</a>';
+		$del = '<a href="' . wp_nonce_url('plugins.php?action=delete-selected&amp;checked[]=updraftplus-addons/updraftplus-addons.php&amp;plugin_status=all&amp;paged=1&amp;s=', 'bulk-plugins') . '" title="' . esc_attr__('Delete Plugin') . '" class="delete">' . 'delete the UpdraftPlus Addons Manager plugin' . '</a>'; // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- 'Delete Plugin' translation string already present in plugins.php
 		$this->show_admin_warning('You can '.$del.' - it is obsolete (all of its functions, including your add-ons, are now included in the main UpdraftPlus plugin obtained from updraftplus.com).');
 	}
 
@@ -585,11 +605,12 @@ class UpdraftPlusAddons2 {
 	 */
 	public function ajax_udaddons_claimaddon() {
 
-		$nonce = empty($_REQUEST['nonce']) ? '' : $_REQUEST['nonce'];
-		if (!wp_verify_nonce($nonce, 'udmanager-nonce') || empty($_POST['key'])) die('Security check');
+		list($nonce, $key) = array_values(UpdraftPlus_Manipulation_Functions::fetch_superglobal_array(
+			array('request', 'nonce', ''),
+			array('post', 'key')
+		));
+		if (!wp_verify_nonce($nonce, 'udmanager-nonce') || !$key) die('Security check');
 
-		$key = $_POST['key'];
-		
 		$result = $this->claim_addon($key);
  
 		if (is_wp_error($result)) {
@@ -993,7 +1014,7 @@ class UpdraftPlusAddons2 {
 		$trans = get_site_transient('udaddons_connect_'.$ehash);
 
 		// In debug mode, we don't cache
-		if (true !== $this->debug && empty($_GET['udm_refresh']) && is_array($trans)) {
+		if (true !== $this->debug && empty($_GET['udm_refresh']) && is_array($trans)) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- False positive: nonce verification not necessary.
 			if (isset($trans['myaddons']) && is_array($trans['myaddons'])) {
 				$this->user_addons = $trans['myaddons'];
 			}
@@ -1069,7 +1090,7 @@ class UpdraftPlusAddons2 {
 				if (false !== $ip_addr && false !== filter_var($ip_addr, FILTER_VALIDATE_IP)) {
 					$message .= '  IP: '.htmlspecialchars($ip_addr);
 					
-					$message .= '<br>'.__('This most likely means that you share a webserver with a hacked website that has been used in previous attacks.', 'updraftplus').'<br> <a href="https://updraftplus.com/unblock-ip-address/" target="_blank">'.__('To remove any block, please go here.', 'updraftplus').'</a> '.__('Your IP address:', 'updraftplus').' '.htmlspecialchars($ip_addr);
+					$message .= '<br>'.__('This most likely means that you share a webserver with a hacked website that has been used in previous attacks.', 'updraftplus').'<br> <a href="https://teamupdraft.com/documentation/updraftplus/topics/general/troubleshooting/updraftplus-ip-unblock-how-to-regain-access-if-your-ip-is-blocked/" target="_blank">'.__('To remove any block, please go here.', 'updraftplus').'</a> '.__('Your IP address:', 'updraftplus').' '.htmlspecialchars($ip_addr);
 					
 				}
 			}
@@ -1082,12 +1103,19 @@ class UpdraftPlusAddons2 {
 		if (!is_array($response) || !isset($response['updraftpluscom']) || !isset($response['loggedin'])) {
 			$ser_resp = htmlspecialchars(serialize($response));
 			if (preg_match('/has banned your IP address \(([\.:0-9a-f]+)\)/', $response, $matches)) {
-				return new WP_Error('banned_ip', sprintf(__("UpdraftPlus.com has responded with 'Access Denied'.", 'updraftplus').'<br>'.__("It appears that your web server's IP Address (%s) is blocked.", 'updraftplus').' '.__('This most likely means that you share a webserver with a hacked website that has been used in previous attacks.', 'updraftplus').'<br> <a href="https://updraftplus.com/unblock-ip-address/" target="_blank">'.__('To remove any block, please go here.', 'updraftplus').'</a> ', $matches[1]));
+				return new WP_Error(
+					'banned_ip',
+					__("UpdraftPlus.com has responded with 'Access Denied'.", 'updraftplus').'<br>'.
+					/* translators: %s: IP Address. */
+					sprintf(__("It appears that your web server's IP Address (%s) is blocked.", 'updraftplus'), $matches[1]).' '.
+					__('This most likely means that you share a webserver with a hacked website that has been used in previous attacks.', 'updraftplus').'<br> <a href="https://updraftplus.com/unblock-ip-address/" target="_blank">'.__('To remove any block, please go here.', 'updraftplus').'</a> '
+				);
 			} else {
 				if (null === $ser_resp) {
 					return new WP_Error('unknown_response', __('No response data was received.', 'updraftplus').' '.__('This usually indicates a network connectivity issue (e.g. an outgoing firewall or overloaded network) between this site and UpdraftPlus.com.', 'updraftplus'));
 				} else {
-					return new WP_Error('unknown_response', sprintf(__('UpdraftPlus.Com returned a response which we could not understand (data: %s)', 'updraftplus'), $ser_resp));
+					/* translators: 1: Non-translated "UpdraftPlus.Com" text, 2: Server response. */
+					return new WP_Error('unknown_response', sprintf(__('%1$s returned a response which we could not understand (data: %2$s)', 'updraftplus'), 'UpdraftPlus.Com', $ser_resp));
 				}
 			}
 		}

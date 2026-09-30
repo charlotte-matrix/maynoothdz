@@ -10,8 +10,9 @@ IncludePHP: methods/addon-base-v2.php
 RequiresPHP: 5.3.3
 */
 // @codingStandardsIgnoreEnd
-// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fclose, WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fgets, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_mkdir, WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.WP.AlternativeFunctions.file_system_operations_fputs, WordPress.WP.AlternativeFunctions.file_system_operations_is_writeable, WordPress.WP.AlternativeFunctions.file_system_operations_chown, WordPress.WP.AlternativeFunctions.file_system_operations_chgrp, WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Native PHP fileystem function is used for direct control and performance because it can bypass additional layers of abstraction so that no overhead from the WordPress filesystem API's internal handling
+// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fclose, WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fgets, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_mkdir, WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.WP.AlternativeFunctions.file_system_operations_chmod, WordPress.WP.AlternativeFunctions.file_system_operations_fputs, WordPress.WP.AlternativeFunctions.file_system_operations_is_writeable, WordPress.WP.AlternativeFunctions.file_system_operations_chown, WordPress.WP.AlternativeFunctions.file_system_operations_chgrp, WordPress.WP.AlternativeFunctions.file_system_operations_touch, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir, WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Native PHP fileystem function is used for direct control and performance because it can bypass additional layers of abstraction so that no overhead from the WordPress filesystem API's internal handling
 // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Error messages should be escaped when caught and printed.
+// phpcs:disable PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage -- Display images from plugin folder on admin settings page.
 
 if (!defined('UPDRAFTPLUS_DIR')) die('No direct access allowed');
 
@@ -153,6 +154,7 @@ class UpdraftPlus_Addons_RemoteStorage_backblaze extends UpdraftPlus_RemoteStora
 					// Update bucket to enable Object Lock
 					$response = $storage->setObjectLockToBucket($bucket->getId());
 					if (!isset($response['fileLockConfiguration']['value']['isFileLockEnabled']) || !$response['fileLockConfiguration']['value']['isFileLockEnabled']) {
+						/* translators: %s: Bucket Name.*/
 						$this->log(sprintf(__('Error: unable to set object lock for bucket: %s', 'updraftplus'), $bucket->getName()), 'error');
 						$this->log("Unable to set object lock for bucket: ".$bucket->getName());
 					} else {
@@ -616,7 +618,11 @@ class UpdraftPlus_Addons_RemoteStorage_backblaze extends UpdraftPlus_RemoteStora
 						$result = true;
 					}
 				} elseif (!$new_bucket_created) {
-					echo esc_html(__('Failure: We could not successfully access or create such a bucket', 'updraftplus').' '.sprintf(__('Please check your access credentials, and if those are correct then try another bucket name (as another %s user may already have taken your name).', 'updraftplus'), 'Backblaze'));
+					echo esc_html(
+						__('Failure: We could not successfully access or create such a bucket', 'updraftplus').' '.
+						/* translators: %s: The text 'Backblaze' (brand name, non-translated).*/
+						sprintf(__('Please check your access credentials, and if those are correct then try another bucket name (as another %s user may already have taken your name).', 'updraftplus'), 'Backblaze')
+					);
 				}
 			}
 		} catch (Exception $e) {
@@ -797,10 +803,15 @@ class UpdraftPlus_Addons_RemoteStorage_backblaze extends UpdraftPlus_RemoteStora
 		$properties = array(
 			'storage_image_url' => UPDRAFTPLUS_URL.'/images/backblaze.png',
 			'curl_existence_label' => wp_kses($updraftplus_admin->curl_check('Backblaze B2', false, 'backblaze hidden-in-updraftcentral', false), $this->allowed_html_for_content_sanitisation()),
+			/* translators: %s: The text 'Backblaze' (brand name, non-translated).*/
 			'configuration_helper_link_text' => sprintf(__('For help configuring %s, including screenshots, follow this link.', 'updraftplus'), 'Backblaze'),
 			'input_key_id_label' => __('Master Application Key ID', 'updraftplus'),
-			'input_key_id_title' => sprintf(__('Get these settings from %s, or sign up %s.', 'updraftplus'), '<a aria-label="secure.backblaze.com/b2_buckets.htm" target="_blank" href="https://secure.backblaze.com/b2_buckets.htm">'.__('here', 'updraftplus').'</a>', '<a aria-label="www.backblaze.com/b2/" target="_blank" href="https://www.backblaze.com/b2/">'.__('here', 'updraftplus').'</a>'),
-			'input_key_id_placeholder' => __('Paste your master application key ID here', 'updraftplus'),
+			'input_key_id_title' => sprintf(
+				/* translators: 1: 'here' link to Backblaze settings page, 2: 'here' link to Sign up page.*/
+				__('Get these settings from %1$s, or sign up %2$s.', 'updraftplus'),
+				'<a aria-label="secure.backblaze.com/b2_buckets.htm" target="_blank" href="https://secure.backblaze.com/b2_buckets.htm">'.__('here', 'updraftplus').'</a>',
+				'<a aria-label="www.backblaze.com/b2/" target="_blank" href="https://www.backblaze.com/b2/">'.__('here', 'updraftplus').'</a>'
+			),
 			'input_application_key_label' => __('Application key', 'updraftplus'),
 			'input_application_key_type' => apply_filters('updraftplus_admin_secret_field_type', 'password'),
 			'input_application_key_placeholder' => __('Paste your key here', 'updraftplus'),
@@ -815,12 +826,14 @@ class UpdraftPlus_Addons_RemoteStorage_backblaze extends UpdraftPlus_RemoteStora
 			'input_object_lock_title' => __('Object lock is a Backblaze B2 feature that prevents data from being changed or deleted for a given number of days.', 'updraftplus').' '.__('Use this to protect your data from hackers or for regulatory compliance reasons.', 'updraftplus').' '.__('0 days means no lock is applied.', 'updraftplus'),
 			'read_more_object_lock' => ' <a target="_blank" href="https://www.backblaze.com/docs/cloud-storage-object-lock">'.__('Read more about the Backblaze Object Lock', 'updraftplus').'</a>.',
 			'input_object_lock_warning' => __('A file which is locked cannot be deleted by any means until the lock time duration has expired.', 'updraftplus'),
-			'input_bucket_name_placeholder' => __('Example: my-bucket/updraftplus', 'updraftplus'),
+			'input_bucket_name_placeholder' => __('Example: my-bucket', 'updraftplus'),
 			'input_backup_path_name_placeholder' => __('Bucket name', 'updraftplus'),
 			'input_backup_path_title' => '<a target="_blank" href="https://help.backblaze.com/hc/en-us/articles/217666908-What-you-need-to-know-about-B2-Bucket-names">'.__('There are limits upon which path-names are valid.', 'updraftplus').' '.__('Spaces are not allowed.', 'updraftplus').'</a>',
 			'input_backup_path_some_path_placeholder' => __('some/path', 'updraftplus'),
+			/* translators: %s: Backup method name.*/
 			'input_test_label' => sprintf(__('Test %s Settings', 'updraftplus'), $updraftplus->backup_methods[$this->get_id()]),
 		);
+		$properties['input_bucket_name_label'] = $properties['input_backup_path_name_placeholder'];
 		return wp_parse_args($properties, $this->get_persistent_variables_and_methods());
 	}
 	
@@ -869,10 +882,11 @@ class UpdraftPlus_Addons_RemoteStorage_backblaze extends UpdraftPlus_RemoteStora
 
 			if (is_array($object_lock_response) && !empty($object_lock_response['fileRetention']['retainUntilTimestamp'])) {
 				// Object lock set successfully. Log the information.
-				$retain_date = get_date_from_gmt(date('M d, Y G:i', $object_lock_response['fileRetention']['retainUntilTimestamp'] / 1000), 'M d, Y G:i');
+				$retain_date = get_date_from_gmt(gmdate('M d, Y G:i', $object_lock_response['fileRetention']['retainUntilTimestamp'] / 1000), 'M d, Y G:i');
 				$this->log(sprintf('The file named %s has been successfully locked for %d day(s) and the lock will expire on %s.', $file->getName(), $opts['object_lock_duration'], $retain_date));
 			} else {
 				// Failed to set object lock. Log an error.
+				/* translators: %s: Filename.*/
 				$this->log(sprintf(__('Error: unable to set object lock for file: %s', 'updraftplus'), $file->getName()), 'error');
 				$this->log("Unable to set object lock for file: ".$file->getName());
 			}
@@ -897,10 +911,6 @@ class UpdraftPlus_Addons_RemoteStorage_backblaze extends UpdraftPlus_RemoteStora
 		$prefix = 'input_'.$option['template_property_input_mapping'].'_';
 
 		if (empty($field['tooltip']) && isset($template_properties[$prefix.'title'])) $field['tooltip'] = array('text' => $template_properties[$prefix.'title']);
-
-		if ('bucket_name' === $field_name) $field['label'] = $template_properties['input_backup_path_label'];
-		
-		if ('backup_path' === $field_name) $field = array();
 
 		return $field;
 	}

@@ -1,0 +1,7 @@
+{
+  "name": "rounded",
+  "title": "Rounded",
+  "description": "Large rounded inputs with labels within the input.",
+  "version": "1.0.0",
+  "css": ["./assets/css/rounded.css"]
+}

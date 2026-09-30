@@ -1,0 +1,246 @@
+/* @import "./form.variables.css"; - Imported in root form.css, included here for IDE support only */
+
+.mapsvg-address-search {
+  /* height: 66px !important;
+  padding: 15px 32px !important;
+  border-radius: 33px !important;
+  border-color: #e5e5e5;
+  box-sizing: border-box; */
+  padding: 0;
+}
+.mapsvg-form-field-distance {
+  position: relative;
+  align-self: flex-start;
+  padding: 0 !important;
+}
+.mapsvg-form-field-distance label {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 32px;
+}
+.mapsvg-form-field-distance .mapsvg-address-search:not([name]) {
+  height: var(--mapsvg-input-height);
+  /* padding: 15px 32px; */
+  /* border-radius: 33px; */
+  /* border: var(--mapsvg-border); */
+  box-sizing: border-box;
+  /* padding-right: 86px; */
+  position: relative;
+  color: transparent;
+}
+.mapsvg-form-field-distance .mapsvg-address-search[name]:not([name=""]) {
+  height: 22px;
+  padding: 0;
+  border: none;
+  z-index: 1;
+  top: 33px;
+  left: 0;
+  background: transparent;
+  width: auto;
+}
+.mapsvg-form-field-distance .select2-selection .select2-selection--single {
+  background: none;
+}
+.mapsvg-form-field-distance .tt-menu.tt-open {
+  /* max-width: 100%; */
+  width: 100%;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  padding: 5px;
+  border-top: none;
+  transform: translateY(1px);
+  width: calc(100% + 1px);
+  /* border-radius: 33px;
+  padding: 15px 32px;
+  margin-top: 5px; */
+}
+
+.mapsvg-form-field-distance .tt-suggestion {
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+.mapsvg-form-field-distance .typeahead {
+  background-color: var(--mapsvg-bg-primary);
+}
+.mapsvg-form-field-distance .twitter-typeahead {
+  display: block !important;
+  width: auto;
+  height: 100%;
+  margin-left: 32px;
+}
+.mapsvg-form-field-distance input.typeahead.form-control.tt-input {
+  background-color: transparent;
+}
+.mapsvg-form-field-distance .twitter-typeahead input:first-child {
+  display: none;
+}
+.mapsvg-form-field-distance .tt-input,
+.tt-hint {
+  width: 100%;
+  outline: none;
+}
+.mapsvg-form-field-distance .tt-hint {
+  color: var(--mapsvg-text-hint);
+}
+
+.mapsvg-form-field-distance .tt-menu {
+  width: 100%;
+  margin-top: 0px;
+  background-color: var(--mapsvg-bg-primary);
+  color: black;
+  border: var(--mapsvg-border);
+  border-radius: var(--mapsvg-border-radius-dropdown);
+  box-shadow: var(--mapsvg-shadow-box);
+}
+.mapsvg-map-container .mapsvg-form-field-distance .tt-menu {
+  /* background-color: rgba(255, 255, 255, 0.9); */
+}
+.tt-suggestion {
+  padding: var(--mapsvg-space-xs) 15px;
+}
+
+.tt-suggestion.tt-cursor,
+.tt-suggestion.tt-selectable:hover {
+  background-color: #eee;
+  cursor: pointer;
+  color: black;
+}
+.tt-suggestion p {
+  margin: 0;
+}
+
+.twitter-typeahead .spinner-border,
+.distance-search-wrap .spinner-border {
+  position: absolute;
+  top: 26px;
+  right: 15px;
+}
+.distance-search-wrap {
+  position: relative;
+  height: 100%;
+}
+.distance-search-wrap.with-user-location-button {
+}
+.distance-search-wrap.with-user-location-button .mapsvg-address-search {
+  padding-right: 30px !important;
+}
+.distance-search-wrap .user-location-button {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 11px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+  cursor: pointer;
+}
+.distance-search-wrap .user-location-button:hover {
+  opacity: 0.6;
+}
+.distance-search-wrap.with-user-location-button .user-location-button {
+  display: block;
+}
+.mapsvg-distance-fields {
+  margin: 0;
+}
+.mapsvg-distance-fields > * {
+  min-width: 0 !important;
+}
+
+.mapsvg-header .mapsvg-distance-fields,
+.mapsvg-footer .mapsvg-distance-fields {
+  display: flex;
+  flex-direction: row;
+}
+.mapsvg-header .mapsvg-distance-fields > div:first-child,
+.mapsvg-footer .mapsvg-distance-fields > div:first-child {
+  flex-grow: 2;
+  margin-right: 0;
+}
+.mapsvg-distance-fields > .mapsvg-distance-field-1,
+.mapsvg-distance-fields > div:first-child {
+  max-width: 90%;
+  margin-right: 0;
+}
+.mapsvg-distance-fields > .mapsvg-distance-field-2 {
+  margin-top: 0px;
+}
+.mapsvg-distance-field-2
+  .select2-container
+  .select2-selection--single
+  .select2-selection__rendered {
+  padding-left: 15px;
+  padding-right: 30px;
+}
+.mapsvg-distance-field-2 .select2-selection {
+  border: 0 !important;
+  border-radius: 0 !important;
+  height: 64px !important;
+  transform: translateY(1px);
+  border-left: var(--mapsvg-border) !important;
+  background-color: transparent !important;
+}
+.mapsvg-distance-fields.search-by-zip .tt-menu {
+  display: none !important;
+}
+.mapsvg-header .mapsvg-distance-fields > .mapsvg-distance-field-2,
+.mapsvg-footer .mapsvg-distance-fields > .mapsvg-distance-field-2 {
+  margin-top: 0;
+}
+.mapsvg-form-field-distance .select2-dropdown--below {
+  transform: translateY(-1px);
+}
+
+.mapsvg-distance-fields .select2-dropdown--below {
+  border: var(--mapsvg-border);
+}
+
+.mapsvg-filters-wrap
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__rendered {
+  line-height: var(--mapsvg-input-line-height);
+}
+.mapsvg-filters-wrap
+  .select2-container--default
+  .select2-selection--single
+  .select2-selection__arrow {
+  height: 64px;
+  right: 8px;
+}
+
+.mapsvg-form-field-distance
+  > .select2-container.select2-container--default.select2-container--open {
+  margin-top: 3px;
+}
+
+.mapsvg-form-field-distance .select2-dropdown.select2-dropdown--below {
+  padding: 4px;
+  border-radius: 8px;
+  border: var(--mapsvg-border);
+  box-shadow: var(--mapsvg-shadow-box);
+}
+.mapsvg-form-field-distance .select2-search.select2-search--dropdown {
+  margin-bottom: 10px;
+}
+
+.mapsvg-form-field-distance .select2-search__field {
+  border-radius: 8px !important;
+}
+
+.mapsvg-form-field-distance .select2-results__option {
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.mapsvg-form-field-distance
+  .select2-container--default
+  .select2-results__option--highlighted[aria-selected] {
+  background-color: #eee;
+  color: black;
+}
+.mapsvg-form-field-distance .select2-results__option {
+  margin-bottom: 4px;
+}

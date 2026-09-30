@@ -1,0 +1,42 @@
+<div>
+  <p>
+    This is the demo content of the
+    <strong>DB Object Details View</strong>
+    .
+  </p>
+  <p>
+    How to edit it: if you are in mapsvg control panel now, click on the following link to open the
+    template editor for this view:
+    <a href="#" class="mapsvg-template-link" data-template="detailsView">
+      Menu > Templates > DB Object Details View
+    </a>
+    .
+  </p>
+  <p>
+    More information about templates:
+    <a href="https://mapsvg.com/docs/map-editor/templates" target="_blank">
+      mapsvg.com/docs/map-editor/templates
+    </a>
+  </p>
+</div>
+<hr />
+
+<!-- DB Object fields are available in this template. -->
+<h5>{{title}}</h5>
+<!-- When you need to render a fields as HTML, use 3 curly braces instead of 2:-->
+<p>{{{description}}}</p>
+<p><em>{{location.address.formatted}}</em></p>
+
+<!-- Show all images: -->
+{{#each images}}
+<!-- Image fields "thumbnail", "medium", "full" -->
+<!-- are available in this block                -->
+<img src="{{thumbnail}}" />
+{{/each}}
+
+<!-- Show all linked Regions, comma-separated: -->
+<p>
+  Regions: {{#each regions}}
+  <!-- Region fields are available in this block -->
+  {{#if title}} {{title}} {{else}} {{id}} {{/if}}{{#unless @last}}, {{/unless}} {{/each}}
+</p>

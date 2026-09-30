@@ -75,7 +75,9 @@ class UpdraftPlus_Addons_Importer {
 			}
 		}
 
-		return '<p><a href="https://teamupdraft.com/documentation/updraftplus/premium-features/how-to-restore-from-other-backup-plugins/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=unknown&utm_creative_format=unknown" target="_blank">'.__('Was this a backup created by a different backup plugin? If so, then you might first need to rename it so that it can be recognized - please follow this link.', 'updraftplus').'</a></p><p>'.sprintf(__('Supported backup plugins: %s', 'updraftplus'), $supported).'</p>';
+		return '<p><a href="https://teamupdraft.com/documentation/updraftplus/premium-features/how-to-restore-from-other-backup-plugins/?utm_source=udp-plugin&utm_medium=referral&utm_campaign=paac&utm_content=unknown&utm_creative_format=unknown" target="_blank">'.__('Was this a backup created by a different backup plugin? If so, then you might first need to rename it so that it can be recognized - please follow this link.', 'updraftplus').'</a></p><p>'.
+				/* translators: %s: List of supported backup plugins. */
+				sprintf(__('Supported backup plugins: %s', 'updraftplus'), $supported).'</p>';
 	}
 
 	/**
@@ -215,7 +217,7 @@ class UpdraftPlus_Addons_Importer {
 					while (($file = readdir($handle)) !== false) {
 						if (strtolower(substr($file, -4, 4)) == '.sql') {
 							if (is_string($found_sql)) {
-								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- trigger_error() message contains only esc_html()-escaped values; no unescaped user input reaches browser output. The trigger_error() function is intentionally used to generate user-level error messages.
+								// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped, WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- the escaping should be happening when the exception is printed, trigger_error() message contains only esc_html()-escaped values; no unescaped user input reaches browser output. The trigger_error() function is intentionally used to generate user-level error messages.
 								trigger_error("Multiple .sql files found in backwpup backup - couldn't work out which to use (" . esc_html($found_sql) . ", " . esc_html($file) . ")", E_USER_WARNING);
 								return false;
 							} else {
@@ -276,6 +278,7 @@ class UpdraftPlus_Addons_Importer {
 	public function importforeign_backupable_plus_db($backupable_plus_db, $args) {
 		$foinfo = $args[0];
 		$mess = &$args[1];
+		/* translators: %s: Backup Initiator. */
 		$mess[] = sprintf(__('Backup created by: %s.', 'updraftplus'), $foinfo['desc']);
 		return array('wpcore' => $backupable_plus_db['wpcore']);
 	}

@@ -3,16 +3,15 @@
 
 /*
 Plugin Name: UpdraftPlus - Backup/Restore
-Plugin URI: https://updraftplus.com
-Update URI: https://updraftplus.com/
+Plugin URI: https://teamupdraft.com/updraftplus
 Description: Backup and restore: take backups locally, or backup to Amazon S3, Dropbox, Google Drive, Rackspace, (S)FTP, WebDAV & email, on automatic schedules.
 Author: TeamUpdraft, DavidAnderson
-Version: 2.26.7.26
+Version: 2.26.8.26
 Donate link: https://david.dw-perspective.org.uk/donate
 License: GPLv3 or later
 Text Domain: updraftplus
 Domain Path: /languages
-Author URI: https://updraftplus.com
+Author URI: https://teamupdraft.com/updraftplus
 */
 // @codingStandardsIgnoreEnd
 
@@ -45,6 +44,8 @@ define('UPDRAFTPLUS_URL', plugins_url('', __FILE__));
 define('UPDRAFTPLUS_PLUGIN_SLUG', plugin_basename(__FILE__));
 define('UPDRAFT_DEFAULT_OTHERS_EXCLUDE', 'upgrade,cache,updraft,backup*,*backups,mysql.sql,debug.log');
 define('UPDRAFT_DEFAULT_UPLOADS_EXCLUDE', 'backup*,*backups,backwpup*,wp-clone,snapshots,wp-staging');
+// The minimum PHP version that phpseclib requires for the encryption-related features. Deliberately not overridable: it reflects a library requirement, not a user preference.
+define('UPDRAFTPLUS_PHPSECLIB_MIN_PHP_VERSION', '5.6.1');
 
 // The following can go in your wp-config.php
 // Tables whose data can be skipped without significant loss, if (and only if) the attempt to back them up fails (e.g. bwps_log, from WordPress Better Security, is log data; but individual entries can be huge and cause out-of-memory fatal errors on low-resource environments). Comma-separate the table names (without the WordPress table prefix).
@@ -247,7 +248,7 @@ if (!file_exists(UPDRAFTPLUS_DIR.'/class-updraftplus.php') || !file_exists(UPDRA
 	 * Warn if they've not got the whole plugin - can happen if WP crashes (e.g. out of disk space) when upgrading the plugin
 	 */
 	function updraftplus_incomplete_install_warning() {
-		echo '<div class="updraftmessage error"><p><strong>'.esc_html(__('Error', 'updraftplus')).':</strong> '.esc_html(__('You do not have UpdraftPlus completely installed - please de-install and install it again.', 'updraftplus').' '.__('Most likely, WordPress malfunctioned when copying the plugin files.', 'updraftplus')).' <a href="https://updraftplus.com/faqs/wordpress-crashed-when-updating-updraftplus-what-can-i-do/">'.esc_html__('Go here for more information.', 'updraftplus').'</a></p></div>';
+		echo '<div class="updraftmessage error"><p><strong>'.esc_html(__('Error', 'updraftplus')).':</strong> '.esc_html(__('You do not have UpdraftPlus completely installed - please de-install and install it again.', 'updraftplus').' '.__('Most likely, WordPress malfunctioned when copying the plugin files.', 'updraftplus')).' <a href="https://teamupdraft.com/documentation/updraftplus/topics/general/troubleshooting/wordpress-crashed-when-updating-updraftplus-what-can-i-do/">'.esc_html__('Go here for more information.', 'updraftplus').'</a></p></div>';
 	}
 	add_action('all_admin_notices', 'updraftplus_incomplete_install_warning');
 } else {
@@ -306,6 +307,8 @@ function updraftplus_build_mysqldump_list() {
 		return "/usr/bin/mysqldump,/bin/mysqldump,/usr/local/bin/mysqldump,/usr/sfw/bin/mysqldump,/usr/xdg4/bin/mysqldump,/opt/bin/mysqldump";
 	}
 }
+
+register_activation_hook(__FILE__, array($updraftplus, 'maybe_set_onboarding_flag'));
 
 // Do this even if the missing files detection above fired, as the "missing files" detection above has a greater chance of showing the user useful info
 if (!class_exists('UpdraftPlus_Options')) updraft_try_include_file('options.php', 'require_once');

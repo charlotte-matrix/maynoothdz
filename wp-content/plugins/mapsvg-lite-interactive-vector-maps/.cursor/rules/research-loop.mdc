@@ -1,0 +1,25 @@
+---
+description: Stop looping on research — ask the human instead
+alwaysApply: true
+---
+
+# Research Loop Rule
+
+If you have done **more than 2 read/search iterations** trying to answer a single question (e.g. understanding how a pattern works, where something is stored, how data flows) and still don't have a clear answer — **stop and ask the human**.
+
+Do NOT keep reading more files hoping the answer will appear. A one-line question to the human is faster and cheaper than 5 more tool calls.
+
+## MapSVG Schema Architecture
+
+`php/Core/schema/*.json` files (e.g. `schema.json`, `object.json`, `api.json`) are **baseline defaults only** — they define the minimal table structure for a brand-new v1 install.
+
+- They are NOT the source of truth for what columns exist at runtime.
+- Each migration in `php/Migrate/Migrations/` progressively adds columns to the live DB table.
+- `SchemaRepository` overrides both `encodeParams` and `decodeParams` to pass **all** DB columns through, not just those listed in the JSON file.
+- So the actual schema structure = `schema.json` columns + everything added by migrations up to the current version.
+
+## Example
+
+❌ BAD: Read file A → read file B → read file C → read file D → still unsure → read file E
+
+✅ GOOD: Read file A → read file B → still unsure → ask: "I see the schema table has columns added by migrations, but `schema.json` only defines 4 fields. Does `encodeParams` save all DB columns or only the ones in `schema.json`?"

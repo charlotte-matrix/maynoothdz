@@ -107,7 +107,16 @@ class UpdraftPlus_Addon_Google_Enhanced {
 	 */
 	public function partial_template_properties() {
 		return array(
-			'input_enhanced_folder_title' => sprintf(__('Enter the path of the %s folder you wish to use here.', 'updraftplus'), 'Google Drive').' '.__('If the folder does not already exist, then it will be created.').' '.sprintf(__('e.g. %s', 'updraftplus'), 'MyBackups/WorkWebsite.').' '.sprintf(__('If you leave it blank, then the backup will be placed in the root of your %s', 'updraftplus'), 'Google Drive').' '.sprintf(__('In %s, path names are case sensitive.', 'updraftplus'), 'Google Drive'),
+											/* translators: %s: Untranslated string "Google Drive". */
+			'input_enhanced_folder_title' => sprintf(__('Enter the path of the %s folder you wish to use here.', 'updraftplus'), 'Google Drive').' '.
+											__('If the folder does not already exist, then it will be created.', 'updraftplus').' '.
+											/* translators: %s: Untranslated string "MyBackups/WorkWebsite" */
+											sprintf(__('e.g. %s', 'updraftplus'), 'MyBackups/WorkWebsite.').' '.
+											/* translators: %s: Untranslated string "Google Drive". */
+											sprintf(__('If you leave it blank, then the backup will be placed in the root of your %s.', 'updraftplus'), 'Google Drive').' '.
+											/* translators: %s: Untranslated string "Google Drive". */
+											sprintf(__('In %s, path names are case sensitive.', 'updraftplus'), 'Google Drive'),
+											/* translators: %s: Untranslated string "Google Drive". */
 			'input_enhanced_folder_label' => sprintf(__('In %s, path names are case sensitive.', 'updraftplus'), 'Google Drive'),
 		);
 	}
@@ -122,16 +131,27 @@ class UpdraftPlus_Addon_Google_Enhanced {
 	 */
 	public function options_googledrive_others($folder_opts, $backup_module_object) {// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Unused parameters are for future use.
 		$classes = $backup_module_object->get_css_classes();
+				/* translators: %s: Untranslated string "Google Drive". */
+		$title = sprintf(__('Enter the path of the %s folder you wish to use here.', 'updraftplus'), 'Google Drive').' '.
+				__('If the folder does not already exist, then it will be created.', 'updraftplus').' '.
+				/* translators: %s: Untranslated string "MyBackups/WorkWebsite" */
+				sprintf(__('e.g. %s', 'updraftplus'), 'MyBackups/WorkWebsite.').' '.
+				/* translators: %s: Untranslated string "Google Drive". */
+				sprintf(__('If you leave it blank, then the backup will be placed in the root of your %s', 'updraftplus'), 'Google Drive').' '.
+				/* translators: %s: Untranslated string "Google Drive". */
+				sprintf(__('In %s, path names are case sensitive.', 'updraftplus'), 'Google Drive');
 		return '<tr class="'.$classes.'">
 					<th>'.__('Google Drive', 'updraftplus').' '.__('Folder', 'updraftplus').':</th>
 					<td>
-						<input title="'.esc_attr(sprintf(__('Enter the path of the %s folder you wish to use here.', 'updraftplus'), 'Google Drive').' '.__('If the folder does not already exist, then it will be created.').' '.sprintf(__('e.g. %s', 'updraftplus'), 'MyBackups/WorkWebsite.').' '.sprintf(__('If you leave it blank, then the backup will be placed in the root of your %s', 'updraftplus'), 'Google Drive')).' '.sprintf(__('In %s, path names are case sensitive.', 'updraftplus'), 'Google Drive').
-						'" type="text" '.$backup_module_object->output_settings_field_name_and_id('folder', true).' value="{{folder}}" class="updraft_input--wide">
+						<input title="'.esc_attr($title).'" type="text" '.$backup_module_object->output_settings_field_name_and_id('folder', true).' value="{{folder}}" class="updraft_input--wide"/>
 						{{#if is_authenticate_with_google}}
 						<a href="#" class="updraft_googledrive_select_folder">{{input_select_folder_label}}</a>
 						{{/if}}
 						<br>
-						<em>'.htmlspecialchars(sprintf(__('In %s, path names are case sensitive.', 'updraftplus'), 'Google Drive')).'</em>
+						<em>'.
+							/* translators: %s: Untranslated string "Google Drive". */
+							esc_html(sprintf(__('In %s, path names are case sensitive.', 'updraftplus'), 'Google Drive')).
+						'</em>
 						
 						{{#if is_authenticate_with_google}}
 						<div class="updraft_googledrive_container hidden-in-updraftcentral" style="clear:left;">

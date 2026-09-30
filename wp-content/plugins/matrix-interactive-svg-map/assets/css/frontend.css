@@ -1,0 +1,65 @@
+/**
+ * Front-end styles for interactive SVG maps.
+ */
+
+.misvm-map {
+	position: relative;
+	width: 100%;
+	max-width: 100%;
+}
+
+.misvm-map__canvas {
+	width: 100%;
+	line-height: 0;
+}
+
+.misvm-map__canvas .misvm-svg {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+.misvm-map .misvm-region {
+	transition: fill 0.15s ease, opacity 0.15s ease;
+	outline: none;
+}
+
+.misvm-map .misvm-region--linked {
+	cursor: pointer;
+}
+
+.misvm-map .misvm-region--linked:hover,
+.misvm-map .misvm-region--linked:focus-visible,
+.misvm-map .misvm-region--linked.is-hover {
+	fill: var(--misvm-hover-color, #c8102e) !important;
+}
+
+.misvm-tooltip {
+	position: absolute;
+	z-index: 10;
+	pointer-events: none;
+	padding: 6px 10px;
+	background: #1d2327;
+	color: #fff;
+	font-size: 13px;
+	line-height: 1.3;
+	border-radius: 4px;
+	white-space: nowrap;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	transform: translate(-50%, calc(-100% - 10px));
+}
+
+.misvm-tooltip::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	bottom: -5px;
+	transform: translateX(-50%);
+	border: 5px solid transparent;
+	border-top-color: #1d2327;
+	border-bottom-width: 0;
+}
+
+.misvm-tooltip[hidden] {
+	display: none !important;
+}

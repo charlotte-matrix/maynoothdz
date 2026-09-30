@@ -1,0 +1,27 @@
+.mapsvg-filters-wrap {
+  height: 100%;
+  box-sizing: border-box;
+}
+.mapsvg-filters-wrap * {
+  box-sizing: border-box;
+}
+.mapsvg-details-container .mapsvg-form-builder {
+  padding: 0 !important;
+}
+
+.mapsvg-filters-wrap .mapsvg-controller-view-content {
+  padding: 0;
+}
+.mapsvg-header .mapsvg-filters-wrap,
+.mapsvg-footer .mapsvg-filters-wrap,
+.mapsvg-sidebar .mapsvg-filters-wrap,
+.mapsvg-sidebar .mapsvg-filters-wrap {
+  width: 100%;
+}
+.mapsvg-directory-search-wrap .mapsvg-form-builder {
+  padding: 10px;
+}
+
+.mapsvg-header .mapsvg-data-form-view {
+  max-width: 100%;
+}

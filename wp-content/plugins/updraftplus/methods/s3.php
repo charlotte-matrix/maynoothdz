@@ -1,5 +1,5 @@
 <?php
-
+// phpcs:disable PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- This file configures the Amazon S3 remote storage backend (UpdraftPlus_S3 / UpdraftPlus_S3_Compat). The amazonaws.com strings flagged below are AWS S3 API region endpoints used to connect to the user's own configured storage bucket for backups, not JS/CSS/images/fonts offloaded from this plugin to a remote server.
 if (!defined('ABSPATH')) die('No direct access allowed');
 
 // Converted to multi-options (Feb 2017-) and previous options conversion removed: Yes
@@ -1618,8 +1618,8 @@ Check your permissions and credentials.','updraftplus'), 'error');
 			if ('s3' == $config['key'] && 'AK' != substr($key, 0, 2)) echo "\n\n".esc_html(sprintf(__('The AWS access key looks to be wrong (valid %s access keys begin with "AK")', 'updraftplus'), $whoweare));
 		
 		} else {
-		
-			$try_file = md5(rand());
+
+			$try_file = md5(wp_rand());
 
 			$storage->setExceptions(true);
 			try {

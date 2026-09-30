@@ -1,5 +1,5 @@
 <?php
-// phpcs:disable WordPress.Security.EscapeOutput.HeredocOutputNotEscaped
+// phpcs:disable PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage -- Only static images from plugin folder are being added below.
 if (!defined('ABSPATH')) die('No direct access allowed');
 
 /**
@@ -76,18 +76,18 @@ class UpdraftPlusAddOns_Options2 {
 	 * Registers any admin page notices. Runs upon admin_init.
 	 */
 	public function show_admin_notices() {
-		global $pagenow;
+		global $pagenow, $plugin_page;
 
 		if (apply_filters('updraftplus_settings_page_render', true)) {
 
 			$options = $this->options->get_option(UDADDONS2_SLUG.'_options');
-			if (empty($options['email']) && UpdraftPlus_Options::user_can_manage() && isset($_REQUEST['page']) && 'updraftplus' == $_REQUEST['page']) {
+			if (empty($options['email']) && UpdraftPlus_Options::user_can_manage() && 'updraftplus' == $plugin_page) {
 				add_action('all_admin_notices', array($this, 'show_admin_warning_notconnected'));
 			}
 
 		}
 
-		if ((is_multisite() && 'settings.php' == $pagenow) || (!is_multisite() && 'options-general.php' == $pagenow) && isset($_REQUEST['page']) && (UDADDONS2_PAGESLUG == $_REQUEST['page'] || $_REQUEST['page'] == $this->slug)) {
+		if ((is_multisite() && 'settings.php' == $pagenow) || (!is_multisite() && 'options-general.php' == $pagenow) && (UDADDONS2_PAGESLUG == $plugin_page || $this->slug == $plugin_page)) {
 			$updates_available = get_site_transient('update_plugins');
 			global $updraftplus_addons2;
 			if (is_object($updates_available) && isset($updates_available->response) && isset($updraftplus_addons2->plug_updatechecker) && isset($updraftplus_addons2->plug_updatechecker->pluginFile) && isset($updates_available->response[$updraftplus_addons2->plug_updatechecker->pluginFile])) {
@@ -159,7 +159,7 @@ class UpdraftPlusAddOns_Options2 {
 
 		register_setting(UDADDONS2_SLUG.'_options', UDADDONS2_SLUG.'_options', array($this, 'options_validate'));
 
-		if (is_multisite() && (isset($_POST['action']) && 'update' == $_POST['action']) && !empty($_POST['updraftplus-addons_options'])) {
+		if (is_multisite() && (isset($_POST['action']) && 'update' == $_POST['action']) && !empty($_POST['updraftplus-addons_options'])) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification not required here.
 			$this->update_wpmu_options();
 		}
 
@@ -200,11 +200,10 @@ class UpdraftPlusAddOns_Options2 {
 		$options = $this->options->get_option(UDADDONS2_SLUG.'_options');
 		if (!is_array($options)) $options = array();
 
-		foreach ($_POST as $key => $value) {
-			if ('updraftplus-addons_options' == $key && is_array($value) && isset($value['email']) && isset($value['password'])) {
-				$options['email'] = $value['email'];
-				$options['password'] = $value['password'];
-			}
+		$post_udp_addons_options = UpdraftPlus_Manipulation_Functions::fetch_superglobal('post', 'updraftplus-addons_options');
+		if (is_array($post_udp_addons_options) && isset($post_udp_addons_options['email']) && isset($post_udp_addons_options['password'])) {
+			$options['email'] = $post_udp_addons_options['email'];
+			$options['password'] = $post_udp_addons_options['password'];
 		}
 
 		$options = $this->options_validate($options);
@@ -228,7 +227,7 @@ class UpdraftPlusAddOns_Options2 {
 	 * This is the function outputting the HTML for our options page
 	 */
 	public function options_printpage() {
-		if (!UpdraftPlus_Options::user_can_manage()) wp_die(esc_html__('You do not have sufficient permissions to access this page.'));
+		if (!UpdraftPlus_Options::user_can_manage()) wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'updraftplus'));
 
 		$options = $this->options->get_option(UDADDONS2_SLUG.'_options');
 
@@ -258,6 +257,7 @@ class UpdraftPlusAddOns_Options2 {
 		}
 
 		if (defined('WP_HTTP_BLOCK_EXTERNAL') && WP_HTTP_BLOCK_EXTERNAL) {
+			/* translators: %s: WP_HTTP_BLOCK_EXTERNAL enclosed in <strong> tags. */
 			echo '<div class="notice inline"><p>'.sprintf(esc_html__('Please make sure that %s is not set to "true" in your wp-config file - this ensures UpdraftPlus can connect and update.', 'updraftplus'), '<strong>WP_HTTP_BLOCK_EXTERNAL</strong>').'</p></div>';
 		}
 
@@ -344,12 +344,12 @@ class UpdraftPlusAddOns_Options2 {
 
 		if (count($unclaimed_available) > 0) {
 			$nonce = wp_create_nonce('udmanager-nonce');
-			$pleasewait = htmlspecialchars(esc_html__('Please wait whilst we make the claim...', 'updraftplus'));
-			$notgranted = esc_js(__('Claim not granted - perhaps you have already used this purchase somewhere else, or your paid period for downloading from updraftplus.com has expired?', 'updraftplus'));
-			$notgrantedlogin = esc_js(__('Claim not granted - your account login details were wrong', 'updraftplus'));
-			$ukresponse = esc_js(__('An unknown response was received.', 'updraftplus').' '.esc_html__('Response was:', 'updraftplus'));
-			$addon_installed = esc_html__('The claim and installation was successful.', 'updraftplus').' '.esc_html__('You can now use your purchase!', 'updraftplus');
-			echo <<<ENDHERE
+			$pleasewait = __('Please wait whilst we make the claim...', 'updraftplus');
+			$notgranted = __('Claim not granted - perhaps you have already used this purchase somewhere else, or your paid period for downloading from updraftplus.com has expired?', 'updraftplus');
+			$notgrantedlogin = __('Claim not granted - your account login details were wrong', 'updraftplus');
+			$ukresponse = __('An unknown response was received.', 'updraftplus').' '.__('Response was:', 'updraftplus');
+			$addon_installed = __('The claim and installation was successful.', 'updraftplus').' '.__('You can now use your purchase!', 'updraftplus');
+			?>
 		<script type="text/javascript">
 			function udm_claim(key) {
 				if (jQuery('#addon-'+key).children('.addon-activation-notice').length) {
@@ -357,11 +357,11 @@ class UpdraftPlusAddOns_Options2 {
 				}
 				var data = {
 					action: 'udaddons_claimaddon',
-					nonce: '$nonce',
+					nonce: '<?php echo $nonce; ?>',
 					key: key
 				};
 				
-				jQuery('#addon-'+key).prepend('<div class="addon-activation-notice updated" style="border: 1px solid; padding: 10px; margin-top: 10px; margin-bottom: 10px; position: absolute; z-index:99; "><strong>$pleasewait</strong></div>');
+				jQuery('#addon-'+key).prepend('<div class="addon-activation-notice updated" style="border: 1px solid; padding: 10px; margin-top: 10px; margin-bottom: 10px; position: absolute; z-index:99; "><strong><?php echo esc_html($pleasewait);?></strong></div>');
 				
 				jQuery.post(ajaxurl, data, function(resp) {
 				
@@ -378,28 +378,28 @@ class UpdraftPlusAddOns_Options2 {
 					}
 					
 					if ('ERR' == response_code) {
-						alert("$notgranted");
+						alert("<?php echo esc_js($notgranted); ?>");
 					} else if ('OK' == response_code) {
 						// We used to force udm_refresh to 1, before (Oct 2017) the possibility that there was already an updates result in the claim response
-						var new_location = '$href?page=$ourpageslug&tab=addons';
+						var new_location = '<?php echo esc_url($href);?>';
 						// Aug 2018: The check updates process does not refresh the user_addons list, so the plugin does not recognise the claim was granted. We need to force a refresh when a claim is activated
 						if (addons_written) {
-							alert("$addon_installed");
+							alert("<?php echo esc_js($addon_installed);?>");
 						}
 						// Still do the page refresh so that the version number + other UI elements update
-						new_location += '&udm_refresh=1';
+						new_location += '?page=<?php echo esc_js($ourpageslug); ?>&tab=addons&udm_refresh=1';
 						window.location.href = new_location;
 					} else if ('BADAUTH' == response_code) {
-						alert("$notgrantedlogin");
+						alert("<?php echo esc_js($notgrantedlogin); ?>");
 					} else {
-						alert("$ukresponse "+response);
+						alert("<?php echo esc_js($ukresponse);?> "+response);
 					}
 				});
 				
 				return false;
 			}
 		</script>
-ENDHERE;
+			<?php
 		}
 
 		$addons = $updraftplus_addons2->get_available_addons();
@@ -537,6 +537,7 @@ ENDHERE;
 			$blurb = "<p>";
 			$preblurb = "<div style=\"float:right;padding-top:10px;\"><img title=\"".esc_html__('You\'ve got it', 'updraftplus')."\" src=\"$urlbase/$key.png\" width=\"100\" height=\"100\" alt=\"".esc_html__("You've got it", 'updraftplus')."\"></div>";
 			if ('all' != $key) {
+				/* translators: %s: Currently installed version of Add-on. */
 				$blurb .= sprintf(esc_html__('Your version: %s', 'updraftplus'), $installedversion);
 				if (!empty($latestversion) && $latestversion == $installedversion) {
 					$blurb .= " (".esc_html__('latest', 'updraftplus').')';
@@ -553,13 +554,16 @@ ENDHERE;
 				$blurb = '<p><strong>'.esc_html__('Available for this site (via your all-addons purchase)', 'updraftplus').' - <a href="'.$this->plugin_update_url.'">'.esc_html__('please follow this link to update the plugin in order to get it', 'updraftplus').'</a></strong></p>';
 				$preblurb = "<div style=\"border: 2px solid #189c5f;padding: 10px;width: 72px;height: 72px;border-radius: 5px;position: relative;background: #1a9c5e0f;\"><img style=\"-webkit-filter: grayscale(100%);filter: grayscale(100%);width: 56px;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\" src=\"$urlbase/$key.png\"></div>";
 			} elseif ($is_assigned) {
-				$blurb = '<p><strong>'.esc_html__('Assigned to this site', 'updraftplus').' - <a href="'.$this->plugin_update_url.'">'.esc_html__('please  follow this link to update the plugin in order to activate it', 'updraftplus').'</a></strong></p>';
+				$blurb = '<p><strong>'.esc_html__('Assigned to this site', 'updraftplus').' - <a href="'.$this->plugin_update_url.'">'.esc_html__('please follow this link to update the plugin in order to activate it', 'updraftplus').'</a></strong></p>';
 				$preblurb = "<div style=\"border: 2px solid #189c5f;padding: 10px;width: 72px;height: 72px;border-radius: 5px;position: relative;background: #1a9c5e0f;\"><img style=\"-webkit-filter: grayscale(100%);filter: grayscale(100%);width: 56px;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\" src=\"$urlbase/$key.png\"></div>";
 			} elseif (is_array($unclaimed)) {
 				// Keys: eid = unique ID, status = available|reclaimable
 				// Value of $unclaimed is a unique id, though we won't particularly use it
 				if (isset($unclaimed['status']) && 'reclaimable' == $unclaimed['status']) {
-					$blurb ='<p><strong>'.esc_html__('Available to claim on this site', 'updraftplus').' - <a aria-label="'.sprintf(esc_html__('%s available to claim on this site.', 'updraftplus').' '.esc_html__('Follow this link to activate this licence', 'updraftplus'), $name).'" href="#" onclick="return udm_claim(\''.esc_js($key).'\');">'.esc_html__('activate it on this site', 'updraftplus').'</a></strong></p>';
+					$blurb ='<p><strong>'.esc_html__('Available to claim on this site', 'updraftplus').' - <a aria-label="'.
+						/* translators: %s: Add-on name. */
+						sprintf(esc_html__('%s available to claim on this site.', 'updraftplus').' '.
+						esc_html__('Follow this link to activate this licence', 'updraftplus'), $name).'" href="#" onclick="return udm_claim(\''.esc_js($key).'\');">'.esc_html__('activate it on this site', 'updraftplus').'</a></strong></p>';
 				} else {
 					$blurb ='<p><strong>'.esc_html__('You have an inactive purchase', 'updraftplus').' - <a href="#" onclick="return udm_claim(\''.esc_js($key).'\');">'.esc_html__('activate it on this site', 'updraftplus').'</a></strong></p>';
 				}
@@ -568,16 +572,15 @@ ENDHERE;
 				/* translators: %s: Add-on name */
 				$blurb = '<p><a aria-label="'.sprintf(esc_html__('Get %s from teamupdraft.com', 'updraftplus'), $name).
 						(($this->connected) ? '' : ' '.esc_html__('(or connect using the form on this page if you have already purchased it)', 'updraftplus')).'" target="_blank" href="'.$mother.$shopurl.'">'.esc_html__('Get it from teamupdraft.com', 'updraftplus').'</a>'.(($this->connected) ? '' : ' '.esc_html__('(or connect using the login form on this page if you have already bought it)', 'updraftplus')).'</p>';
+						/* translators: %s: Add-on name. */
 				$preblurb = "<div style=\"border: 2px solid #8c8c8c;padding: 10px;width: 72px;height: 72px;border-radius: 5px;position: relative;background: #8c8c8c0f;\"><a href=\"".$mother.$shopurl."\" title=\"".sprintf(esc_html__('Buy %s', 'updraftplus'), $name)."\"><img style=\"-webkit-filter: grayscale(100%);filter: grayscale(100%);width: 56px;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);\" src=\"$urlbase/$key.png\" alt=\"".esc_html__('Buy It', 'updraftplus')."\"></a></div>";
 			}
 		}
 		if ($extra_description) $extra_description = '<p>'.$extra_description.'</p>';
-		return <<<ENDHERE
-			<div id="addon-$key" style="border: 1px solid #d0d0d0;border-radius: 5px;padding: 12px;max-width: 680px;margin-bottom: 22px;background-color:#fff;box-shadow: 0 0 20px 5px rgb(0 0 0 / 7%);display: flex;justify-content: space-between;align-items: center;">
-				<div style="max-width: 80%;"><h2 style="">$name</h2><p>$description</p>$extra_description$blurb</div>
-				$preblurb
-			</div>
-ENDHERE;
+		return "<div id=\"addon-$key\" style=\"border: 1px solid #d0d0d0;border-radius: 5px;padding: 12px;max-width: 680px;margin-bottom: 22px;background-color:#fff;box-shadow: 0 0 20px 5px rgb(0 0 0 / 7%);display: flex;justify-content: space-between;align-items: center;\">
+					<div style=\"max-width: 80%;\"><h2>$name</h2><p>$description</p>$extra_description$blurb</div>
+					$preblurb
+				</div>";
 	}
 
 	/**

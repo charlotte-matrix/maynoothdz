@@ -70,14 +70,11 @@ class UpdraftCentral_Listener {
 		}
 		
 		// If we ever need to expand beyond a single GET action, this can/should be generalised and put into the commands class
-		$udcentral_action = UpdraftPlus_Manipulation_Functions::fetch_superglobal('get', 'udcentral_action');
-		if (!empty($udcentral_action) && 'login' == $udcentral_action) {
+		if (!empty($_GET['udcentral_action']) && 'login' == $_GET['udcentral_action']) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Runs before authentication, where nonces do not apply. This request is authenticated by the 'login_key' instead.
 			// auth_redirect() does not return, according to the documentation; but the code shows that it can
 			// auth_redirect();
-			$login_id = UpdraftPlus_Manipulation_Functions::fetch_superglobal('get', 'login_id', 0, false, 'integer', 'intval');
-			$get_login_key = UpdraftPlus_Manipulation_Functions::fetch_superglobal('get', 'login_key');
-			if (!empty($login_id) && !empty($get_login_key)) {
-				$login_user = get_user_by('id', $login_id);
+			if (!empty($_GET['login_id']) && is_numeric($_GET['login_id']) && !empty($_GET['login_key'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Runs before authentication, where nonces do not apply. This request is authenticated by the 'login_key' instead.
+				$login_user = get_user_by('id', intval($_GET['login_id'])); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Runs before authentication, where nonces do not apply. This request is authenticated by the 'login_key' instead.
 				
 				// THis is included so we can get $wp_version
 				include_once(ABSPATH.WPINC.'/version.php');
@@ -87,7 +84,8 @@ class UpdraftCentral_Listener {
 					$allow_autologin = apply_filters('updraftcentral_allow_autologin', true, $login_user);
 					if ($allow_autologin) {
 						$login_key = get_user_meta($login_user->ID, 'updraftcentral_login_key', true);
-						if (is_array($login_key) && !empty($login_key['created']) && $login_key['created'] > time() - 60 && !empty($login_key['key']) && $login_key['key'] == $get_login_key) {
+						// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Runs before authentication, where nonces do not apply. This request is authenticated by the 'login_key' instead.
+						if (is_array($login_key) && !empty($login_key['created']) && $login_key['created'] > time() - 60 && !empty($login_key['key']) && $login_key['key'] == $_GET['login_key']) {
 							$autologin = empty($login_key['redirect_url']) ? network_admin_url() : $login_key['redirect_url'];
 						}
 					}
@@ -203,7 +201,7 @@ class UpdraftCentral_Listener {
 			add_filter('auth_cookie', array($this, 'set_global_logged_in_cookie'), 10, 4);
 			wp_set_auth_cookie($user->ID);
 			remove_filter('auth_cookie', array($this, 'set_global_logged_in_cookie'), 10, 4);
-			do_action('wp_login', $user->user_login, $user);
+			do_action('wp_login', $user->user_login, $user); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
 		}
 		if ($redirect_url) {
 			// the wp_set_auth_cookie() above uses setcookie() function but the corresponding LOGGED_IN_COOKIE variable is visible and can only be accessible on the next page load

@@ -82,7 +82,7 @@ class UpdraftPlus_Tour {
 
 		$script_suffix = $updraftplus->use_unminified_scripts() ? '' : '.min';
 		$updraft_min_or_not = $updraftplus->get_updraftplus_file_version();
-		wp_enqueue_script('updraftplus-tether-js', trailingslashit(UPDRAFTPLUS_URL).'includes/tether/tether'.$script_suffix.'.js', $updraftplus->version, true);
+		wp_enqueue_script('updraftplus-tether-js', trailingslashit(UPDRAFTPLUS_URL).'includes/tether/tether'.$script_suffix.'.js', array(), $updraftplus->version, true);
 		wp_enqueue_script('updraftplus-shepherd-js', trailingslashit(UPDRAFTPLUS_URL).'includes/tether-shepherd/shepherd'.$script_suffix.'.js', array('updraftplus-tether-js'), $updraftplus->version, true);
 		wp_enqueue_style('updraftplus-shepherd-css', trailingslashit(UPDRAFTPLUS_URL).'css/tether-shepherd/shepherd-theme-arrows-plain-buttons'.$script_suffix.'.css', false, $updraftplus->version);
 		wp_enqueue_style('updraftplus-tour-css', trailingslashit(UPDRAFTPLUS_URL).'css/updraftplus-tour'.$updraft_min_or_not.'.css', false, $updraftplus->version);
@@ -306,4 +306,4 @@ class UpdraftPlus_Tour {
 	}
 }
 
-add_action('admin_init', array(UpdraftPlus_Tour::get_instance(), 'init'));
+// add_action('admin_init', array(UpdraftPlus_Tour::get_instance(), 'init'));

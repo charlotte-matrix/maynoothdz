@@ -507,9 +507,9 @@ class UpdraftCentral_Posts_Commands extends UpdraftCentral_Commands {
 			$editing_styles[] = array('css' => $result['content'], 'inline' => '');
 		};
 
-		do_action('enqueue_block_assets');
-		do_action('enqueue_block_editor_assets');
-		do_action('wp_enqueue_scripts');
+		do_action('enqueue_block_assets'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
+		do_action('enqueue_block_editor_assets'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
+		do_action('wp_enqueue_scripts'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
 
 		// Checking for editor styles support since styles may vary from theme to theme
 		if ($editor_styles) {
@@ -803,7 +803,7 @@ class UpdraftCentral_Posts_Commands extends UpdraftCentral_Commands {
 			'echo'			   => false
 		);
 
-		$parent_dropdown_args = apply_filters('post_edit_category_parent_dropdown_args', $parent_dropdown_args);
+		$parent_dropdown_args = apply_filters('post_edit_category_parent_dropdown_args', $parent_dropdown_args); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
 		$parent_dropdown = wp_dropdown_categories($parent_dropdown_args);
 
 		if (!function_exists('wp_popular_terms_checklist')) {
@@ -1058,16 +1058,14 @@ class UpdraftCentral_Posts_Commands extends UpdraftCentral_Commands {
 				}
 			}
 
-			// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date -- post_date is stored in WP local timezone; gmdate() would return incorrect UTC values
 			$published_date = array(
-				'jj' => date('d', strtotime($post->post_date)),
-				'mm' => date('m', strtotime($post->post_date)),
-				'aa' => date('Y', strtotime($post->post_date)),
-				'hh' => date('H', strtotime($post->post_date)),
-				'mn' => date('i', strtotime($post->post_date)),
-				'ss' => date('s', strtotime($post->post_date))
+				'jj' => date('d', strtotime($post->post_date)),// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- post_date is stored in WP local timezone; gmdate() would return incorrect UTC values
+				'mm' => date('m', strtotime($post->post_date)),// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- post_date is stored in WP local timezone; gmdate() would return incorrect UTC values
+				'aa' => date('Y', strtotime($post->post_date)),// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- post_date is stored in WP local timezone; gmdate() would return incorrect UTC values
+				'hh' => date('H', strtotime($post->post_date)),// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- post_date is stored in WP local timezone; gmdate() would return incorrect UTC values
+				'mn' => date('i', strtotime($post->post_date)),// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- post_date is stored in WP local timezone; gmdate() would return incorrect UTC values
+				'ss' => date('s', strtotime($post->post_date))// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- post_date is stored in WP local timezone; gmdate() would return incorrect UTC values
 			);
-			// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date
 
 			$sample_permalink = get_sample_permalink($post->ID, $post->post_title, '');
 			$permalink = get_permalink($post->ID);
@@ -1098,12 +1096,12 @@ class UpdraftCentral_Posts_Commands extends UpdraftCentral_Commands {
 			$response = array(
 				'post' => $encode ? json_encode($post) : $post,
 				'misc' => array(
-					'guid_rendered' => apply_filters('get_the_guid', $post->guid, $post->ID),
+					'guid_rendered' => apply_filters('get_the_guid', $post->guid, $post->ID), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
 					'link' => $permalink,
 					'slug' => $slug,
 					'site_url' => site_url('/'),
 					'title_rendered' => get_the_title($post->ID),
-					'content_rendered' => apply_filters('the_content', $post->post_content),
+					'content_rendered' => apply_filters('the_content', $post->post_content), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- False positive: this is a core WordPress hook.
 					'excerpt' => $post->post_excerpt,
 					'featured_media' => 0,
 					'sticky' => is_sticky($post->ID),
