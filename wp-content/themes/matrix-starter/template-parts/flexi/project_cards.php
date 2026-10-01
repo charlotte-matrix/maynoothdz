@@ -3,7 +3,7 @@ $cards = get_sub_field('cards') ?: [];
 $empty = get_sub_field('empty_state') ?: [];
 if (!is_array($cards)) { $cards = []; }
 ?>
-<section aria-label="<?php echo esc_attr__('Project card grid', 'matrix-starter'); ?>" class="dz-flexi flex-project-cards">
+<section aria-label="<?php echo esc_attr__('Project card grid', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-project-cards">
   <div class="container flex-demo">
     <div class="flex-card-grid">
       <?php foreach ($cards as $card) :

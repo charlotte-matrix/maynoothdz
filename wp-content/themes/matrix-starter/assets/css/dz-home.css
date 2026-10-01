@@ -1,6 +1,14 @@
 /**
  * Maynooth DZ homepage section styles.
+ * Selectors use .dz-home.section / .dz-home.hero (compound) because those
+ * classes live on the same element — a descendant space selector never matched.
  */
+
+/* Design uses a fluid root rem so type/spacing grow on large displays. */
+html:has(body.home),
+html:has(body.front-page) {
+  font-size: clamp(1rem, calc(0.4375rem + 0.625vw), 2rem);
+}
 
 .dz-home .button {
   display: inline-flex;
@@ -54,7 +62,7 @@
   margin-inline: auto;
 }
 
-.dz-home .section {
+.dz-home.section {
   padding-block: 6rem;
 }
 
@@ -67,10 +75,33 @@
   font-family: Poppins, Arial, sans-serif;
   font-weight: 700;
   margin: 0;
+  color: var(--dz-forest, #203129);
+}
+
+.dz-home h1 {
+  font-size: 2rem;
+  line-height: 1.125;
+  letter-spacing: -0.028125rem;
+}
+
+.dz-home h2 {
+  font-size: 1.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.03125rem;
+}
+
+.dz-home h3 {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.021875rem;
 }
 
 .dz-home p {
   margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: var(--dz-forest, #203129);
 }
 
 .dz-home img {
@@ -88,12 +119,19 @@
   font-family: Inter, Arial, sans-serif;
 }
 
+.dz-home.animated-gradient,
 .dz-home .animated-gradient {
   isolation: isolate;
   background-image: linear-gradient(115deg, #c0e8bc 0%, #88d8c8 25%, #9edec0 45%, #66c6c5 65%, #a9dfaa 85%, #c0e8bc 100%);
   background-size: 320% 220%;
   background-position: 0% 30%;
   animation: dz-living-gradient 14s ease-in-out infinite alternate;
+}
+
+@keyframes dz-living-gradient {
+  0% { background-position: 0% 25%; }
+  50% { background-position: 50% 75%; }
+  100% { background-position: 100% 35%; }
 }
 
 .dz-home .hero-row {
@@ -248,7 +286,7 @@
 
 /* Projects carousel */
 .dz-home.projects {
-  padding-bottom: 3rem;
+  padding-block: 6rem 3rem;
   overflow: hidden;
   color: var(--dz-forest, #203129);
   font-family: Inter, Arial, sans-serif;
@@ -265,6 +303,7 @@
 .dz-home .section-heading h2 {
   font-size: 1.75rem;
   line-height: 1.15;
+  letter-spacing: -0.03125rem;
 }
 
 .dz-home .text-link {
@@ -389,11 +428,14 @@
 }
 
 .dz-home .card-content h3 {
-  font-size: 1.1875rem;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.021875rem;
 }
 
 .dz-home .card-content p {
   margin-top: 0.25rem;
+  font-size: 1rem;
   line-height: 1.625rem;
 }
 
@@ -462,10 +504,19 @@
   background: #f8f7f2;
   color: var(--dz-forest, #203129);
   font-family: Inter, Arial, sans-serif;
+  overflow: hidden;
+}
+
+.dz-home .action-layout {
+  display: block;
+  padding: 0;
 }
 
 .dz-home .action-layout h2 {
   font-size: 1.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.03125rem;
+  white-space: normal;
 }
 
 .dz-home .action-grid {
@@ -476,9 +527,15 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  cursor: auto;
+  scroll-snap-type: none;
 }
 
 .dz-home .action-card {
+  min-width: 0;
   min-height: 9.75rem;
   padding: 1.4rem 1.5rem;
   gap: 1.25rem;
@@ -520,7 +577,9 @@
 .dz-home .action-card strong {
   font-size: 1.25rem;
   line-height: 1.28;
+  letter-spacing: -0.025rem;
   display: block;
+  white-space: normal;
 }
 
 .dz-home .action-card > span:nth-child(2) {
@@ -668,15 +727,51 @@
 
 @media (min-width: 1600px) {
   .dz-home .container {
-    max-width: 83rem;
+    max-width: 96rem;
   }
 
   :root {
     --dz-rail-count: 4;
   }
 
+  .dz-home .hero-row {
+    max-width: 104rem;
+    gap: 4.5rem;
+  }
+
+  .dz-home .hero-copy {
+    max-width: 34rem;
+  }
+
+  .dz-home .hero-copy h1 {
+    font-size: 2.625rem;
+  }
+
+  .dz-home .hero-copy p {
+    max-width: 28rem;
+  }
+
+  .dz-home .hero-map {
+    height: auto;
+    aspect-ratio: 1.5;
+  }
+
+  .dz-home .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3rem;
+  }
+
+  .dz-home .stat p,
+  .dz-home .stat:first-child p {
+    max-width: 21rem;
+  }
+
   .dz-home .about-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .dz-home .about-copy h2 {
+    white-space: normal;
   }
 
   .dz-home .about-photo {
@@ -689,6 +784,10 @@
 
   .dz-home .community-photo {
     height: 18rem;
+  }
+
+  .dz-home .community-card h2 {
+    max-width: 26rem;
   }
 }
 
@@ -725,7 +824,11 @@
     --dz-rail-inset: 1.5rem;
   }
 
-  .dz-home .section {
+  .dz-home.section {
+    padding-block: 3rem;
+  }
+
+  .dz-home.projects {
     padding-block: 3rem;
   }
 
@@ -739,6 +842,12 @@
   .dz-home .hero-copy {
     padding: 0;
     max-width: none;
+  }
+
+  .dz-home .hero-copy h1 {
+    font-size: 1.75rem;
+    line-height: 2rem;
+    letter-spacing: -0.025rem;
   }
 
   .dz-home .hero-actions {
@@ -786,8 +895,32 @@
     padding-block: 3rem;
   }
 
+  .dz-home .action-grid {
+    margin-top: 1.5rem;
+  }
+
   .dz-home #action-track {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .dz-home .action-card {
+    min-height: 7.5rem;
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .dz-home .action-card strong {
+    font-size: 1.125rem;
+  }
+
+  .dz-home .action-card > span:nth-child(2) > span {
+    font-size: 0.875rem;
+  }
+
+  .dz-home .action-icon {
+    width: 2.75rem;
+    height: 2.75rem;
   }
 
   .dz-home .about-grid {
@@ -819,9 +952,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .dz-home.animated-gradient,
   .dz-home .animated-gradient,
   .dz-home .map-stickers img {
     animation: none;
+  }
+
+  .dz-home.animated-gradient,
+  .dz-home .animated-gradient {
+    background-position: 45% 50%;
   }
 
   .js .dz-home .reveal {

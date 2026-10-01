@@ -10,7 +10,7 @@ if (trim(wp_strip_all_tags($quote_text)) === '') {
     return;
 }
 ?>
-<section aria-label="<?php echo esc_attr__('Quote', 'matrix-starter'); ?>" class="dz-flexi flex-quote">
+<section aria-label="<?php echo esc_attr__('Quote', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-quote">
     <div class="container flex-demo">
         <div class="article-copy">
             <blockquote>

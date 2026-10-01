@@ -55,6 +55,13 @@ function matrix_acf_scalar_string( $raw ): string {
 }
 
 /**
+ * True when the Flexiblock catalogue page is being viewed.
+ */
+function matrix_dz_is_flexiblock_page(): bool {
+  return is_page('flexi');
+}
+
+/**
  * Enqueue theme assets + optional libs
  */
 function matrix_starter_enqueue_scripts() {
@@ -66,25 +73,22 @@ function matrix_starter_enqueue_scripts() {
   // Dev/prod asset base
   $is_dev = defined('WP_ENV') && WP_ENV === 'development';
   $base   = get_template_directory_uri();
+  $is_flexiblock = matrix_dz_is_flexiblock_page();
 
   $app_js  = $is_dev ? '/wp-content/themes/matrix-starter/dist/app.js'  : $base . '/dist/app.js';
   $app_css = $is_dev ? '/wp-content/themes/matrix-starter/dist/app.css' : $base . '/dist/app.css';
 
-  // Main bundle (footer)
+  // Main JS bundle (footer). Starter CSS is not used on the front end —
+  // Maynooth DZ pages are styled from the supplied design CSS instead.
   wp_enqueue_script('matrix-starter', $app_js, ['jquery'], '1.0.0', true);
-  wp_enqueue_style('matrix-starter', $app_css, [], $theme_version);
+  if (is_admin()) {
+    wp_enqueue_style('matrix-starter', $app_css, [], $theme_version);
+  }
 
   // Alpine + Intersect
   wp_enqueue_script('alpine-intersect','https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js',[],null,true);
   wp_enqueue_script('alpine','https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',['alpine-intersect'],null,true);
   wp_add_inline_script('alpine', "document.addEventListener('alpine:init',()=>{ if(window.Alpine&&window.AlpineIntersect) Alpine.plugin(window.AlpineIntersect); });");
-  wp_add_inline_style('matrix-starter', '[x-cloak]{display:none !important;}');
-  wp_add_inline_style('matrix-starter', '
-    .sr-person-card__imgwrap{height:320px;}
-    @media (max-width:575px){.sr-person-card__imgwrap{height:250px;}}
-    @media (max-width:320px){.sr-people-grid{grid-template-columns:1fr !important;}}
-    .sr-person-card__img{object-fit:cover;}
-  ');
 
   // PACE stat counters (IntersectionObserver — no Alpine dependency)
   $pace_counters_js = get_template_directory() . '/assets/js/pace-counters.js';
@@ -98,15 +102,48 @@ function matrix_starter_enqueue_scripts() {
     );
   }
 
-  // Maynooth DZ flexible content blocks
-  $dz_flexi_css = get_template_directory() . '/assets/css/dz-flexi.css';
-  if (file_exists($dz_flexi_css)) {
-    wp_enqueue_style(
-      'dz-flexi',
-      $base . '/assets/css/dz-flexi.css',
-      ['matrix-starter'],
-      (string) filemtime($dz_flexi_css)
-    );
+  // Design CSS source of truth for the Flexiblock catalogue page.
+  if ($is_flexiblock) {
+    $design_dir = get_template_directory() . '/assets/css/dz-design';
+    $design_uri = $base . '/assets/css/dz-design';
+    $design_deps = [];
+    foreach (['styles', 'breadcrumbs', 'navigation', 'article', 'take-action', 'community', 'resources', 'flexiblock', 'bridge'] as $sheet) {
+      $path = $design_dir . '/' . $sheet . '.css';
+      if (!file_exists($path)) {
+        continue;
+      }
+      $handle = 'dz-design-' . $sheet;
+      wp_enqueue_style(
+        $handle,
+        $design_uri . '/' . $sheet . '.css',
+        $design_deps,
+        (string) filemtime($path)
+      );
+      $design_deps = [$handle];
+    }
+  }
+
+  // Maynooth DZ flexible content (ported) — used on pages that are not the design catalogue.
+  if (!$is_flexiblock) {
+    $dz_flexi_css = get_template_directory() . '/assets/css/dz-flexi.css';
+    if (file_exists($dz_flexi_css)) {
+      wp_enqueue_style(
+        'dz-flexi',
+        $base . '/assets/css/dz-flexi.css',
+        [],
+        (string) filemtime($dz_flexi_css)
+      );
+    }
+
+    $dz_blocks_css = get_template_directory() . '/assets/css/dz-blocks.css';
+    if (file_exists($dz_blocks_css)) {
+      wp_enqueue_style(
+        'dz-blocks',
+        $base . '/assets/css/dz-blocks.css',
+        ['dz-flexi'],
+        (string) filemtime($dz_blocks_css)
+      );
+    }
   }
 
   $dz_flexi_js = get_template_directory() . '/assets/js/dz-flexi.js';
@@ -120,13 +157,14 @@ function matrix_starter_enqueue_scripts() {
     );
   }
 
-  // Maynooth DZ header / footer chrome
+  // Maynooth DZ header / footer chrome (homepage / other DZ pages).
+  // Flexiblock catalogue uses design styles.css for chrome instead.
   $dz_chrome_css = get_template_directory() . '/assets/css/dz-chrome.css';
-  if (file_exists($dz_chrome_css)) {
+  if (file_exists($dz_chrome_css) && !$is_flexiblock) {
     wp_enqueue_style(
       'dz-chrome',
       $base . '/assets/css/dz-chrome.css',
-      ['matrix-starter'],
+      [],
       (string) filemtime($dz_chrome_css)
     );
     $brand_bar = $base . '/assets/dz/brand-bar.svg';
@@ -150,18 +188,8 @@ function matrix_starter_enqueue_scripts() {
     ]);
   }
 
-  $dz_blocks_css = get_template_directory() . '/assets/css/dz-blocks.css';
-  if (file_exists($dz_blocks_css)) {
-    wp_enqueue_style(
-      'dz-blocks',
-      $base . '/assets/css/dz-blocks.css',
-      ['dz-flexi'],
-      (string) filemtime($dz_blocks_css)
-    );
-  }
-
   $dz_home_css = get_template_directory() . '/assets/css/dz-home.css';
-  if (file_exists($dz_home_css)) {
+  if (file_exists($dz_home_css) && (is_front_page() || is_home()) && !$is_flexiblock) {
     wp_enqueue_style(
       'dz-home',
       $base . '/assets/css/dz-home.css',
@@ -343,6 +371,17 @@ wp_add_inline_script(
   }, 10, 2);
 }
 add_action('wp_enqueue_scripts', 'matrix_starter_enqueue_scripts', 20);
+
+/**
+ * Mark the Flexiblock catalogue page for design CSS hooks.
+ */
+add_filter('body_class', function (array $classes): array {
+  if (function_exists('matrix_dz_is_flexiblock_page') && matrix_dz_is_flexiblock_page()) {
+    $classes[] = 'directory-page';
+    $classes[] = 'flexiblock-page';
+  }
+  return $classes;
+});
 
 /**
  * Keep jQuery in header group so it prints early if needed

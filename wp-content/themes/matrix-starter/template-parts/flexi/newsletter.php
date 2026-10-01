@@ -3,7 +3,7 @@ $heading = trim((string) get_sub_field('heading'));
 $intro = trim((string) get_sub_field('intro'));
 $uid = wp_unique_id('nl-');
 ?>
-<section aria-label="<?php echo esc_attr__('Newsletter sign-up', 'matrix-starter'); ?>" class="dz-flexi flex-newsletter">
+<section aria-label="<?php echo esc_attr__('Newsletter sign-up', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-newsletter">
   <div class="container flex-demo">
     <section aria-labelledby="<?php echo esc_attr($uid); ?>-title" class="community-newsletter">
       <div>

@@ -3,7 +3,7 @@ $heading = trim((string) get_sub_field('heading'));
 $items = get_sub_field('items') ?: [];
 if (!is_array($items) || $items === []) { return; }
 ?>
-<section aria-label="<?php echo esc_attr__('Link list', 'matrix-starter'); ?>" class="dz-flexi flex-link-list">
+<section aria-label="<?php echo esc_attr__('Link list', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-link-list">
   <div class="container flex-demo">
     <div class="resources-column">
       <section class="resource-group">

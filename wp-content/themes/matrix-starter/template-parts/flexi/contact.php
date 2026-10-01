@@ -4,7 +4,7 @@ $address = (string) get_sub_field('address');
 $email = trim((string) get_sub_field('email'));
 if ($heading === '' && $address === '' && $email === '') { return; }
 ?>
-<section aria-label="<?php echo esc_attr__('Contact', 'matrix-starter'); ?>" class="dz-flexi flex-contact-block">
+<section aria-label="<?php echo esc_attr__('Contact', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-contact-block">
   <div class="container flex-demo">
     <div class="flex-contact flex-narrow">
       <div>

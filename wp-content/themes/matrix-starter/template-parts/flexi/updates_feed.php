@@ -3,7 +3,7 @@ $updates = get_sub_field('updates') ?: [];
 $empty = get_sub_field('empty_state') ?: [];
 if (!is_array($updates)) { $updates = []; }
 ?>
-<section aria-label="<?php echo esc_attr__('Updates feed', 'matrix-starter'); ?>" class="dz-flexi flex-updates">
+<section aria-label="<?php echo esc_attr__('Updates feed', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-updates">
   <div class="container flex-demo">
     <div class="community-columns">
       <?php foreach ($updates as $update) :

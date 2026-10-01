@@ -4,7 +4,7 @@ $items = get_sub_field('items') ?: [];
 $note = (string) get_sub_field('accessibility_note');
 if (!is_array($items)) { $items = []; }
 ?>
-<section aria-label="<?php echo esc_attr__('Downloads list', 'matrix-starter'); ?>" class="dz-flexi flex-downloads">
+<section aria-label="<?php echo esc_attr__('Downloads list', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-downloads">
   <div class="container flex-demo">
     <div class="resources-column">
       <section class="resource-group">

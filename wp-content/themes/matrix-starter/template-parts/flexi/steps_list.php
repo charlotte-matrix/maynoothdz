@@ -2,7 +2,7 @@
 $steps = get_sub_field('steps') ?: [];
 if (!is_array($steps) || $steps === []) { return; }
 ?>
-<section aria-label="<?php echo esc_attr__('Steps', 'matrix-starter'); ?>" class="dz-flexi flex-steps">
+<section aria-label="<?php echo esc_attr__('Steps', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-steps">
   <div class="container flex-demo">
     <ol class="publishing-steps">
       <?php $i = 0; foreach ($steps as $step) :

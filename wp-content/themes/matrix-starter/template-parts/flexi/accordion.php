@@ -11,7 +11,7 @@ if (!is_array($items) || $items === []) {
 
 $group_name = 'flex-faq-' . wp_unique_id();
 ?>
-<section aria-label="<?php echo esc_attr__('Accordion', 'matrix-starter'); ?>" class="dz-flexi flex-accordion">
+<section aria-label="<?php echo esc_attr__('Accordion', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-accordion">
     <div class="container flex-demo">
         <div class="flex-narrow flex-faq">
             <?php foreach ($items as $item) :

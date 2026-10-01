@@ -101,7 +101,7 @@ $flexi_blocks = [
     ],
     [
         'acf_fc_layout' => 'rich_text',
-        'content' => '<h2>A greener Maynooth, together</h2><p>The Zone brings local people, places and projects together. Discover what is happening nearby and find <a href="' . esc_url($projects) . '">a project that interests you</a>.</p><h3>Start with your everyday</h3><p>There are many ways to take part, whether you have a few minutes or a bigger idea.</p><ul><li>Explore walking and cycling routes around town.</li><li>Connect with a local community group.</li></ul><ol><li>Choose an area you would like to learn about.</li><li>Explore the projects and practical next steps.</li></ol>',
+        'content' => '<h2>A greener Maynooth, together</h2><p>The Zone brings local people, places and projects together. Discover what is happening nearby and find <a href="' . esc_url($projects) . '">a project that interests you</a>.</p><h3>Start with your everyday</h3><p>There are many ways to take part, whether you have a few minutes or a bigger idea.</p><ul><li>Explore walking and cycling routes around town.</li><li>Connect with a local community group.</li></ul><ol><li>Choose an area you would like to learn about.</li><li>Explore the projects and practical next steps.</li></ol><figure class="flex-figure"><img class="article-photo" src="' . esc_url(wp_get_attachment_image_url((int) $img['canal_nature'], 'large') ?: '') . '" alt="Trees and waterside paths along the Royal Canal" loading="lazy" width="1600" height="1067"><figcaption>Space for nature, and for everyday journeys along the Royal Canal.</figcaption></figure>',
     ],
     [
         'acf_fc_layout' => 'stats_strip',

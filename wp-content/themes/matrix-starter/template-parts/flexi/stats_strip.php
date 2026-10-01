@@ -11,7 +11,7 @@ if (!is_array($stats) || $stats === []) {
     return;
 }
 ?>
-<section aria-label="<?php echo esc_attr__('Stats strip', 'matrix-starter'); ?>" class="dz-flexi flex-stats">
+<section aria-label="<?php echo esc_attr__('Stats strip', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-stats">
     <div class="stats container">
         <?php foreach ($stats as $stat) :
             $value    = trim((string) ($stat['value'] ?? ''));

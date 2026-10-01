@@ -11,7 +11,7 @@ $meta = [];
 if ($ts) { $meta[] = date_i18n('j F Y', $ts); }
 if ($location !== '') { $meta[] = $location; }
 ?>
-<section aria-label="<?php echo esc_attr__('Event item', 'matrix-starter'); ?>" class="dz-flexi flex-event-block">
+<section aria-label="<?php echo esc_attr__('Event item', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-event-block">
   <div class="container flex-demo">
     <div class="flex-event flex-narrow">
       <div class="event-summary">

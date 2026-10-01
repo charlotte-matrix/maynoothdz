@@ -18,7 +18,7 @@ if ($title_html === '' && $introduction === '' && !$image && !$has_actions) {
     return;
 }
 ?>
-<section aria-label="<?php echo esc_attr__('Compact hero', 'matrix-starter'); ?>" class="dz-flexi flex-hero-block">
+<section aria-label="<?php echo esc_attr__('Compact hero', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-hero-block">
     <div class="flex-hero">
         <div class="container">
             <?php if ($show_breadcrumbs) : ?>

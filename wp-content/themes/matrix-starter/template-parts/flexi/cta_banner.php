@@ -10,7 +10,7 @@ if ($heading === '' && !matrix_dz_link_attrs($button)) {
     return;
 }
 ?>
-<section aria-label="<?php echo esc_attr__('Call to action', 'matrix-starter'); ?>" class="dz-flexi flex-cta">
+<section aria-label="<?php echo esc_attr__('Call to action', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-cta">
     <div class="container flex-demo">
         <section class="resources-cta">
             <?php if ($heading !== '') : ?>

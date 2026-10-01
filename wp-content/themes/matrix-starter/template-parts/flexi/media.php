@@ -2,7 +2,7 @@
 $items = get_sub_field('items') ?: [];
 if (!is_array($items) || $items === []) { return; }
 ?>
-<section aria-label="<?php echo esc_attr__('Media', 'matrix-starter'); ?>" class="dz-flexi flex-media">
+<section aria-label="<?php echo esc_attr__('Media', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-media">
   <div class="container flex-demo">
     <div class="flex-media-grid">
       <?php foreach ($items as $item) :

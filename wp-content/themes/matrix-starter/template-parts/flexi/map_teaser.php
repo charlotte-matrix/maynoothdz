@@ -7,7 +7,7 @@ $map_url = is_array($map_image) && !empty($map_image['url']) ? $map_image['url']
 $map_alt = is_array($map_image) ? (string) ($map_image['alt'] ?? '') : 'Illustrated map of Maynooth';
 $link = matrix_dz_link_attrs($button);
 ?>
-<section aria-label="<?php echo esc_attr__('Map teaser', 'matrix-starter'); ?>" class="dz-flexi flex-map-teaser">
+<section aria-label="<?php echo esc_attr__('Map teaser', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-map-teaser">
   <div class="container flex-demo">
     <div class="flex-map-example">
       <div class="wander-card animated-gradient reveal">

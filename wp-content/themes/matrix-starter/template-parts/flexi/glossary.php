@@ -6,7 +6,7 @@ if ($anchor === '') { $anchor = sanitize_title($term); }
 $link = matrix_dz_link_attrs(get_sub_field('link'));
 if ($term === '') { return; }
 ?>
-<section aria-label="<?php echo esc_attr__('Glossary', 'matrix-starter'); ?>" class="dz-flexi flex-glossary-block">
+<section aria-label="<?php echo esc_attr__('Glossary', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-glossary-block">
   <div class="container flex-demo">
     <aside class="flex-glossary flex-narrow" id="<?php echo esc_attr($anchor); ?>">
       <h2><?php echo esc_html($term); ?></h2>
