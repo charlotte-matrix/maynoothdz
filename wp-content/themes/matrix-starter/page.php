@@ -8,7 +8,7 @@ get_header();
     }
 
     $enable_breadcrumbs = function_exists('get_field') ? get_field('enable_breadcrumbs', 'option') : false;
-    $skip_breadcrumbs   = is_page(['contact-us', 'about-us', 'flexi']);
+    $skip_breadcrumbs   = is_page(['contact-us', 'about-us', 'flexi', 'resources']);
     $breadcrumb_tpl     = locate_template('template-parts/header/breadcrumbs.php');
 
     if ($enable_breadcrumbs !== false && !$skip_breadcrumbs && $breadcrumb_tpl) {

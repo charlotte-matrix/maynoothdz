@@ -36,6 +36,67 @@ $fallback_links = [
     ],
 ];
 
+/**
+ * Whether a top-level nav URL should show as the current section.
+ */
+$matrix_dz_nav_is_current = static function (string $url): bool {
+    if ($url === '' || str_starts_with($url, '#')) {
+        return false;
+    }
+
+    $home_path = wp_parse_url(home_url('/'), PHP_URL_PATH);
+    $home_path = is_string($home_path) ? untrailingslashit($home_path) : '';
+
+    $normalize = static function (string $raw) use ($home_path): string {
+        $path = wp_parse_url($raw, PHP_URL_PATH);
+        $path = is_string($path) ? $path : '/';
+        if ($home_path !== '' && str_starts_with($path, $home_path)) {
+            $path = substr($path, strlen($home_path)) ?: '/';
+        }
+        $path = '/' . ltrim($path, '/');
+        return $path === '/' ? '/' : untrailingslashit($path);
+    };
+
+    $path = $normalize($url);
+
+    // Projects section: archive + every project single.
+    if ($path === '/projects') {
+        return is_post_type_archive('project') || is_singular('project');
+    }
+
+    // Take Action pathway page.
+    if ($path === '/take-action') {
+        return is_page('take-action') || is_page_template('templates/page-take-action.php');
+    }
+
+    // Community section: page + community-category posts.
+    if ($path === '/community') {
+        return is_page('community')
+            || is_page_template('templates/page-community.php')
+            || (is_singular('post') && function_exists('matrix_dz_is_community_post') && matrix_dz_is_community_post());
+    }
+
+    // Hash links on the homepage (e.g. /#about) — highlight only on the front page.
+    $fragment = wp_parse_url($url, PHP_URL_FRAGMENT);
+    if (is_string($fragment) && $fragment !== '') {
+        return is_front_page();
+    }
+
+    if (is_front_page()) {
+        $current = '/';
+    } elseif (is_singular()) {
+        $permalink = get_permalink();
+        $current   = is_string($permalink) ? $normalize($permalink) : '/';
+    } else {
+        global $wp;
+        $current = isset($wp->request) && is_string($wp->request) && $wp->request !== ''
+            ? '/' . untrailingslashit($wp->request)
+            : '/';
+    }
+
+    return $path === $current;
+};
+
 $menu_links = [];
 if (has_nav_menu('primary')) {
     $locations = get_nav_menu_locations();
@@ -76,11 +137,13 @@ if ($menu_links === []) {
         </button>
         <nav aria-label="<?php echo esc_attr__('Main navigation', 'matrix-starter'); ?>" id="navigation">
             <?php foreach ($menu_links as $link) :
-                $classes = trim((string) ($link['class'] ?? ''));
+                $classes    = trim((string) ($link['class'] ?? ''));
+                $is_current = $matrix_dz_nav_is_current((string) ($link['url'] ?? ''));
                 ?>
                 <a
                     href="<?php echo esc_url($link['url']); ?>"
                     <?php echo $classes !== '' ? ' class="' . esc_attr($classes) . '"' : ''; ?>
+                    <?php echo $is_current ? ' aria-current="page"' : ''; ?>
                 ><?php echo esc_html($link['title']); ?></a>
             <?php endforeach; ?>
         </nav>

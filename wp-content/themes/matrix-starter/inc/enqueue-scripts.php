@@ -74,6 +74,14 @@ function matrix_starter_enqueue_scripts() {
   $is_dev = defined('WP_ENV') && WP_ENV === 'development';
   $base   = get_template_directory_uri();
   $is_flexiblock = matrix_dz_is_flexiblock_page();
+  $is_project_single  = is_singular('project');
+  $is_project_archive = is_post_type_archive('project');
+  $is_project_surface = $is_project_single || $is_project_archive;
+  $is_take_action     = is_page_template('templates/page-take-action.php') || is_page('take-action');
+  $is_community_page  = is_page_template('templates/page-community.php') || is_page('community');
+  $is_community_post  = is_singular('post') && function_exists('matrix_dz_is_community_post') && matrix_dz_is_community_post();
+  $is_resources_page  = is_page('resources');
+  $is_design_surface  = $is_project_surface || $is_take_action || $is_community_page || $is_community_post || $is_resources_page;
 
   $app_js  = $is_dev ? '/wp-content/themes/matrix-starter/dist/app.js'  : $base . '/dist/app.js';
   $app_css = $is_dev ? '/wp-content/themes/matrix-starter/dist/app.css' : $base . '/dist/app.css';
@@ -123,8 +131,128 @@ function matrix_starter_enqueue_scripts() {
     }
   }
 
+  // Project single / archive — design stack. No map assets.
+  if ($is_project_surface) {
+    $design_dir = get_template_directory() . '/assets/css/dz-design';
+    $design_uri = $base . '/assets/css/dz-design';
+    $design_deps = [];
+    $sheets = $is_project_single
+      ? ['styles', 'breadcrumbs', 'navigation', 'projects', 'project']
+      : ['styles', 'breadcrumbs', 'navigation', 'projects'];
+    foreach ($sheets as $sheet) {
+      $path = $design_dir . '/' . $sheet . '.css';
+      if (!file_exists($path)) {
+        continue;
+      }
+      $handle = 'dz-design-' . $sheet;
+      wp_enqueue_style(
+        $handle,
+        $design_uri . '/' . $sheet . '.css',
+        $design_deps,
+        (string) filemtime($path)
+      );
+      $design_deps = [$handle];
+    }
+  }
+
+  // Take Action pathway page — design stack.
+  if ($is_take_action) {
+    $design_dir = get_template_directory() . '/assets/css/dz-design';
+    $design_uri = $base . '/assets/css/dz-design';
+    $design_deps = [];
+    foreach (['styles', 'breadcrumbs', 'navigation', 'take-action'] as $sheet) {
+      $path = $design_dir . '/' . $sheet . '.css';
+      if (!file_exists($path)) {
+        continue;
+      }
+      $handle = 'dz-design-' . $sheet;
+      wp_enqueue_style(
+        $handle,
+        $design_uri . '/' . $sheet . '.css',
+        $design_deps,
+        (string) filemtime($path)
+      );
+      $design_deps = [$handle];
+    }
+
+    $ta_js = get_template_directory() . '/assets/js/dz-take-action.js';
+    if (file_exists($ta_js)) {
+      wp_enqueue_script(
+        'dz-take-action',
+        $base . '/assets/js/dz-take-action.js',
+        [],
+        (string) filemtime($ta_js),
+        true
+      );
+    }
+  }
+
+  // Community page + community articles.
+  if ($is_community_page || $is_community_post) {
+    $design_dir = get_template_directory() . '/assets/css/dz-design';
+    $design_uri = $base . '/assets/css/dz-design';
+    $design_deps = [];
+    $sheets = $is_community_post
+      ? ['styles', 'breadcrumbs', 'navigation', 'community', 'article']
+      : ['styles', 'breadcrumbs', 'navigation', 'community'];
+    foreach ($sheets as $sheet) {
+      $path = $design_dir . '/' . $sheet . '.css';
+      if (!file_exists($path)) {
+        continue;
+      }
+      $handle = 'dz-design-' . $sheet;
+      wp_enqueue_style(
+        $handle,
+        $design_uri . '/' . $sheet . '.css',
+        $design_deps,
+        (string) filemtime($path)
+      );
+      $design_deps = [$handle];
+    }
+  }
+
+  // Resources hub — page heading + downloads / link list / CTA flexi blocks.
+  if ($is_resources_page) {
+    $design_dir = get_template_directory() . '/assets/css/dz-design';
+    $design_uri = $base . '/assets/css/dz-design';
+    $design_deps = [];
+    foreach (['styles', 'breadcrumbs', 'navigation', 'resources'] as $sheet) {
+      $path = $design_dir . '/' . $sheet . '.css';
+      if (!file_exists($path)) {
+        continue;
+      }
+      $handle = 'dz-design-' . $sheet;
+      wp_enqueue_style(
+        $handle,
+        $design_uri . '/' . $sheet . '.css',
+        $design_deps,
+        (string) filemtime($path)
+      );
+      $design_deps = [$handle];
+    }
+  }
+
+  if ($is_project_archive) {
+    $dir_js = get_template_directory() . '/assets/js/dz-projects-directory.js';
+    if (file_exists($dir_js) && function_exists('matrix_dz_projects_directory_data')) {
+      wp_enqueue_script(
+        'dz-projects-directory',
+        $base . '/assets/js/dz-projects-directory.js',
+        [],
+        (string) filemtime($dir_js),
+        true
+      );
+      // wp_localize_script HTML-escapes & in category names; use raw JSON instead.
+      wp_add_inline_script(
+        'dz-projects-directory',
+        'window.matrixDzProjects = ' . wp_json_encode(matrix_dz_projects_directory_data()) . ';',
+        'before'
+      );
+    }
+  }
+
   // Maynooth DZ flexible content (ported) — used on pages that are not the design catalogue.
-  if (!$is_flexiblock) {
+  if (!$is_flexiblock && !$is_design_surface) {
     $dz_flexi_css = get_template_directory() . '/assets/css/dz-flexi.css';
     if (file_exists($dz_flexi_css)) {
       wp_enqueue_style(
@@ -158,9 +286,9 @@ function matrix_starter_enqueue_scripts() {
   }
 
   // Maynooth DZ header / footer chrome (homepage / other DZ pages).
-  // Flexiblock catalogue uses design styles.css for chrome instead.
+  // Flexiblock catalogue + project / take-action surfaces use design styles.css for chrome instead.
   $dz_chrome_css = get_template_directory() . '/assets/css/dz-chrome.css';
-  if (file_exists($dz_chrome_css) && !$is_flexiblock) {
+  if (file_exists($dz_chrome_css) && !$is_flexiblock && !$is_design_surface) {
     wp_enqueue_style(
       'dz-chrome',
       $base . '/assets/css/dz-chrome.css',
@@ -189,7 +317,7 @@ function matrix_starter_enqueue_scripts() {
   }
 
   $dz_home_css = get_template_directory() . '/assets/css/dz-home.css';
-  if (file_exists($dz_home_css) && (is_front_page() || is_home()) && !$is_flexiblock) {
+  if (file_exists($dz_home_css) && (is_front_page() || is_home()) && !$is_flexiblock && !$is_design_surface) {
     wp_enqueue_style(
       'dz-home',
       $base . '/assets/css/dz-home.css',
@@ -379,6 +507,31 @@ add_filter('body_class', function (array $classes): array {
   if (function_exists('matrix_dz_is_flexiblock_page') && matrix_dz_is_flexiblock_page()) {
     $classes[] = 'directory-page';
     $classes[] = 'flexiblock-page';
+  }
+  if (is_singular('project')) {
+    $classes[] = 'directory-page';
+    $classes[] = 'project-detail-page';
+  }
+  if (is_post_type_archive('project')) {
+    $classes[] = 'directory-page';
+    $classes[] = 'projects-archive-page';
+  }
+  if (is_page_template('templates/page-take-action.php') || is_page('take-action')) {
+    $classes[] = 'directory-page';
+    $classes[] = 'take-action-page';
+  }
+  if (is_page_template('templates/page-community.php') || is_page('community')) {
+    $classes[] = 'directory-page';
+    $classes[] = 'community-page';
+  }
+  if (is_page('resources')) {
+    $classes[] = 'directory-page';
+    $classes[] = 'resources-page';
+  }
+  if (is_singular('post') && function_exists('matrix_dz_is_community_post') && matrix_dz_is_community_post()) {
+    $classes[] = 'directory-page';
+    $classes[] = 'community-page';
+    $classes[] = 'article-page';
   }
   return $classes;
 });

@@ -8,19 +8,31 @@ $updates_feed = new FieldsBuilder('updates_feed', [
 
 $updates_feed
     ->addTab('Content', ['placement' => 'top'])
-        ->addRepeater('updates', [
-            'label' => 'Updates',
-            'layout' => 'block',
-            'button_label' => 'Add update',
+        ->addSelect('feed_mode', [
+            'label'         => 'Source',
+            'choices'       => [
+                'recent'   => 'Most recent Community posts',
+                'selected' => 'Selected posts',
+            ],
+            'default_value' => 'recent',
+            'ui'            => 1,
         ])
-            ->addImage('image', ['label' => 'Image', 'return_format' => 'array'])
-            ->addText('author', ['label' => 'Author / group'])
-            ->addText('avatar_initials', ['label' => 'Avatar initials', 'default_value' => 'MT'])
-            ->addText('title', ['label' => 'Title', 'required' => 1])
-            ->addLink('link', ['label' => 'Link'])
-            ->addTextarea('excerpt', ['label' => 'Excerpt', 'rows' => 3])
-            ->addDatePicker('date', ['label' => 'Date', 'display_format' => 'd F Y', 'return_format' => 'Y-m-d'])
-        ->endRepeater()
+        ->addNumber('recent_count', [
+            'label'         => 'Number of posts',
+            'default_value' => 3,
+            'min'           => 1,
+            'max'           => 12,
+        ])
+            ->conditional('feed_mode', '==', 'recent')
+        ->addRelationship('selected_posts', [
+            'label'         => 'Selected posts',
+            'post_type'     => ['post'],
+            'filters'       => ['search', 'taxonomy'],
+            'return_format' => 'id',
+            'min'           => 0,
+            'max'           => 12,
+        ])
+            ->conditional('feed_mode', '==', 'selected')
         ->addGroup('empty_state', ['label' => 'Empty state'])
             ->addText('title', ['label' => 'Title', 'default_value' => 'Community updates are coming'])
             ->addTextarea('text', ['label' => 'Text', 'rows' => 2, 'default_value' => 'Hear from your group, in its own voice — new stories will appear as groups publish.'])

@@ -18,7 +18,10 @@ $downloads
             ->addText('name', ['label' => 'Name', 'required' => 1])
             ->addText('meta', ['label' => 'Meta', 'instructions' => 'e.g. 10.1 MB or Request a copy'])
             ->addFile('file', ['label' => 'File upload', 'return_format' => 'array'])
-            ->addUrl('url', ['label' => 'External URL', 'instructions' => 'Used if no file is uploaded'])
+            ->addText('url', [
+                'label' => 'External URL',
+                'instructions' => 'Used if no file is uploaded. Accepts https:// or mailto: links.',
+            ])
         ->endRepeater()
         ->addWysiwyg('accessibility_note', [
             'label' => 'Accessibility note',

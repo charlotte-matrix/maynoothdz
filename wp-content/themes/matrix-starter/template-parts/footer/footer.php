@@ -62,7 +62,7 @@ $footer_groups = [
         'links' => [
             ['label' => 'Events', 'url' => home_url('/community/#events')],
             ['label' => 'Updates', 'url' => home_url('/community/#updates')],
-            ['label' => 'Add an event or update', 'url' => home_url('/community/#join')],
+            ['label' => 'Add an event or update', 'url' => wp_registration_url()],
         ],
     ],
 ];

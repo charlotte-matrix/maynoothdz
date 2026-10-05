@@ -1,43 +1,62 @@
 <?php
-$updates = get_sub_field('updates') ?: [];
+/**
+ * Updates feed — Community posts (recent or selected).
+ */
+
+$mode  = (string) (get_sub_field('feed_mode') ?: 'recent');
 $empty = get_sub_field('empty_state') ?: [];
-if (!is_array($updates)) { $updates = []; }
+$count = (int) (get_sub_field('recent_count') ?: 3);
+$ids   = [];
+
+if ($mode === 'selected') {
+    $selected = get_sub_field('selected_posts') ?: [];
+    if (is_array($selected)) {
+        foreach ($selected as $item) {
+            if (is_object($item) && isset($item->ID)) {
+                $ids[] = (int) $item->ID;
+            } elseif (is_numeric($item)) {
+                $ids[] = (int) $item;
+            }
+        }
+    }
+}
+
+$query = matrix_dz_community_posts_query([
+    'count'   => $count,
+    'include' => $ids,
+]);
 ?>
 <section aria-label="<?php echo esc_attr__('Updates feed', 'matrix-starter'); ?>" class="dz-flexi flex-block flex-updates">
   <div class="container flex-demo">
-    <div class="community-columns">
-      <?php foreach ($updates as $update) :
-        $title = trim((string) ($update['title'] ?? ''));
-        if ($title === '') { continue; }
-        $link = matrix_dz_link_attrs($update['link'] ?? null);
-        $image = $update['image'] ?? null;
-        $date = (string) ($update['date'] ?? '');
-        $date_label = $date !== '' ? date_i18n('j F Y', strtotime($date)) : '';
-      ?>
-        <article class="update-card">
-          <?php if (is_array($image) && !empty($image['ID'])) :
-            echo wp_get_attachment_image((int) $image['ID'], 'medium_large', false, ['class' => 'update-photo']);
-          elseif (is_array($image) && !empty($image['url'])) : ?>
-            <img class="update-photo" src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt'] ?? ''); ?>">
-          <?php endif; ?>
-          <div class="update-content">
-            <?php if (!empty($update['author'])) : ?>
-              <p class="update-author"><span aria-hidden="true" class="group-avatar"><?php echo esc_html($update['avatar_initials'] ?? ''); ?></span><?php echo esc_html($update['author']); ?></p>
-            <?php endif; ?>
-            <h3>
-              <?php if ($link) : ?>
-                <a class="update-open" href="<?php echo esc_url($link['url']); ?>"><?php echo esc_html($title); ?></a>
-              <?php else : ?>
-                <?php echo esc_html($title); ?>
+    <div class="update-feed">
+      <?php if ($query->have_posts()) : ?>
+        <?php while ($query->have_posts()) :
+            $query->the_post();
+            $pid    = (int) get_the_ID();
+            $author = matrix_dz_community_author_meta($pid);
+            $aclass = 'update-author' . ($author['is_council'] ? ' council' : '');
+            ?>
+            <article class="update-card">
+              <?php if (has_post_thumbnail()) : ?>
+                <?php the_post_thumbnail('medium_large', ['class' => 'update-photo']); ?>
               <?php endif; ?>
-            </h3>
-            <?php if (!empty($update['excerpt'])) : ?><p class="update-excerpt"><?php echo esc_html($update['excerpt']); ?></p><?php endif; ?>
-            <?php if ($date_label !== '') : ?><time datetime="<?php echo esc_attr($date); ?>"><?php echo esc_html($date_label); ?></time><?php endif; ?>
-          </div>
-        </article>
-      <?php endforeach; ?>
-
-      <?php if (!empty($empty['title'])) : ?>
+              <div class="update-content">
+                <p class="<?php echo esc_attr($aclass); ?>">
+                  <span aria-hidden="true" class="group-avatar"><?php echo esc_html($author['initials']); ?></span>
+                  <?php echo esc_html($author['name']); ?>
+                </p>
+                <h3>
+                  <a class="update-open" href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                </h3>
+                <?php if (has_excerpt() || get_the_excerpt()) : ?>
+                  <p class="update-excerpt"><?php echo esc_html(get_the_excerpt()); ?></p>
+                <?php endif; ?>
+                <time datetime="<?php echo esc_attr(get_the_date('c')); ?>"><?php echo esc_html(get_the_date('j F Y')); ?></time>
+              </div>
+            </article>
+        <?php endwhile;
+        wp_reset_postdata(); ?>
+      <?php elseif (!empty($empty['title'])) : ?>
         <div class="events-empty">
           <h3><?php echo esc_html($empty['title']); ?></h3>
           <?php if (!empty($empty['text'])) : ?><p><?php echo esc_html($empty['text']); ?></p><?php endif; ?>

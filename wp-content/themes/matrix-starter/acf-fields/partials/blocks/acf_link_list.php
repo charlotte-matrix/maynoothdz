@@ -17,6 +17,12 @@ $link_list
             ->addText('title', ['label' => 'Title', 'required' => 1])
             ->addTextarea('description', ['label' => 'Description', 'rows' => 2])
             ->addUrl('url', ['label' => 'URL', 'required' => 1])
-        ->endRepeater();
+        ->endRepeater()
+        ->addWysiwyg('accessibility_note', [
+            'label' => 'Accessibility note',
+            'instructions' => 'Optional note shown below the list (e.g. accessible format request).',
+            'media_upload' => 0,
+            'toolbar' => 'basic',
+        ]);
 
 return $link_list;
