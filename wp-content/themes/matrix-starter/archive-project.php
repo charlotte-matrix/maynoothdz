@@ -15,7 +15,7 @@ $settings = matrix_dz_projects_archive_settings();
             <nav class="breadcrumbs" aria-label="<?php echo esc_attr__('Breadcrumb', 'matrix-starter'); ?>">
                 <a href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'matrix-starter'); ?></a>
                 <span aria-hidden="true">/</span>
-                <span aria-current="page"><?php echo esc_html($settings['title']); ?></span>
+                <span aria-current="page"><?php esc_html_e('Projects', 'matrix-starter'); ?></span>
             </nav>
 
             <h1 id="directory-title"><?php echo esc_html($settings['title']); ?></h1>

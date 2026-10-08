@@ -42,6 +42,21 @@ function matrix_starter_setup() {
 add_action('after_setup_theme', 'matrix_starter_setup');
 
 /**
+ * Fallback favicon from the DZ logo when no Customizer site icon is set.
+ */
+add_action('wp_head', static function (): void {
+    if (function_exists('has_site_icon') && has_site_icon()) {
+        return;
+    }
+    $icon = get_template_directory_uri() . '/assets/dz/logo.svg';
+    printf(
+        '<link rel="icon" href="%1$s" type="image/svg+xml">' . "\n" .
+        '<link rel="apple-touch-icon" href="%1$s">' . "\n",
+        esc_url($icon)
+    );
+}, 1);
+
+/**
  * Menu link attributes (theme_location is the slug)
  */
 add_filter('nav_menu_link_attributes', function ($atts, $item, $args) {
