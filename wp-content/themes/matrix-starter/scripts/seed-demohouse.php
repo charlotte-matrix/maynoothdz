@@ -183,6 +183,29 @@ $fields = [
 ];
 
 foreach ($fields as $key => $value) {
+    // Never dump repeater/gallery arrays onto the parent meta key — ACF needs a count + row meta.
+    if (in_array($key, ['project_glance_items', 'project_grant_icons', 'project_partner_logos'], true) && is_array($value)) {
+        $ok = update_field($key, $value, $post_id);
+        if (!$ok && $key === 'project_glance_items') {
+            delete_post_meta($post_id, $key);
+            update_field($key, $value, $post_id);
+        }
+        if (!get_field($key, $post_id) && $key === 'project_glance_items') {
+            update_post_meta($post_id, 'project_glance_items', count($value));
+            update_post_meta($post_id, '_project_glance_items', 'field_project_details_project_glance_items');
+            foreach ($value as $i => $row) {
+                update_post_meta($post_id, "project_glance_items_{$i}_label", (string) ($row['label'] ?? ''));
+                update_post_meta($post_id, "project_glance_items_{$i}_value", (string) ($row['value'] ?? ''));
+                update_post_meta($post_id, "project_glance_items_{$i}_is_pending", !empty($row['is_pending']) ? 1 : 0);
+                update_post_meta($post_id, "_project_glance_items_{$i}_label", 'field_project_details_project_glance_items_label');
+                update_post_meta($post_id, "_project_glance_items_{$i}_value", 'field_project_details_project_glance_items_value');
+                update_post_meta($post_id, "_project_glance_items_{$i}_is_pending", 'field_project_details_project_glance_items_is_pending');
+            }
+            WP_CLI::warning("Wrote glance repeater rows manually for {$key}.");
+        }
+        continue;
+    }
+
     $ok = update_field($key, $value, $post_id);
     if (!$ok) {
         update_post_meta($post_id, $key, $value);

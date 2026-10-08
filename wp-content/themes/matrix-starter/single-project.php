@@ -27,7 +27,7 @@ while (have_posts()) :
     $extra     = (string) get_field('project_story_extra', $post_id);
 
     $glance_h  = (string) (get_field('project_glance_heading', $post_id) ?: __('At a glance', 'matrix-starter'));
-    $glance    = get_field('project_glance_items', $post_id);
+    $glance    = matrix_dz_project_glance_items($post_id);
     $grants    = get_field('project_grant_icons', $post_id);
 
     $partners_h = (string) (get_field('project_partners_heading', $post_id) ?: __('Partners', 'matrix-starter'));

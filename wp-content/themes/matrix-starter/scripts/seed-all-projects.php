@@ -365,8 +365,26 @@ foreach ($rows as $i => $row) {
     }
 
     foreach ($fields as $key => $value) {
+        // Never dump repeater arrays onto the parent meta key — ACF needs a count + row meta.
+        if ($key === 'project_glance_items' && is_array($value)) {
+            $ok = update_field($key, $value, $post_id);
+            if (!$ok || !is_array(get_field($key, $post_id))) {
+                update_post_meta($post_id, 'project_glance_items', count($value));
+                update_post_meta($post_id, '_project_glance_items', 'field_project_details_project_glance_items');
+                foreach ($value as $i => $row) {
+                    update_post_meta($post_id, "project_glance_items_{$i}_label", (string) ($row['label'] ?? ''));
+                    update_post_meta($post_id, "project_glance_items_{$i}_value", (string) ($row['value'] ?? ''));
+                    update_post_meta($post_id, "project_glance_items_{$i}_is_pending", !empty($row['is_pending']) ? 1 : 0);
+                    update_post_meta($post_id, "_project_glance_items_{$i}_label", 'field_project_details_project_glance_items_label');
+                    update_post_meta($post_id, "_project_glance_items_{$i}_value", 'field_project_details_project_glance_items_value');
+                    update_post_meta($post_id, "_project_glance_items_{$i}_is_pending", 'field_project_details_project_glance_items_is_pending');
+                }
+            }
+            continue;
+        }
+
         $ok = update_field($key, $value, $post_id);
-        if (!$ok) {
+        if (!$ok && !is_array($value)) {
             update_post_meta($post_id, $key, $value);
         }
     }

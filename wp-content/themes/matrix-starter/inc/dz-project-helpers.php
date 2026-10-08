@@ -298,6 +298,80 @@ add_filter('document_title_parts', function (array $parts): array {
     return $parts;
 });
 
+if (!function_exists('matrix_dz_project_glance_items')) {
+    /**
+     * Load “At a glance” repeater rows, including a repair path when meta was
+     * saved as a serialized array instead of ACF’s expected row count.
+     *
+     * @return list<array{label:string,value:string,is_pending:bool}>
+     */
+    function matrix_dz_project_glance_items(int $post_id): array
+    {
+        $items = function_exists('get_field') ? get_field('project_glance_items', $post_id) : null;
+        if (is_array($items) && $items !== []) {
+            return array_values($items);
+        }
+
+        $raw = get_post_meta($post_id, 'project_glance_items', true);
+
+        // Seed fallback sometimes wrote the full rows array onto the repeater key.
+        if (is_array($raw) && $raw !== [] && isset($raw[0]) && is_array($raw[0])) {
+            $rows = [];
+            foreach ($raw as $i => $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+                $label = trim((string) ($row['label'] ?? ''));
+                $value = trim((string) ($row['value'] ?? ''));
+                if ($label === '' || $value === '') {
+                    continue;
+                }
+                $pending = !empty($row['is_pending']);
+                $rows[] = [
+                    'label'      => $label,
+                    'value'      => $value,
+                    'is_pending' => $pending,
+                ];
+                // Heal into ACF’s expected shape for next load / admin edits.
+                update_post_meta($post_id, "project_glance_items_{$i}_label", $label);
+                update_post_meta($post_id, "project_glance_items_{$i}_value", $value);
+                update_post_meta($post_id, "project_glance_items_{$i}_is_pending", $pending ? 1 : 0);
+                update_post_meta($post_id, "_project_glance_items_{$i}_label", 'field_project_details_project_glance_items_label');
+                update_post_meta($post_id, "_project_glance_items_{$i}_value", 'field_project_details_project_glance_items_value');
+                update_post_meta($post_id, "_project_glance_items_{$i}_is_pending", 'field_project_details_project_glance_items_is_pending');
+            }
+            if ($rows !== []) {
+                update_post_meta($post_id, 'project_glance_items', count($rows));
+                update_post_meta($post_id, '_project_glance_items', 'field_project_details_project_glance_items');
+            }
+            return $rows;
+        }
+
+        // Rebuild from indexed subfields if a count is missing/wrong.
+        $rows = [];
+        for ($i = 0; $i < 50; $i++) {
+            $label = (string) get_post_meta($post_id, "project_glance_items_{$i}_label", true);
+            $value = (string) get_post_meta($post_id, "project_glance_items_{$i}_value", true);
+            if ($label === '' && $value === '') {
+                break;
+            }
+            if ($label === '' || $value === '') {
+                continue;
+            }
+            $rows[] = [
+                'label'      => $label,
+                'value'      => $value,
+                'is_pending' => (bool) get_post_meta($post_id, "project_glance_items_{$i}_is_pending", true),
+            ];
+        }
+        if ($rows !== [] && (!is_numeric($raw) || (int) $raw !== count($rows))) {
+            update_post_meta($post_id, 'project_glance_items', count($rows));
+        }
+
+        return $rows;
+    }
+}
+
 add_action('template_redirect', function () {
     if (!is_singular('project')) {
         return;
