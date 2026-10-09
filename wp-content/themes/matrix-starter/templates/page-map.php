@@ -109,7 +109,6 @@ if ($intro === '') {
             <div id="map-legend"></div>
             <p><?php esc_html_e('Select a pin to discover its project. Filter by category to explore a theme.', 'matrix-starter'); ?></p>
         </div>
-        <p class="map-demo-note"><?php esc_html_e('Demonstration map · Pin locations are illustrative and await confirmation.', 'matrix-starter'); ?></p>
     </section>
 </main>
 <?php

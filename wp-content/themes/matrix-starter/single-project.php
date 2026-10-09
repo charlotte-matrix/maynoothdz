@@ -36,7 +36,7 @@ while (have_posts()) :
 
     $enable_summary = (bool) get_field('project_enable_summary', $post_id);
     $summary_title  = (string) get_field('project_summary_title', $post_id);
-    $summary_meta   = (string) (get_field('project_summary_meta', $post_id) ?: __('Demonstration content · printable, accessible HTML', 'matrix-starter'));
+    $summary_meta   = (string) (get_field('project_summary_meta', $post_id) ?: __('Printable, accessible HTML', 'matrix-starter'));
     if ($summary_title === '') {
         $summary_title = sprintf(
             /* translators: %s: project title */
@@ -214,7 +214,7 @@ while (have_posts()) :
                             <?php endforeach; ?>
                         </dl>
                         <?php if (is_array($grants) && $grants !== []) : ?>
-                            <div class="grant-icons" aria-label="<?php echo esc_attr__('Illustrative home energy measures', 'matrix-starter'); ?>">
+                            <div class="grant-icons" aria-label="<?php echo esc_attr__('Home energy measures', 'matrix-starter'); ?>">
                                 <?php foreach ($grants as $icon) :
                                     if (!is_array($icon) || empty($icon['ID'])) {
                                         continue;

@@ -50,10 +50,10 @@ $footer_groups = [
         'title' => 'Take Action',
         'url'   => home_url('/take-action/'),
         'links' => [
-            ['label' => 'Retrofit your home', 'url' => home_url('/take-action/')],
-            ['label' => 'Travel sustainably', 'url' => home_url('/take-action/')],
-            ['label' => 'Start a community project', 'url' => home_url('/take-action/')],
-            ['label' => 'Business and school actions', 'url' => home_url('/take-action/')],
+            ['label' => 'Retrofit your home', 'url' => home_url('/take-action/retrofit-your-home/')],
+            ['label' => 'Travel sustainably', 'url' => home_url('/take-action/travel-sustainably/')],
+            ['label' => 'Start a community project', 'url' => home_url('/take-action/start-a-community-project/')],
+            ['label' => 'Business and school actions', 'url' => home_url('/take-action/business-and-school-actions/')],
         ],
     ],
     [

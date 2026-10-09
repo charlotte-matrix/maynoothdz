@@ -110,7 +110,7 @@ $copy_by_original = [
         'cta'    => 'Thinking about your own home?',
         'sub'    => 'Explore the retrofit pathway, step by step.',
         'button' => 'Explore home retrofit',
-        'url'    => home_url('/take-action/'),
+        'url'    => home_url('/take-action/retrofit-your-home/'),
     ],
     'Transport' => [
         'why'    => 'Making everyday journeys easier on foot or by bicycle can help reduce the need for short car trips. This project explores how local routes can connect people with schools, shops, green spaces and the town centre.',
@@ -294,7 +294,7 @@ foreach ($rows as $i => $row) {
             'project_status'           => $status,
             'project_location_label'   => 'Maynooth, County Kildare',
             'project_lead'             => $lead,
-            'project_demo_note'        => 'Demonstration case study based on the supplied draft. Figures, map locations and supporting documents await confirmation.',
+            'project_demo_note'        => '',
             'project_why_heading'      => 'Why this project',
             'project_why_body'         => $why,
             'project_media_image'      => $image_id ?: '',
@@ -312,7 +312,7 @@ foreach ($rows as $i => $row) {
             'project_partners_fallback'=> 'Project partners to be confirmed.',
             'project_enable_summary'   => 1,
             'project_summary_title'    => '',
-            'project_summary_meta'     => 'Demonstration content · printable, accessible HTML',
+            'project_summary_meta'     => 'Printable, accessible HTML',
             'project_show_related'     => 1,
             'project_related_heading'  => 'Related projects',
             'project_cta_heading'      => $copy['cta'],
@@ -325,7 +325,7 @@ foreach ($rows as $i => $row) {
         ];
     } else {
         $cta_url = ($display_category === 'Retrofit' || $original === 'Retrofit')
-            ? home_url('/take-action/')
+            ? home_url('/take-action/retrofit-your-home/')
             : home_url('/#action');
 
         $fields = [
@@ -333,7 +333,7 @@ foreach ($rows as $i => $row) {
             'project_status'           => $status,
             'project_location_label'   => 'Maynooth, County Kildare',
             'project_lead'             => $description,
-            'project_demo_note'        => 'Illustrative project · Example content, photos and map locations for this demonstration.',
+            'project_demo_note'        => '',
             'project_why_heading'      => 'Why this project',
             'project_why_body'         => '<p>' . esc_html($copy['why']) . '</p><p>' . esc_html($copy['more']) . '</p>',
             'project_media_image'      => $image_id ?: '',
@@ -351,7 +351,7 @@ foreach ($rows as $i => $row) {
             'project_partners_fallback'=> 'Project partners to be confirmed.',
             'project_enable_summary'   => 1,
             'project_summary_title'    => '',
-            'project_summary_meta'     => 'Demonstration content · printable, accessible HTML',
+            'project_summary_meta'     => 'Printable, accessible HTML',
             'project_show_related'     => 1,
             'project_related_heading'  => 'Related projects',
             'project_cta_heading'      => $copy['cta'],

@@ -91,6 +91,7 @@ require_once get_template_directory() . '/inc/hero-functions.php';
 require_once get_template_directory() . '/inc/flexible-content-functions.php';
 require_once get_template_directory() . '/inc/dz-flexi-helpers.php';
 require_once get_template_directory() . '/inc/dz-project-helpers.php';
+require_once get_template_directory() . '/inc/dz-take-action-helpers.php';
 require_once get_template_directory() . '/inc/dz-community-helpers.php';
 require_once get_template_directory() . '/inc/dz-community-registration.php';
 require_once get_template_directory() . '/inc/autoload-helpers-setup.php';

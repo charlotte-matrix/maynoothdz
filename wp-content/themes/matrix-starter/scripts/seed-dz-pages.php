@@ -79,6 +79,7 @@ $img = [
 $home_url = home_url('/');
 $projects = home_url('/projects/');
 $take = home_url('/take-action/');
+$take_retrofit = home_url('/take-action/retrofit-your-home/');
 $map = home_url('/map/');
 $community = home_url('/community/');
 $resources = home_url('/resources/');
@@ -185,7 +186,7 @@ $flexi_blocks = [
             [
                 'type' => 'video',
                 'video_title' => 'A local story, in motion',
-                'caption' => 'Video block demonstration — a video URL has not yet been supplied.',
+                'caption' => 'Video — add a URL when available.',
             ],
         ],
     ],
@@ -387,7 +388,7 @@ $home_blocks = [
         'heading' => 'Take action',
         'section_id' => 'action',
         'cards' => [
-            ['color' => 'sand', 'icon' => $img['home_action'] ?: '', 'title' => 'Retrofit your home', 'subtitle' => 'A 6-step pathway', 'link' => $link('Retrofit', $take)],
+            ['color' => 'sand', 'icon' => $img['home_action'] ?: '', 'title' => 'Retrofit your home', 'subtitle' => 'A 6-step pathway', 'link' => $link('Retrofit', $take_retrofit)],
             ['color' => 'lime', 'icon' => $img['travel_action'] ?: '', 'title' => 'Travel sustainably', 'subtitle' => 'A 4-step pathway', 'link' => $link('Travel', 'mailto:climateaction@kildarecoco.ie?subject=Travel%20sustainably')],
             ['color' => 'olive', 'icon' => $img['leaf_action'] ?: '', 'title' => 'Grow a community garden', 'subtitle' => 'An example pathway', 'link' => $link('Garden', 'mailto:climateaction@kildarecoco.ie?subject=Maynooth%20climate%20action')],
             ['color' => 'ochre', 'icon' => $img['home_action'] ?: '', 'title' => 'Save energy every day', 'subtitle' => 'Small changes at home', 'link' => $link('Energy', 'mailto:climateaction@kildarecoco.ie?subject=Maynooth%20climate%20action')],

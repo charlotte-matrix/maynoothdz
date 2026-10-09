@@ -31,3 +31,7 @@
 .project-pagination button[aria-current=page]{background:var(--forest);color:white;border-color:var(--forest)}.project-pagination button:hover:not(:disabled){box-shadow:0 0 0 2px #20312925}.project-pagination button:disabled{opacity:.4;cursor:default}
 .project-results{scroll-margin-top:8rem}.directory-category{text-align:left}
 @media(max-width:640px){.filter-row{flex-direction:row;align-items:center;gap:.5rem}.filter-toggle{min-width:0;padding:.55rem .85rem}.filter-row>p{font-size:.75rem}.directory-intro #category-filters{gap:.65rem}.category-filter{flex:initial;max-width:100%;text-align:left}.project-pagination{gap:.35rem;margin-top:2rem}.project-pagination button{padding:.65rem .8rem}}
+
+/* Take Action directory (no category filters). */
+.take-action-directory .take-action-count-row{margin-top:1.25rem;justify-content:flex-end}
+.take-action-directory .directory-photo-placeholder{background:linear-gradient(135deg,color-mix(in srgb,var(--category,#1b853f) 35%,#f9f8f3),#d1f3d6);min-height:10rem}

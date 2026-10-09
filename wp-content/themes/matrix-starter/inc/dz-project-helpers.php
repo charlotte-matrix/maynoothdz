@@ -112,7 +112,7 @@ if (!function_exists('matrix_dz_projects_archive_settings')) {
         return [
             'title'              => (string) ($group['title'] ?? __('Local projects & case studies', 'matrix-starter')),
             'intro'              => (string) ($group['intro'] ?? __('Discover the projects helping Maynooth take climate action — and the people and places making it happen.', 'matrix-starter')),
-            'sample_note'        => (string) ($group['sample_note'] ?? __('Demonstration directory · Includes sample projects and illustrative photos.', 'matrix-starter')),
+            'sample_note'        => (string) ($group['sample_note'] ?? ''),
             'search_placeholder' => (string) ($group['search_placeholder'] ?? __('Search projects by name', 'matrix-starter')),
             'map_url'            => $map,
             'page_size'          => $page_size,
@@ -318,7 +318,7 @@ if (!function_exists('matrix_dz_project_build_summary_html')) {
         $html .= '<style>body{font:18px/1.65 system-ui;color:#203129;max-width:760px;margin:48px auto;padding:0 24px}h1{line-height:1.2}small{color:#526259}</style>';
         $html .= '<h1>' . $esc($title) . '</h1>';
         $html .= '<p>' . $esc(implode(' · ', $meta_bits)) . '</p>';
-        $html .= '<p><small>Demonstration project summary. Content and figures require confirmation.</small></p>';
+        $html .= '<p><small>Project summary.</small></p>';
         $html .= '<h2>Why this project</h2>' . $body;
         $html .= '<h2>Get involved</h2>';
         $html .= '<p>Contact the Climate Action Office: climateaction@kildarecoco.ie</p>';

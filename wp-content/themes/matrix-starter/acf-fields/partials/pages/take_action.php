@@ -3,16 +3,17 @@
 use StoutLogic\AcfBuilder\FieldsBuilder;
 
 /**
- * Take Action page — design/website/take-action.html (retrofit pathway).
- * Template: templates/page-take-action.php
+ * Take Action pathway — design/website/take-action.html.
+ * Primary: take_action CPT singles. Legacy: page template still supported.
  */
 
 $take_action = new FieldsBuilder('take_action_page', [
-    'title' => 'Take Action page',
+    'title' => 'Take Action pathway',
 ]);
 
 $take_action
-    ->setLocation('page_template', '==', 'templates/page-take-action.php')
+    ->setLocation('post_type', '==', 'take_action')
+    ->or('page_template', '==', 'templates/page-take-action.php')
 
     ->addTab('Hero', ['placement' => 'top'])
         ->addText('ta_tag_label', [
@@ -27,6 +28,7 @@ $take_action
                 'biodiversity' => 'Biodiversity',
                 'energy'       => 'Energy',
                 'public-realm' => 'Public realm',
+                'community'    => 'Community',
             ],
             'default_value' => 'retrofit',
             'ui'            => 1,

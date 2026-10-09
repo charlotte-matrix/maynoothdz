@@ -160,7 +160,7 @@ $project
         ])
         ->addText('project_summary_meta', [
             'label'         => 'Download meta line',
-            'default_value' => 'Demonstration content · printable, accessible HTML',
+            'default_value' => 'Printable, accessible HTML',
         ])
 
     ->addTab('Related & CTA')

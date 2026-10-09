@@ -4,7 +4,7 @@ $aside = get_sub_field('aside') ?: [];
 if (!is_array($steps) || $steps === []) { return; }
 $uid = wp_unique_id('path-');
 ?>
-<section aria-label="<?php echo esc_attr__('Pathway tabs', 'matrix-starter'); ?>" class="dz-flexi flex-block dz-pathway flex-pathway">
+<section aria-label="<?php echo esc_attr__('Pathway tabs', 'matrix-starter'); ?>" class="dz-flexi flex-block dz-pathway flex-pathway pathway-section">
   <div class="container flex-demo">
     <div class="pathway-tabs" role="tablist" aria-label="<?php echo esc_attr__('Pathway steps', 'matrix-starter'); ?>">
       <?php foreach ($steps as $i => $step) :

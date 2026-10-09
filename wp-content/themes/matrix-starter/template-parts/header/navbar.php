@@ -64,9 +64,11 @@ $matrix_dz_nav_is_current = static function (string $url): bool {
         return is_post_type_archive('project') || is_singular('project');
     }
 
-    // Take Action pathway page.
+    // Take Action section: directory + pathway singles (+ legacy page template).
     if ($path === '/take-action') {
-        return is_page('take-action') || is_page_template('templates/page-take-action.php');
+        return is_post_type_archive('take_action')
+            || is_singular('take_action')
+            || is_page_template('templates/page-take-action.php');
     }
 
     // Community section: page + community-category posts.

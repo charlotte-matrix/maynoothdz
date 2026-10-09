@@ -1,6 +1,8 @@
 <?php
 /**
- * Create/update the Take Action page with design retrofit pathway content.
+ * Seed Take Action CPT archive + pathway singles.
+ * Migrates the legacy /take-action/ page into retrofit-your-home.
+ *
  * Run: wp eval-file wp-content/themes/matrix-starter/scripts/seed-take-action.php
  */
 
@@ -65,8 +67,53 @@ if (!function_exists('matrix_seed_dz_file')) {
     }
 }
 
-$home_icon = matrix_seed_dz_file('home-icon.svg', 'Home icon');
-$town_img  = matrix_seed_dz_file('town-centre.webp', 'Buildings in Maynooth town centre');
+if (!function_exists('matrix_seed_take_action_post')) {
+    function matrix_seed_take_action_post(string $slug, string $title, int $menu_order = 0): int
+    {
+        $existing = get_posts([
+            'post_type'      => 'take_action',
+            'name'           => $slug,
+            'posts_per_page' => 1,
+            'post_status'    => 'any',
+            'fields'         => 'ids',
+        ]);
+        if (!empty($existing[0])) {
+            $id = (int) $existing[0];
+            wp_update_post([
+                'ID'          => $id,
+                'post_title'  => $title,
+                'post_status' => 'publish',
+                'post_name'   => $slug,
+                'menu_order'  => $menu_order,
+            ]);
+            return $id;
+        }
+
+        $id = wp_insert_post([
+            'post_title'  => $title,
+            'post_name'   => $slug,
+            'post_status' => 'publish',
+            'post_type'   => 'take_action',
+            'menu_order'  => $menu_order,
+        ], true);
+
+        if (is_wp_error($id)) {
+            WP_CLI::error($id->get_error_message());
+        }
+
+        return (int) $id;
+    }
+}
+
+$home_icon   = matrix_seed_dz_file('home-icon.svg', 'Home icon');
+$travel_icon = matrix_seed_dz_file('travel-action-icon.svg', 'Travel icon');
+$leaf_icon   = matrix_seed_dz_file('leaf-action-icon.svg', 'Leaf icon');
+$energy_icon = matrix_seed_dz_file('energy-icon.svg', 'Energy icon');
+$town_img    = matrix_seed_dz_file('town-centre.webp', 'Buildings in Maynooth town centre');
+$canal_img   = matrix_seed_dz_file('canal.webp', 'The Royal Canal in Maynooth');
+$community_img = matrix_seed_dz_file('community.webp', 'Community gathering in Maynooth');
+$maynooth_img  = matrix_seed_dz_file('maynooth.webp', 'A view of Maynooth');
+$retrofit_img  = matrix_seed_dz_file('retrofit.webp', 'Illustrative retrofit photograph');
 
 $demo = get_posts([
     'post_type'      => 'project',
@@ -155,52 +202,42 @@ $steps = [
     ],
 ];
 
-$existing = get_page_by_path('take-action');
-if ($existing) {
-    $post_id = (int) $existing->ID;
+// Free /take-action/ for the CPT archive.
+$legacy = get_page_by_path('take-action');
+if ($legacy instanceof WP_Post) {
     wp_update_post([
-        'ID'          => $post_id,
-        'post_title'  => 'Take Action',
-        'post_status' => 'publish',
-        'post_name'   => 'take-action',
+        'ID'          => (int) $legacy->ID,
+        'post_name'   => 'take-action-legacy-page',
+        'post_status' => 'draft',
     ]);
-    WP_CLI::log("Updating page #{$post_id}");
-} else {
-    $post_id = wp_insert_post([
-        'post_title'   => 'Take Action',
-        'post_name'    => 'take-action',
-        'post_status'  => 'publish',
-        'post_type'    => 'page',
-        'post_content' => '',
-    ], true);
-    if (is_wp_error($post_id)) {
-        WP_CLI::error($post_id->get_error_message());
-    }
-    WP_CLI::log("Created page #{$post_id}");
+    WP_CLI::log('Retired legacy Take Action page #' . $legacy->ID);
 }
 
-update_post_meta($post_id, '_wp_page_template', 'templates/page-take-action.php');
+$retrofit_id = matrix_seed_take_action_post('retrofit-your-home', 'Retrofit your home', 1);
+if ($retrofit_img) {
+    set_post_thumbnail($retrofit_id, $retrofit_img);
+}
 
-$fields = [
-    'ta_tag_label'   => 'Retrofit pathway',
-    'ta_tag_style'   => 'retrofit',
-    'ta_tag_icon'    => $home_icon ?: '',
-    'ta_title'       => 'Retrofit your home',
-    'ta_intro'       => 'Six steps from “where do I start?” to a warmer home — with guidance on grants, finding contractors and learning from local experience.',
-    'ta_steps'       => $steps,
-    'ta_final_cta'   => [
+$retrofit_fields = [
+    'ta_tag_label'          => 'Retrofit pathway',
+    'ta_tag_style'          => 'retrofit',
+    'ta_tag_icon'           => $home_icon ?: '',
+    'ta_title'              => 'Retrofit your home',
+    'ta_intro'              => 'Six steps from “where do I start?” to a warmer home — with guidance on grants, finding contractors and learning from local experience.',
+    'ta_steps'              => $steps,
+    'ta_final_cta'          => [
         'title'  => 'Explore retrofit projects →',
         'url'    => $map_url,
         'target' => '',
     ],
-    'ta_case_project'=> $demo_post ? (int) $demo_post->ID : '',
-    'ta_case_title'  => 'See it done: DemoHouse',
-    'ta_case_cta'    => 'Read the case study →',
-    'ta_case_image'  => '',
-    'ta_nearby_tag'  => 'Retrofit in Maynooth',
-    'ta_nearby_heading' => "See retrofit projects\nnear you.",
-    'ta_nearby_text' => 'Explore local projects, see the homes behind the stories and find inspiration for your own next step.',
-    'ta_nearby_button' => [
+    'ta_case_project'       => $demo_post ? (int) $demo_post->ID : '',
+    'ta_case_title'         => 'See it done: DemoHouse',
+    'ta_case_cta'           => 'Read the case study →',
+    'ta_case_image'         => '',
+    'ta_nearby_tag'         => 'Retrofit in Maynooth',
+    'ta_nearby_heading'     => "See retrofit projects\nnear you.",
+    'ta_nearby_text'        => 'Explore local projects, see the homes behind the stories and find inspiration for your own next step.',
+    'ta_nearby_button'      => [
         'title'  => 'View on the map',
         'url'    => $map_url,
         'target' => '',
@@ -209,14 +246,67 @@ $fields = [
     'ta_nearby_secondary'   => $town_img ?: '',
 ];
 
-foreach ($fields as $key => $value) {
-    $ok = update_field($key, $value, $post_id);
+foreach ($retrofit_fields as $key => $value) {
+    $ok = update_field($key, $value, $retrofit_id);
     if (!$ok) {
-        update_post_meta($post_id, $key, $value);
+        update_post_meta($retrofit_id, $key, $value);
         WP_CLI::warning("update_field failed for {$key}; wrote post meta.");
     }
 }
+WP_CLI::log('Retrofit pathway: ' . get_permalink($retrofit_id));
 
-WP_CLI::success('Take Action ready: ' . get_permalink($post_id));
-WP_CLI::log('Template: ' . get_page_template_slug($post_id));
-WP_CLI::log('Case study project: ' . ($demo_post ? $demo_post->post_title : 'none'));
+$stubs = [
+    [
+        'slug'    => 'travel-sustainably',
+        'title'   => 'Travel sustainably',
+        'order'   => 2,
+        'style'   => 'transport',
+        'label'   => 'Travel pathway',
+        'icon'    => $travel_icon,
+        'image'   => $canal_img,
+        'intro'   => 'Practical ways to walk, cycle and take everyday journeys with a lighter footprint around Maynooth.',
+    ],
+    [
+        'slug'    => 'start-a-community-project',
+        'title'   => 'Start a community project',
+        'order'   => 3,
+        'style'   => 'community',
+        'label'   => 'Community pathway',
+        'icon'    => $leaf_icon,
+        'image'   => $community_img,
+        'intro'   => 'Ideas and first steps for neighbours who want to organise local climate action together.',
+    ],
+    [
+        'slug'    => 'business-and-school-actions',
+        'title'   => 'Business and school actions',
+        'order'   => 4,
+        'style'   => 'energy',
+        'label'   => 'Organisation pathway',
+        'icon'    => $energy_icon,
+        'image'   => $maynooth_img,
+        'intro'   => 'Guidance for workplaces and schools looking to cut energy use and inspire climate action.',
+    ],
+];
+
+foreach ($stubs as $stub) {
+    $id = matrix_seed_take_action_post($stub['slug'], $stub['title'], (int) $stub['order']);
+    if (!empty($stub['image'])) {
+        set_post_thumbnail($id, (int) $stub['image']);
+    }
+    $fields = [
+        'ta_tag_label' => $stub['label'],
+        'ta_tag_style' => $stub['style'],
+        'ta_tag_icon'  => $stub['icon'] ?: '',
+        'ta_title'     => $stub['title'],
+        'ta_intro'     => $stub['intro'],
+        'ta_steps'     => [],
+    ];
+    foreach ($fields as $key => $value) {
+        update_field($key, $value, $id);
+    }
+    WP_CLI::log($stub['title'] . ': ' . get_permalink($id));
+}
+
+flush_rewrite_rules(false);
+
+WP_CLI::success('Take Action directory: ' . (get_post_type_archive_link('take_action') ?: home_url('/take-action/')));

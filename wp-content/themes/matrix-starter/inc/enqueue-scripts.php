@@ -77,7 +77,9 @@ function matrix_starter_enqueue_scripts() {
   $is_project_single  = is_singular('project');
   $is_project_archive = is_post_type_archive('project');
   $is_project_surface = $is_project_single || $is_project_archive;
-  $is_take_action     = is_page_template('templates/page-take-action.php') || is_page('take-action');
+  $is_take_action_single  = is_singular('take_action') || is_page_template('templates/page-take-action.php');
+  $is_take_action_archive = is_post_type_archive('take_action');
+  $is_take_action         = $is_take_action_single || $is_take_action_archive;
   $is_community_page  = is_page_template('templates/page-community.php') || is_page('community');
   $is_community_post  = is_singular('post') && function_exists('matrix_dz_is_community_post') && matrix_dz_is_community_post();
   $is_resources_page  = is_page('resources');
@@ -193,8 +195,45 @@ function matrix_starter_enqueue_scripts() {
     }
   }
 
-  // Take Action pathway page — design stack.
-  if ($is_take_action) {
+  // Take Action archive — projects directory chrome without category filters.
+  if ($is_take_action_archive) {
+    $design_dir = get_template_directory() . '/assets/css/dz-design';
+    $design_uri = $base . '/assets/css/dz-design';
+    $design_deps = [];
+    foreach (['styles', 'breadcrumbs', 'navigation', 'projects'] as $sheet) {
+      $path = $design_dir . '/' . $sheet . '.css';
+      if (!file_exists($path)) {
+        continue;
+      }
+      $handle = 'dz-design-' . $sheet;
+      wp_enqueue_style(
+        $handle,
+        $design_uri . '/' . $sheet . '.css',
+        $design_deps,
+        (string) filemtime($path)
+      );
+      $design_deps = [$handle];
+    }
+
+    $dir_js = get_template_directory() . '/assets/js/dz-take-action-directory.js';
+    if (file_exists($dir_js) && function_exists('matrix_dz_take_action_directory_data')) {
+      wp_enqueue_script(
+        'dz-take-action-directory',
+        $base . '/assets/js/dz-take-action-directory.js',
+        [],
+        (string) filemtime($dir_js),
+        true
+      );
+      wp_add_inline_script(
+        'dz-take-action-directory',
+        'window.matrixDzTakeActions = ' . wp_json_encode(matrix_dz_take_action_directory_data()) . ';',
+        'before'
+      );
+    }
+  }
+
+  // Take Action pathway single — design stack.
+  if ($is_take_action_single) {
     $design_dir = get_template_directory() . '/assets/css/dz-design';
     $design_uri = $base . '/assets/css/dz-design';
     $design_deps = [];
@@ -554,7 +593,11 @@ add_filter('body_class', function (array $classes): array {
     $classes[] = 'directory-page';
     $classes[] = 'projects-archive-page';
   }
-  if (is_page_template('templates/page-take-action.php') || is_page('take-action')) {
+  if (is_post_type_archive('take_action')) {
+    $classes[] = 'directory-page';
+    $classes[] = 'take-action-archive-page';
+  }
+  if (is_singular('take_action') || is_page_template('templates/page-take-action.php')) {
     $classes[] = 'directory-page';
     $classes[] = 'take-action-page';
   }

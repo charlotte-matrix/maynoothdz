@@ -123,8 +123,8 @@ $map_content = <<<'HTML'
 <p>The project map brings together themes including retrofit, transport, biodiversity, energy, community and public spaces. It offers a starting point for discovering how local action can help shape the Decarbonising Zone.</p>
 <h3>Find a project that interests you</h3>
 <p>Choose a theme, select a pin and open the project to find out more. You can also browse the <a href="/projects/">project directory</a> and filter the results by category or status.</p>
-<h3>Explore the demonstration</h3>
-<p>The current map contains 18 demonstration projects. Sample projects and illustrative pin locations show how the directory and map work together.</p>
+<h3>Explore the map</h3>
+<p>Find projects by theme, explore the places behind them and choose your own next step.</p>
 <p><a href="/map/">Explore the map ↗</a></p>
 HTML;
 

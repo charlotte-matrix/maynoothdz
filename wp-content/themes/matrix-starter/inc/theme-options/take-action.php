@@ -1,24 +1,24 @@
 <?php
-// File: theme-options/projects.php
+// File: theme-options/take-action.php
 
 use StoutLogic\AcfBuilder\FieldsBuilder;
 
-$projectsFields = new FieldsBuilder('projects_archive_fields');
+$takeActionFields = new FieldsBuilder('take_action_archive_fields');
 
-$projectsFields
-    ->addGroup('projects_archive', [
-        'label'        => 'Projects directory',
-        'instructions' => 'Content for the /projects/ archive (listing page).',
+$takeActionFields
+    ->addGroup('take_action_archive', [
+        'label'        => 'Take Action directory',
+        'instructions' => 'Content for the /take-action/ archive (listing page).',
     ])
         ->addText('title', [
             'label'         => 'Title',
-            'default_value' => 'Local projects & case studies',
+            'default_value' => 'Take action in Maynooth',
         ])
         ->addTextarea('intro', [
             'label'         => 'Intro',
             'rows'          => 3,
             'new_lines'     => '',
-            'default_value' => 'Discover the projects helping Maynooth take climate action — and the people and places making it happen.',
+            'default_value' => 'Practical pathways to cut carbon at home, on the move, and in the community — pick a theme and follow the steps.',
         ])
         ->addTextarea('sample_note', [
             'label'         => 'Sample note',
@@ -29,19 +29,14 @@ $projectsFields
         ])
         ->addText('search_placeholder', [
             'label'         => 'Search placeholder',
-            'default_value' => 'Search projects by name',
-        ])
-        ->addUrl('map_url', [
-            'label'         => 'Map URL (empty state)',
-            'instructions'  => 'Used by the “See the map” button when no results match.',
-            'default_value' => '/map/',
+            'default_value' => 'Search actions by name',
         ])
         ->addNumber('page_size', [
-            'label'         => 'Projects per page',
+            'label'         => 'Actions per page',
             'default_value' => 9,
             'min'           => 1,
             'max'           => 48,
         ])
     ->endGroup();
 
-return $projectsFields;
+return $takeActionFields;
