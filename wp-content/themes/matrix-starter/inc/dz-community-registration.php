@@ -24,6 +24,117 @@ function matrix_dz_user_is_approved(int $user_id): bool
 }
 
 /**
+ * Absolute URL for the email logo (PNG — SVG is unreliable in clients).
+ */
+function matrix_dz_community_email_logo_url(): string
+{
+    $path = get_template_directory() . '/assets/dz/logo-email.png';
+    if (is_readable($path)) {
+        return get_template_directory_uri() . '/assets/dz/logo-email.png';
+    }
+    return get_template_directory_uri() . '/assets/dz/logo.svg';
+}
+
+/**
+ * Wrap community notification content in a branded HTML layout.
+ *
+ * @param string               $heading Visible email heading.
+ * @param string               $intro   Lead paragraph (plain text).
+ * @param list<string>         $paras   Extra paragraphs (plain text).
+ * @param array{label?:string,url?:string}|null $cta Optional button.
+ * @param list<array{label:string,value:string}> $details Optional key/value rows.
+ */
+function matrix_dz_community_email_html(
+    string $heading,
+    string $intro,
+    array $paras = [],
+    ?array $cta = null,
+    array $details = []
+): string {
+    $site   = wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES);
+    $logo   = esc_url(matrix_dz_community_email_logo_url());
+    $home   = esc_url(home_url('/'));
+    $year   = gmdate('Y');
+
+    $forest = '#203129';
+    $green  = '#1b853f';
+    $mint   = '#d1f3d6';
+    $paper  = '#f9f8f3';
+    $teal   = '#02a59f';
+
+    $paras_html = '';
+    foreach ($paras as $p) {
+        $paras_html .= '<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:' . $forest . ';">'
+            . esc_html($p) . '</p>';
+    }
+
+    $details_html = '';
+    if ($details !== []) {
+        $details_html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;border-collapse:collapse;background:#fff;border:1px solid ' . $mint . ';border-radius:8px;">';
+        foreach ($details as $i => $row) {
+            $bg = $i % 2 === 0 ? $paper : '#ffffff';
+            $value = (string) $row['value'];
+            if (preg_match('#^https?://#i', $value)) {
+                $value_html = '<a href="' . esc_url($value) . '" style="color:' . $green . ';word-break:break-all;">'
+                    . esc_html($value) . '</a>';
+            } elseif (is_email($value)) {
+                $value_html = '<a href="mailto:' . esc_attr($value) . '" style="color:' . $green . ';">'
+                    . esc_html($value) . '</a>';
+            } else {
+                $value_html = esc_html($value);
+            }
+            $details_html .= '<tr style="background:' . $bg . ';">'
+                . '<td style="padding:12px 16px;font-size:13px;font-weight:700;color:' . $green . ';width:38%;vertical-align:top;">'
+                . esc_html($row['label']) . '</td>'
+                . '<td style="padding:12px 16px;font-size:15px;color:' . $forest . ';vertical-align:top;">'
+                . $value_html . '</td></tr>';
+        }
+        $details_html .= '</table>';
+    }
+
+    $cta_html = '';
+    if ($cta && !empty($cta['url']) && !empty($cta['label'])) {
+        $cta_html = '<p style="margin:24px 0 8px;">'
+            . '<a href="' . esc_url($cta['url']) . '" style="display:inline-block;background:' . $green . ';color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 22px;border-radius:6px;">'
+            . esc_html($cta['label']) . '</a></p>';
+    }
+
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">'
+        . '<title>' . esc_html($heading) . '</title></head>'
+        . '<body style="margin:0;padding:0;background:' . $paper . ';font-family:Arial,Helvetica,sans-serif;color:' . $forest . ';">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $paper . ';padding:24px 12px;">'
+        . '<tr><td align="center">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid ' . $mint . ';">'
+        . '<tr><td style="height:10px;background:' . $green . ';font-size:0;line-height:0;">&nbsp;</td></tr>'
+        . '<tr><td style="padding:28px 28px 8px;text-align:center;">'
+        . '<a href="' . $home . '" style="text-decoration:none;"><img src="' . $logo . '" alt="' . esc_attr($site) . '" width="190" height="40" style="display:inline-block;width:190px;height:auto;border:0;"></a>'
+        . '</td></tr>'
+        . '<tr><td style="padding:8px 28px 32px;">'
+        . '<p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:' . $teal . ';">' . esc_html($site) . '</p>'
+        . '<h1 style="margin:0 0 18px;font-size:22px;line-height:1.25;color:' . $forest . ';font-family:Arial,Helvetica,sans-serif;">' . esc_html($heading) . '</h1>'
+        . '<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:' . $forest . ';">' . esc_html($intro) . '</p>'
+        . $details_html
+        . $paras_html
+        . $cta_html
+        . '<p style="margin:28px 0 0;font-size:14px;line-height:1.5;color:#5a6b62;">Climate Action Office<br>'
+        . '<a href="mailto:climateaction@kildarecoco.ie" style="color:' . $green . ';text-decoration:none;">climateaction@kildarecoco.ie</a></p>'
+        . '</td></tr>'
+        . '<tr><td style="padding:16px 28px;background:' . $forest . ';color:#ffffff;font-size:12px;line-height:1.5;text-align:center;">'
+        . '&copy; ' . esc_html($year) . ' ' . esc_html($site) . ' · Kildare County Council'
+        . '</td></tr>'
+        . '</table></td></tr></table></body></html>';
+}
+
+/**
+ * Send a branded HTML community email.
+ */
+function matrix_dz_community_mail(string $to, string $subject, string $html): bool
+{
+    $headers = ['Content-Type: text/html; charset=UTF-8'];
+    return (bool) wp_mail($to, $subject, $html, $headers);
+}
+
+/**
  * Approve a pending community contributor and email them.
  */
 function matrix_dz_approve_community_user(int $user_id): bool
@@ -44,7 +155,6 @@ function matrix_dz_approve_community_user(int $user_id): bool
 
     $login_url = wp_login_url();
     $reset     = network_site_url('wp-login.php?action=rp&key=0&login=' . rawurlencode($user->user_login), 'login');
-    // Proper reset key.
     $key       = get_password_reset_key($user);
     if (!is_wp_error($key)) {
         $reset = network_site_url(
@@ -59,14 +169,26 @@ function matrix_dz_approve_community_user(int $user_id): bool
         wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES)
     );
 
-    $message  = sprintf("Hello %s,\n\n", $user->display_name);
-    $message .= "Your Maynooth DZ community group account has been approved.\n\n";
-    $message .= "You can sign in here:\n{$login_url}\n\n";
-    $message .= "Set or reset your password here:\n{$reset}\n\n";
-    $message .= "Once signed in, you can draft community updates and events. An administrator will review and publish them.\n\n";
-    $message .= "— Climate Action Office\n";
+    $html = matrix_dz_community_email_html(
+        __('Your account is approved', 'matrix-starter'),
+        sprintf(
+            /* translators: %s: user display name */
+            __('Hello %s — your Maynooth DZ community group account has been approved.', 'matrix-starter'),
+            $user->display_name
+        ),
+        [
+            __('Once signed in, you can draft community updates and events. An administrator will review and publish them.', 'matrix-starter'),
+        ],
+        [
+            'label' => __('Set your password & sign in', 'matrix-starter'),
+            'url'   => $reset,
+        ],
+        [
+            ['label' => __('Sign-in page', 'matrix-starter'), 'value' => $login_url],
+        ]
+    );
 
-    wp_mail($user->user_email, $subject, $message);
+    matrix_dz_community_mail($user->user_email, $subject, $html);
 
     return true;
 }
@@ -172,8 +294,11 @@ add_filter('pre_option_users_can_register', static function () {
 /**
  * After native WP registration (wp-login.php?action=register):
  * Contributor role, pending until admin approval, notify admin + user.
+ *
+ * Priority 5 so pending meta / role exist before core’s priority-10
+ * wp_send_new_user_notifications (otherwise the default admin mail still sends).
  */
-add_action('register_new_user', 'matrix_dz_on_wp_community_register');
+add_action('register_new_user', 'matrix_dz_on_wp_community_register', 5);
 
 function matrix_dz_on_wp_community_register(int $user_id): void
 {
@@ -192,50 +317,77 @@ function matrix_dz_on_wp_community_register(int $user_id): void
     $edit_link   = admin_url('user-edit.php?user_id=' . $user_id);
     $group       = (string) get_user_meta($user_id, 'community_group_name', true);
     $email       = $user->user_email;
+    $site        = wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES);
 
     $admin_subject = sprintf(
         /* translators: %s: site name */
-        __('[%s] New community group registration', 'matrix-starter'),
-        wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES)
+        __('[%s] New community group needs approval', 'matrix-starter'),
+        $site
     );
-    $admin_body  = "A community group has registered interest on the Maynooth DZ site.\n\n";
-    $admin_body .= "Username: {$user->user_login}\n";
-    $admin_body .= "Display name / group: {$group}\n";
-    $admin_body .= "Email: {$email}\n\n";
-    $admin_body .= "Review and approve the account:\n{$edit_link}\n";
-    $admin_body .= "(Tick “Allow this contributor to sign in” and update the user.)\n";
-
-    wp_mail($admin_email, $admin_subject, $admin_body);
+    $admin_html = matrix_dz_community_email_html(
+        __('New community registration', 'matrix-starter'),
+        __('A community group has registered on the Maynooth DZ site and is waiting for approval.', 'matrix-starter'),
+        [
+            __('Open the user profile, tick “Allow this contributor to sign in”, then update the user.', 'matrix-starter'),
+        ],
+        [
+            'label' => __('Review & approve account', 'matrix-starter'),
+            'url'   => $edit_link,
+        ],
+        [
+            ['label' => __('Username', 'matrix-starter'), 'value' => $user->user_login],
+            ['label' => __('Group / name', 'matrix-starter'), 'value' => $group],
+            ['label' => __('Email', 'matrix-starter'), 'value' => $email],
+        ]
+    );
+    matrix_dz_community_mail($admin_email, $admin_subject, $admin_html);
 
     $user_subject = sprintf(
         /* translators: %s: site name */
         __('[%s] Registration received — pending approval', 'matrix-starter'),
-        wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES)
+        $site
     );
-    $user_body  = "Hello {$user->display_name},\n\n";
-    $user_body .= "Thanks for registering with the Maynooth Decarbonising Zone community.\n\n";
-    $user_body .= "Your account has been created and is waiting for approval by the Climate Action Office.\n";
-    $user_body .= "You will receive another email when your account is enabled, with a link to sign in and set your password.\n\n";
-    $user_body .= "— Climate Action Office\n";
-    $user_body .= "climateaction@kildarecoco.ie\n";
-
-    wp_mail($email, $user_subject, $user_body);
+    $user_html = matrix_dz_community_email_html(
+        __('Thanks for registering', 'matrix-starter'),
+        sprintf(
+            /* translators: %s: user display name */
+            __('Hello %s — thanks for registering with the Maynooth Decarbonising Zone community.', 'matrix-starter'),
+            $user->display_name
+        ),
+        [
+            __('Your account has been created and is waiting for approval by the Climate Action Office.', 'matrix-starter'),
+            __('You will receive another email when your account is enabled, with a link to sign in and set your password.', 'matrix-starter'),
+        ]
+    );
+    matrix_dz_community_mail($email, $user_subject, $user_html);
 }
 
 /**
- * Don’t send WP’s default “set your password” mail until the account is approved.
+ * Pending community sign-ups: never send core’s default new-user emails.
+ * (Admin gets our approval notice instead; user gets our pending notice.)
  */
 add_filter('wp_send_new_user_notification_to_user', static function (bool $send, WP_User $user): bool {
-    if ((string) get_user_meta((int) $user->ID, 'community_account_approved', true) === '0') {
+    if (matrix_dz_is_pending_community_user($user)) {
         return false;
     }
     return $send;
 }, 10, 2);
 
-/** Prefer our admin email over the default new-user notice for pending contributors. */
 add_filter('wp_send_new_user_notification_to_admin', static function (bool $send, WP_User $user): bool {
-    if ((string) get_user_meta((int) $user->ID, 'community_account_approved', true) === '0') {
+    if (matrix_dz_is_pending_community_user($user)) {
         return false;
     }
     return $send;
 }, 10, 2);
+
+/**
+ * Whether this user is a community registrant awaiting approval.
+ */
+function matrix_dz_is_pending_community_user(WP_User $user): bool
+{
+    if ((string) get_user_meta((int) $user->ID, 'community_account_approved', true) === '0') {
+        return true;
+    }
+    return in_array('contributor', (array) $user->roles, true)
+        && (string) get_user_meta((int) $user->ID, 'community_account_approved', true) !== '1';
+}
