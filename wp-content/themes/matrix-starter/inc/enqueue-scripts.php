@@ -81,7 +81,8 @@ function matrix_starter_enqueue_scripts() {
   $is_community_page  = is_page_template('templates/page-community.php') || is_page('community');
   $is_community_post  = is_singular('post') && function_exists('matrix_dz_is_community_post') && matrix_dz_is_community_post();
   $is_resources_page  = is_page('resources');
-  $is_design_surface  = $is_project_surface || $is_take_action || $is_community_page || $is_community_post || $is_resources_page;
+  $is_map_page        = is_page_template('templates/page-map.php') || is_page('map');
+  $is_design_surface  = $is_project_surface || $is_take_action || $is_community_page || $is_community_post || $is_resources_page || $is_map_page;
 
   $app_js  = $is_dev ? '/wp-content/themes/matrix-starter/dist/app.js'  : $base . '/dist/app.js';
   $app_css = $is_dev ? '/wp-content/themes/matrix-starter/dist/app.css' : $base . '/dist/app.css';
@@ -131,7 +132,44 @@ function matrix_starter_enqueue_scripts() {
     }
   }
 
-  // Project single / archive — design stack. No map assets.
+  // Interactive Map page — design stack + map.js.
+  if ($is_map_page) {
+    $design_dir = get_template_directory() . '/assets/css/dz-design';
+    $design_uri = $base . '/assets/css/dz-design';
+    $design_deps = [];
+    foreach (['styles', 'breadcrumbs', 'navigation', 'projects', 'map'] as $sheet) {
+      $path = $design_dir . '/' . $sheet . '.css';
+      if (!file_exists($path)) {
+        continue;
+      }
+      $handle = 'dz-design-' . $sheet;
+      wp_enqueue_style(
+        $handle,
+        $design_uri . '/' . $sheet . '.css',
+        $design_deps,
+        (string) filemtime($path)
+      );
+      $design_deps = [$handle];
+    }
+
+    $map_js = get_template_directory() . '/assets/js/dz-map.js';
+    if (file_exists($map_js) && function_exists('matrix_dz_projects_map_data')) {
+      wp_enqueue_script(
+        'dz-map',
+        $base . '/assets/js/dz-map.js',
+        [],
+        (string) filemtime($map_js),
+        true
+      );
+      wp_add_inline_script(
+        'dz-map',
+        'window.matrixDzMap = ' . wp_json_encode(matrix_dz_projects_map_data()) . ';',
+        'before'
+      );
+    }
+  }
+
+  // Project single / archive — design stack.
   if ($is_project_surface) {
     $design_dir = get_template_directory() . '/assets/css/dz-design';
     $design_uri = $base . '/assets/css/dz-design';
@@ -527,6 +565,10 @@ add_filter('body_class', function (array $classes): array {
   if (is_page('resources')) {
     $classes[] = 'directory-page';
     $classes[] = 'resources-page';
+  }
+  if (is_page_template('templates/page-map.php') || is_page('map')) {
+    $classes[] = 'directory-page';
+    $classes[] = 'map-page';
   }
   if (is_singular('post') && function_exists('matrix_dz_is_community_post') && matrix_dz_is_community_post()) {
     $classes[] = 'directory-page';

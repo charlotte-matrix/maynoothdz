@@ -205,6 +205,13 @@ if (!function_exists('matrix_dz_projects_directory_data')) {
             }
             $image = get_the_post_thumbnail_url($id, 'large') ?: '';
 
+            $raw_show = function_exists('get_field') ? get_field('project_show_on_map', $id) : true;
+            // Unset field → show; explicit 0/false → hide (e.g. DemoHouse).
+            $show_on_map = ($raw_show === null || $raw_show === '') ? true : (bool) $raw_show;
+            $map_x = function_exists('get_field') ? get_field('project_map_x', $id) : null;
+            $map_y = function_exists('get_field') ? get_field('project_map_y', $id) : null;
+            $has_coords = $map_x !== null && $map_x !== '' && $map_y !== null && $map_y !== '';
+
             $projects[] = [
                 'id'          => $post->post_name,
                 'title'       => get_the_title($id),
@@ -214,6 +221,10 @@ if (!function_exists('matrix_dz_projects_directory_data')) {
                 'description' => $lead,
                 'url'         => get_permalink($id),
                 'date'        => (int) get_post_time('U', true, $post),
+                'showMap'     => $show_on_map && $has_coords,
+                'location'    => $has_coords
+                    ? ['x' => (float) $map_x, 'y' => (float) $map_y]
+                    : null,
             ];
         }
         wp_reset_postdata();
@@ -224,6 +235,39 @@ if (!function_exists('matrix_dz_projects_directory_data')) {
             'projects'      => $projects,
             'pageSize'      => $settings['page_size'],
             'mapUrl'        => $settings['map_url'],
+        ];
+    }
+}
+
+if (!function_exists('matrix_dz_projects_map_data')) {
+    /**
+     * JSON payload for the interactive map page (subset of directory data + map art).
+     *
+     * @return array{categories:array<string,string>,categoryIcons:array<string,string>,projects:list<array<string,mixed>>,mapImage:string,mapAspect:float,projectsUrl:string}
+     */
+    function matrix_dz_projects_map_data(): array
+    {
+        $base = matrix_dz_projects_directory_data();
+        $projects = array_values(array_filter(
+            $base['projects'],
+            static fn(array $p): bool => !empty($p['showMap']) && is_array($p['location'] ?? null)
+        ));
+
+        // Prefer raster — the source SVG is ~14MB and browsers often fail to paint it as <img>.
+        $dir = get_template_directory() . '/assets/dz';
+        $map_file = 'maynooth-map.webp';
+        if (!is_readable($dir . '/maynooth-map.webp')) {
+            $map_file = is_readable($dir . '/maynooth-map.png') ? 'maynooth-map.png' : 'maynooth-map.svg';
+        }
+
+        return [
+            'categories'    => $base['categories'],
+            'categoryIcons' => $base['categoryIcons'],
+            'projects'      => $projects,
+            'mapImage'      => matrix_dz_assets_url($map_file),
+            // Matches source SVG viewBox 5063×2848 (and the 3600×2025 raster).
+            'mapAspect'     => 5063 / 2848,
+            'projectsUrl'   => get_post_type_archive_link('project') ?: home_url('/projects/'),
         ];
     }
 }

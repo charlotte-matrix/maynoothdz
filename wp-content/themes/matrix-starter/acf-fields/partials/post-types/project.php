@@ -40,6 +40,32 @@ $project
             'new_lines' => '',
         ])
 
+    ->addTab('Map')
+        ->addTrueFalse('project_show_on_map', [
+            'label'         => 'Show on map',
+            'instructions'  => 'When off, this project is hidden from the interactive map (e.g. DemoHouse privacy).',
+            'ui'            => 1,
+            'default_value' => 1,
+        ])
+        ->addNumber('project_map_x', [
+            'label'         => 'Map pin X (%)',
+            'instructions'  => 'Horizontal position on the town map, 0–100. Pins use % of the map image so they stay aligned when the map resizes.',
+            'min'           => 0,
+            'max'           => 100,
+            'step'          => 0.1,
+            'prepend'       => '%',
+        ])
+            ->conditional('project_show_on_map', '==', '1')
+        ->addNumber('project_map_y', [
+            'label'         => 'Map pin Y (%)',
+            'instructions'  => 'Vertical position on the town map, 0–100 (from the top).',
+            'min'           => 0,
+            'max'           => 100,
+            'step'          => 0.1,
+            'prepend'       => '%',
+        ])
+            ->conditional('project_show_on_map', '==', '1')
+
     ->addTab('Story')
         ->addTextarea('project_demo_note', [
             'label'        => 'Top note (optional)',

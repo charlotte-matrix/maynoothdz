@@ -2,7 +2,7 @@
 /**
  * Seed all Maynooth DZ projects from design/website/project-data.js + project.js.
  * DemoHouse keeps its special content; others use category story/CTA templates.
- * No map fields (singles are map-free).
+ * Map pin % coords are seeded by scripts/seed-map-page.php (run after this).
  *
  * Run: wp eval-file wp-content/themes/matrix-starter/scripts/seed-all-projects.php
  */
